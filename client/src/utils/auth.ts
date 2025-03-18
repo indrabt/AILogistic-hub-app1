@@ -42,6 +42,56 @@ export const routePermissions: Record<string, UserRole[]> = {
 };
 
 // Get user from session storage with role validation
+/**
+ * Determine the correct role based on username pattern
+ * This is the single source of truth for role determination
+ */
+export function determineRoleFromUsername(username: string, currentRole?: UserRole): UserRole {
+  // Default to logistics manager if no role is provided
+  let role: UserRole = currentRole || "logistics_manager";
+  
+  // Check username patterns to determine appropriate role
+  // Order matters - check more specific patterns first
+  if (username.toLowerCase().includes('warehouse')) {
+    role = 'warehouse_staff';
+  } 
+  else if (username.toLowerCase().includes('driver')) {
+    role = 'driver';
+  }
+  else if (username.toLowerCase().includes('owner')) {
+    role = 'business_owner';
+  }
+  else if (username.toLowerCase().includes('sales')) {
+    role = 'sales';
+  }
+  else if (username.toLowerCase().includes('manager')) {
+    role = 'logistics_manager';
+  }
+  
+  return role;
+}
+
+/**
+ * Synchronize the user's role in session storage to match username-based role
+ */
+export function syncUserRole(user: any): void {
+  if (!user || !user.username) return;
+  
+  const username = user.username;
+  const currentRole = user.role as UserRole;
+  const correctRole = determineRoleFromUsername(username, currentRole);
+  
+  // If role determined from username doesn't match stored role, update it
+  if (correctRole !== currentRole) {
+    console.log(`Role mismatch detected - username: ${username}, stored role: ${currentRole}`);
+    console.log(`Enforcing ${correctRole} role based on username pattern`);
+    
+    // Update session storage with corrected role
+    const correctedUser = {...user, role: correctRole};
+    sessionStorage.setItem('user', JSON.stringify(correctedUser));
+  }
+}
+
 export function getCurrentUser(): { role: UserRole; username: string; name?: string; id: number } | null {
   try {
     const userData = sessionStorage.getItem('user');
@@ -50,79 +100,17 @@ export function getCurrentUser(): { role: UserRole; username: string; name?: str
     const user = JSON.parse(userData);
     const username = user.username || "";
     
-    // CRITICAL SECURITY: Determine actual role based on username
-    let effectiveRole: UserRole = user.role || "logistics_manager";
+    // Set default role if none exists
+    if (!user.role) {
+      user.role = "logistics_manager";
+    }
     
-    // Check if username indicates a specific role and enforce it
-    if (username.toLowerCase().includes('warehouse')) {
-      // Force warehouse staff role
-      effectiveRole = 'warehouse_staff';
-      
-      // If stored role doesn't match username, fix it in session storage
-      if (user.role !== 'warehouse_staff') {
-        console.log(`Role mismatch detected in getCurrentUser - username: ${username}, role: ${user.role}`);
-        console.log(`Enforcing warehouse_staff role based on username pattern`);
-        
-        // Update session storage with corrected role
-        const correctedUser = {...user, role: 'warehouse_staff'};
-        sessionStorage.setItem('user', JSON.stringify(correctedUser));
-      }
-    } 
-    else if (username.toLowerCase().includes('driver')) {
-      // Force driver role
-      effectiveRole = 'driver';
-      
-      // If stored role doesn't match username, fix it in session storage
-      if (user.role !== 'driver') {
-        console.log(`Role mismatch detected in getCurrentUser - username: ${username}, role: ${user.role}`);
-        console.log(`Enforcing driver role based on username pattern`);
-        
-        // Update session storage with corrected role
-        const correctedUser = {...user, role: 'driver'};
-        sessionStorage.setItem('user', JSON.stringify(correctedUser));
-      }
-    }
-    else if (username.toLowerCase().includes('manager')) {
-      // Force logistics manager role
-      effectiveRole = 'logistics_manager';
-      
-      // If stored role doesn't match username, fix it in session storage
-      if (user.role !== 'logistics_manager') {
-        console.log(`Role mismatch detected in getCurrentUser - username: ${username}, role: ${user.role}`);
-        console.log(`Enforcing logistics_manager role based on username pattern`);
-        
-        // Update session storage with corrected role
-        const correctedUser = {...user, role: 'logistics_manager'};
-        sessionStorage.setItem('user', JSON.stringify(correctedUser));
-      }
-    }
-    else if (username.toLowerCase().includes('owner')) {
-      // Force business owner role
-      effectiveRole = 'business_owner';
-      
-      // If stored role doesn't match username, fix it in session storage
-      if (user.role !== 'business_owner') {
-        console.log(`Role mismatch detected in getCurrentUser - username: ${username}, role: ${user.role}`);
-        console.log(`Enforcing business_owner role based on username pattern`);
-        
-        // Update session storage with corrected role
-        const correctedUser = {...user, role: 'business_owner'};
-        sessionStorage.setItem('user', JSON.stringify(correctedUser));
-      }
-    }
-    else if (username.toLowerCase().includes('sales')) {
-      // Force sales role
-      effectiveRole = 'sales';
-      
-      // If stored role doesn't match username, fix it in session storage
-      if (user.role !== 'sales') {
-        console.log(`Role mismatch detected in getCurrentUser - username: ${username}, role: ${user.role}`);
-        console.log(`Enforcing sales role based on username pattern`);
-        
-        // Update session storage with corrected role
-        const correctedUser = {...user, role: 'sales'};
-        sessionStorage.setItem('user', JSON.stringify(correctedUser));
-      }
+    // Ensure user has correct role based on username
+    const effectiveRole = determineRoleFromUsername(username, user.role);
+    
+    // Update session storage if needed
+    if (effectiveRole !== user.role) {
+      syncUserRole(user);
     }
     
     return {

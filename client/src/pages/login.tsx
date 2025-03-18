@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginUserSchema, UserRole, userRoles } from "@shared/schema";
+import { determineRoleFromUsername } from "@/utils/auth";
 
 import {
   Card,
@@ -58,26 +59,9 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      // Perform role validation based on username
-      let validatedRole = data.role;
-      
-      // Force correct roles based on username for testing convenience
-      if (data.username.toLowerCase().includes('warehouse')) {
-        validatedRole = 'warehouse_staff';
-        console.log('Login: Username contains "warehouse", enforcing warehouse_staff role');
-      } else if (data.username.toLowerCase().includes('driver')) {
-        validatedRole = 'driver';
-        console.log('Login: Username contains "driver", enforcing driver role');
-      } else if (data.username.toLowerCase().includes('manager')) {
-        validatedRole = 'logistics_manager';
-        console.log('Login: Username contains "manager", enforcing logistics_manager role');
-      } else if (data.username.toLowerCase().includes('owner')) {
-        validatedRole = 'business_owner';
-        console.log('Login: Username contains "owner", enforcing business_owner role');
-      } else if (data.username.toLowerCase().includes('sales')) {
-        validatedRole = 'sales';
-        console.log('Login: Username contains "sales", enforcing sales role');
-      }
+      // Determine role based on username using the centralized function
+      const validatedRole = determineRoleFromUsername(data.username, data.role);
+      console.log(`Login: Username "${data.username}" assigned role: ${validatedRole}`)
       
       // In a real app, we would authenticate with the server
       // For demo purposes, we'll simulate a login and store user info in session storage

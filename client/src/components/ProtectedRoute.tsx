@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from 'react';
-import { useLocation, useRoute } from 'wouter';
-import { canAccessRoute, getCurrentUser, getDefaultRoute } from '@/utils/auth';
+import { useLocation } from 'wouter';
+import { canAccessRoute, getCurrentUser, getDefaultRoute, determineRoleFromUsername, syncUserRole } from '@/utils/auth';
 import { toast } from '@/hooks/use-toast';
 
 interface ProtectedRouteProps {
@@ -10,46 +10,9 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const [location, setLocation] = useLocation();
   const user = getCurrentUser();
-
-  // IMPORTANT: Override the role based on username if needed
-  // This ensures consistency with SidebarLayout and prevents security issues
-  let effectiveRole = user?.role;
-  if (user?.username?.toLowerCase().includes('warehouse')) {
-    console.log('ProtectedRoute: Username indicates warehouse staff, enforcing warehouse_staff role');
-    effectiveRole = 'warehouse_staff';
-    // Update the user object with corrected role
-    if (user.role !== 'warehouse_staff') {
-      user.role = 'warehouse_staff';
-    }
-  } else if (user?.username?.toLowerCase().includes('driver')) {
-    console.log('ProtectedRoute: Username indicates driver, enforcing driver role');
-    effectiveRole = 'driver';
-    // Update the user object with corrected role
-    if (user.role !== 'driver') {
-      user.role = 'driver';
-    }
-  } else if (user?.username?.toLowerCase().includes('manager')) {
-    console.log('ProtectedRoute: Username indicates logistics manager, enforcing logistics_manager role');
-    effectiveRole = 'logistics_manager';
-    // Update the user object with corrected role
-    if (user.role !== 'logistics_manager') {
-      user.role = 'logistics_manager';
-    }
-  } else if (user?.username?.toLowerCase().includes('owner')) {
-    console.log('ProtectedRoute: Username indicates business owner, enforcing business_owner role');
-    effectiveRole = 'business_owner';
-    // Update the user object with corrected role
-    if (user.role !== 'business_owner') {
-      user.role = 'business_owner';
-    }
-  } else if (user?.username?.toLowerCase().includes('sales')) {
-    console.log('ProtectedRoute: Username indicates sales role, enforcing sales role');
-    effectiveRole = 'sales';
-    // Update the user object with corrected role
-    if (user.role !== 'sales') {
-      user.role = 'sales';
-    }
-  }
+  
+  // User will already have the correct role from getCurrentUser() which uses determineRoleFromUsername()
+  // No need to re-implement role determination logic here
 
   useEffect(() => {
     console.log(`Protected route check for path: ${location}`);

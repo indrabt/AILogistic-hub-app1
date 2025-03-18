@@ -118,7 +118,7 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
 };
 
 const SidebarLayout = ({ children }: SidebarLayoutProps) => {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userRole, setUserRole] = useState<UserRole>("logistics_manager");
@@ -167,8 +167,10 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
   };
   
   const handleLogout = () => {
+    // Use wouter's navigation instead of direct window.location modification
     sessionStorage.removeItem('user');
-    window.location.href = '/login';
+    console.log('Logging out user, redirecting to login page');
+    setLocation('/login');
   };
 
   const roleNavigation = navigationByRole[userRole] || [];

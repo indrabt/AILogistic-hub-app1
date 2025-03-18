@@ -39,10 +39,7 @@ function Router() {
     return (
       <ProtectedRoute>
         <Switch>
-          <Route path="/" component={() => {
-            console.log('Root path component rendered');
-            return <Dashboard />;
-          }} />
+          {/* More specific routes first */}
           <Route path="/login" component={Login} />
           <Route path="/dashboard" component={() => {
             console.log('Dashboard component rendered for logistics manager');
@@ -66,6 +63,12 @@ function Router() {
           <Route path="/real-time-dashboard" component={RealTimeDashboard} />
           <Route path="/reports" component={Reports} />
           <Route path="/settings" component={Settings} />
+          {/* Root path */}
+          <Route path="/" component={() => {
+            console.log('Root path component rendered - explicit placement at end');
+            return <Dashboard />;
+          }} />
+          {/* Catch-all route for 404 at the end */}
           <Route component={NotFound} />
         </Switch>
       </ProtectedRoute>
