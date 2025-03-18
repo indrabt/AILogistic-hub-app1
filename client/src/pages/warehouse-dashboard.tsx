@@ -146,6 +146,23 @@ export default function WarehouseDashboard() {
       description: `Restock order for ${product} at ${location} has been submitted`,
     });
   };
+  
+  // Handle transport mode selection
+  const handleTransportModeChange = (mode: string) => {
+    setSelectedTransportMode(mode);
+    toast({
+      title: "Transport Mode Updated",
+      description: `Loading instructions updated for ${mode} transport`,
+    });
+  };
+  
+  // Handle responding to weather alert
+  const handleWeatherAlertAction = (alertTitle: string) => {
+    toast({
+      title: "Action Taken",
+      description: `Inventory adjusted for "${alertTitle}" weather event`,
+    });
+  };
 
   if (!user) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
@@ -479,6 +496,143 @@ export default function WarehouseDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Weather Alerts - Predictive Supply Chain Resilience Feature */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Predictive Supply Chain Resilience</h2>
+        
+        {criticalWeatherAlerts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {criticalWeatherAlerts.map((alert) => (
+              <Card key={alert.id} className="border-red-200 bg-red-50">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <Badge variant="destructive" className="mb-2">Severe Alert</Badge>
+                      <CardTitle className="text-base">{alert.title}</CardTitle>
+                    </div>
+                    <CloudRain className="h-5 w-5 text-red-500" />
+                  </div>
+                  <CardDescription className="text-red-800">
+                    {alert.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2 text-sm mb-2">
+                    <Clock className="h-4 w-4" />
+                    <span>{alert.time}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Truck className="h-4 w-4" />
+                    <span>{alert.affectedShipments} shipments affected</span>
+                  </div>
+                  <div className="text-sm mt-3">
+                    <p className="font-medium">Recommendations:</p>
+                    <ul className="list-disc pl-5 mt-1 text-sm">
+                      <li>Relocate vulnerable inventory</li>
+                      <li>Inform drivers about potential delays</li>
+                      <li>Prepare alternative dispatching plan</li>
+                    </ul>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => handleWeatherAlertAction(alert.title)}
+                  >
+                    Take Action
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Alert>
+            <AlertTitle>No Critical Weather Alerts</AlertTitle>
+            <AlertDescription>
+              All supply routes are currently operating normally.
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
+
+      {/* Multi-Modal Logistics Orchestration Feature */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Multi-Modal Logistics</h2>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Transport Mode Selection</CardTitle>
+            <CardDescription>
+              Select transport mode for prepared shipments to ensure correct loading procedures
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className={`cursor-pointer border-2 transition-all ${selectedTransportMode === 'truck' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                onClick={() => handleTransportModeChange('truck')}>
+                <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                  <Truck className={`h-10 w-10 mb-2 ${selectedTransportMode === 'truck' ? 'text-blue-500' : 'text-gray-500'}`} />
+                  <p className="font-medium">Road Transport</p>
+                  <p className="text-xs text-muted-foreground mt-1">Standard palletized loading</p>
+                </CardContent>
+              </Card>
+
+              <Card className={`cursor-pointer border-2 transition-all ${selectedTransportMode === 'plane' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                onClick={() => handleTransportModeChange('plane')}>
+                <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                  <PlaneTakeoff className={`h-10 w-10 mb-2 ${selectedTransportMode === 'plane' ? 'text-blue-500' : 'text-gray-500'}`} />
+                  <p className="font-medium">Air Freight</p>
+                  <p className="text-xs text-muted-foreground mt-1">ULD container loading</p>
+                </CardContent>
+              </Card>
+
+              <Card className={`cursor-pointer border-2 transition-all ${selectedTransportMode === 'uav' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                onClick={() => handleTransportModeChange('uav')}>
+                <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                  <Wind className={`h-10 w-10 mb-2 ${selectedTransportMode === 'uav' ? 'text-blue-500' : 'text-gray-500'}`} />
+                  <p className="font-medium">UAV Delivery</p>
+                  <p className="text-xs text-muted-foreground mt-1">Lightweight packaging required</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="mt-6 p-4 bg-blue-50 rounded-md border border-blue-100">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                <PanelTop className="h-4 w-4" />
+                Loading Instructions for {selectedTransportMode === 'truck' ? 'Road Transport' : selectedTransportMode === 'plane' ? 'Air Freight' : 'UAV Delivery'}:
+              </h3>
+              <div className="text-sm space-y-2">
+                {selectedTransportMode === 'truck' && (
+                  <>
+                    <p>• Use standard pallets and secure with straps</p>
+                    <p>• Heavy items on bottom, fragile on top</p>
+                    <p>• Ensure weight is distributed evenly across the trailer</p>
+                    <p>• Apply Western Sydney specific securing for M7/M4 motorway transit</p>
+                  </>
+                )}
+                {selectedTransportMode === 'plane' && (
+                  <>
+                    <p>• Use airport-approved Unit Load Devices only</p>
+                    <p>• Follow weight restrictions strictly (max 6800kg per ULD)</p>
+                    <p>• Complete dangerous goods declaration if applicable</p>
+                    <p>• Prepare for Western Sydney Airport handling requirements</p>
+                  </>
+                )}
+                {selectedTransportMode === 'uav' && (
+                  <>
+                    <p>• Max package weight: 2.5kg per unit</p>
+                    <p>• Wind-resistant packaging required</p>
+                    <p>• Affix correct QR codes for drone scanning</p>
+                    <p>• Use Sydney urban drone corridor approved packaging</p>
+                  </>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
