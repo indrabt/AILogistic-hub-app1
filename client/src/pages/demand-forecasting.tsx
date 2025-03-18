@@ -1,23 +1,85 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DownloadIcon, Calendar, TrendingUp, ArrowUpRight, ArrowDownRight, ChevronUp, ChevronDown } from "lucide-react";
 
-const generateForecastData = () => {
+const generateForecastData = (periodMonths = 6) => {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const historicalData = [420, 380, 450, 510, 480, 520, 550, 590, 610, 640, 660, 680];
-  const forecastData = [700, 730, 750, 790, 810, 840];
+  // Adjust forecast data based on period
+  const forecastData = periodMonths === 3 
+    ? [700, 730, 750] 
+    : periodMonths === 6 
+      ? [700, 730, 750, 790, 810, 840]
+      : [700, 730, 750, 790, 810, 840, 870, 890, 910, 930, 950, 970];
   
   return {
-    labels: [...months, ...months.slice(0, 6).map(m => `${m} (Forecast)`)],
+    labels: [...months, ...months.slice(0, periodMonths).map(m => `${m} (Forecast)`)],
     historicalData,
     forecastData
   };
 };
 
-const ProductForecastTable = () => {
+const ProductForecastTable = ({ filteredCategories }: { filteredCategories: string[] }) => {
+  // Product data with details
+  type ProductDataType = {
+    [key: string]: {
+      description: string;
+      current: string;
+      next: string;
+      change: string;
+      trend: 'up' | 'down';
+      path: string;
+      confidence: string;
+      confidenceClass: string;
+    }
+  };
+  
+  const productData: ProductDataType = {
+    'Electronics': {
+      description: 'Smart devices, components',
+      current: '1,245 units',
+      next: '1,380 units',
+      change: '+10.8%',
+      trend: 'up',
+      path: 'M0,25 L20,20 L40,15 L60,10 L80,5 L100,2',
+      confidence: 'High (92%)',
+      confidenceClass: 'bg-green-100 text-green-800'
+    },
+    'Apparel': {
+      description: 'Clothing, accessories',
+      current: '3,850 units',
+      next: '4,220 units',
+      change: '+9.6%',
+      trend: 'up',
+      path: 'M0,15 L20,17 L40,12 L60,5 L80,7 L100,2',
+      confidence: 'High (89%)',
+      confidenceClass: 'bg-green-100 text-green-800'
+    },
+    'Furniture': {
+      description: 'Home, office furnishings',
+      current: '920 units',
+      next: '880 units',
+      change: '-4.3%',
+      trend: 'down',
+      path: 'M0,10 L20,12 L40,15 L60,20 L80,22 L100,25',
+      confidence: 'Medium (76%)',
+      confidenceClass: 'bg-yellow-100 text-yellow-800'
+    },
+    'Food & Beverage': {
+      description: 'Perishable goods',
+      current: '5,120 units',
+      next: '5,230 units',
+      change: '+2.1%',
+      trend: 'up',
+      path: 'M0,15 L20,14 L40,16 L60,14 L80,13 L100,12',
+      confidence: 'High (88%)',
+      confidenceClass: 'bg-green-100 text-green-800'
+    }
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -31,124 +93,84 @@ const ProductForecastTable = () => {
           </tr>
         </thead>
         <tbody>
-          <tr className="border-b border-gray-200 hover:bg-gray-50">
-            <td className="p-4">
-              <div>
-                <p className="font-medium text-sm">Electronics</p>
-                <p className="text-xs text-gray-500">Smart devices, components</p>
-              </div>
-            </td>
-            <td className="p-4 text-sm">1,245 units</td>
-            <td className="p-4">
-              <div className="flex items-center">
-                <span className="text-sm">1,380 units</span>
-                <span className="ml-2 text-green-500 text-xs flex items-center">
-                  <ArrowUpRight size={12} /> 10.8%
-                </span>
-              </div>
-            </td>
-            <td className="p-4">
-              <span className="inline-block w-20 h-8">
-                <svg viewBox="0 0 100 30" className="w-full h-full">
-                  <path d="M0,25 L20,20 L40,15 L60,10 L80,5 L100,2" fill="none" stroke="#10b981" strokeWidth="2" />
-                </svg>
-              </span>
-            </td>
-            <td className="p-4">
-              <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">High (92%)</span>
-            </td>
-          </tr>
-          <tr className="border-b border-gray-200 hover:bg-gray-50">
-            <td className="p-4">
-              <div>
-                <p className="font-medium text-sm">Apparel</p>
-                <p className="text-xs text-gray-500">Clothing, accessories</p>
-              </div>
-            </td>
-            <td className="p-4 text-sm">3,850 units</td>
-            <td className="p-4">
-              <div className="flex items-center">
-                <span className="text-sm">4,220 units</span>
-                <span className="ml-2 text-green-500 text-xs flex items-center">
-                  <ArrowUpRight size={12} /> 9.6%
-                </span>
-              </div>
-            </td>
-            <td className="p-4">
-              <span className="inline-block w-20 h-8">
-                <svg viewBox="0 0 100 30" className="w-full h-full">
-                  <path d="M0,15 L20,17 L40,12 L60,5 L80,7 L100,2" fill="none" stroke="#10b981" strokeWidth="2" />
-                </svg>
-              </span>
-            </td>
-            <td className="p-4">
-              <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">High (89%)</span>
-            </td>
-          </tr>
-          <tr className="border-b border-gray-200 hover:bg-gray-50">
-            <td className="p-4">
-              <div>
-                <p className="font-medium text-sm">Furniture</p>
-                <p className="text-xs text-gray-500">Home, office furnishings</p>
-              </div>
-            </td>
-            <td className="p-4 text-sm">920 units</td>
-            <td className="p-4">
-              <div className="flex items-center">
-                <span className="text-sm">880 units</span>
-                <span className="ml-2 text-red-500 text-xs flex items-center">
-                  <ArrowDownRight size={12} /> 4.3%
-                </span>
-              </div>
-            </td>
-            <td className="p-4">
-              <span className="inline-block w-20 h-8">
-                <svg viewBox="0 0 100 30" className="w-full h-full">
-                  <path d="M0,10 L20,12 L40,15 L60,20 L80,22 L100,25" fill="none" stroke="#ef4444" strokeWidth="2" />
-                </svg>
-              </span>
-            </td>
-            <td className="p-4">
-              <span className="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">Medium (76%)</span>
-            </td>
-          </tr>
-          <tr className="border-b border-gray-200 hover:bg-gray-50">
-            <td className="p-4">
-              <div>
-                <p className="font-medium text-sm">Food & Beverage</p>
-                <p className="text-xs text-gray-500">Perishable goods</p>
-              </div>
-            </td>
-            <td className="p-4 text-sm">5,120 units</td>
-            <td className="p-4">
-              <div className="flex items-center">
-                <span className="text-sm">5,230 units</span>
-                <span className="ml-2 text-green-500 text-xs flex items-center">
-                  <ArrowUpRight size={12} /> 2.1%
-                </span>
-              </div>
-            </td>
-            <td className="p-4">
-              <span className="inline-block w-20 h-8">
-                <svg viewBox="0 0 100 30" className="w-full h-full">
-                  <path d="M0,15 L20,14 L40,16 L60,14 L80,13 L100,12" fill="none" stroke="#10b981" strokeWidth="2" />
-                </svg>
-              </span>
-            </td>
-            <td className="p-4">
-              <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">High (88%)</span>
-            </td>
-          </tr>
+          {filteredCategories.map((category) => {
+            const product = productData[category];
+            if (!product) return null;
+            
+            return (
+              <tr key={category} className="border-b border-gray-200 hover:bg-gray-50">
+                <td className="p-4">
+                  <div>
+                    <p className="font-medium text-sm">{category}</p>
+                    <p className="text-xs text-gray-500">{product.description}</p>
+                  </div>
+                </td>
+                <td className="p-4 text-sm">{product.current}</td>
+                <td className="p-4">
+                  <div className="flex items-center">
+                    <span className="text-sm">{product.next}</span>
+                    <span className={`ml-2 ${product.trend === 'up' ? 'text-green-500' : 'text-red-500'} text-xs flex items-center`}>
+                      {product.trend === 'up' ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />} {product.change}
+                    </span>
+                  </div>
+                </td>
+                <td className="p-4">
+                  <span className="inline-block w-20 h-8">
+                    <svg viewBox="0 0 100 30" className="w-full h-full">
+                      <path d={product.path} fill="none" stroke={product.trend === 'up' ? "#10b981" : "#ef4444"} strokeWidth="2" />
+                    </svg>
+                  </span>
+                </td>
+                <td className="p-4">
+                  <span className={`px-2 py-1 rounded-full text-xs ${product.confidenceClass}`}>{product.confidence}</span>
+                </td>
+              </tr>
+            );
+          })}
+          
+          {filteredCategories.length === 0 && (
+            <tr>
+              <td colSpan={5} className="p-8 text-center text-gray-500">
+                No product categories match the selected filter.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
   );
 };
 
+// Helper function to get filtered data based on category
+const getFilteredItems = (category: string) => {
+  // Get product data that matches the selected category
+  if (category === 'all') {
+    return ['Electronics', 'Apparel', 'Furniture', 'Food & Beverage'];
+  } else if (category === 'electronics') {
+    return ['Electronics'];
+  } else if (category === 'apparel') {
+    return ['Apparel'];
+  } else if (category === 'furniture') {
+    return ['Furniture'];
+  } else if (category === 'food') {
+    return ['Food & Beverage'];
+  }
+  return [];
+};
+
 export default function DemandForecasting() {
   const [forecastPeriod, setForecastPeriod] = useState("6");
   const [productCategory, setProductCategory] = useState("all");
-  const { labels, historicalData, forecastData } = generateForecastData();
+  
+  // Use useMemo to generate forecast data based on the forecast period
+  const { labels, historicalData, forecastData } = useMemo(() => {
+    return generateForecastData(parseInt(forecastPeriod, 10));
+  }, [forecastPeriod]);
+  
+  // Get filtered items based on product category
+  const filteredCategories = useMemo(() => {
+    return getFilteredItems(productCategory);
+  }, [productCategory]);
   
   return (
     <div>
@@ -378,7 +400,7 @@ export default function DemandForecasting() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <ProductForecastTable />
+          <ProductForecastTable filteredCategories={filteredCategories} />
         </CardContent>
       </Card>
     </div>
