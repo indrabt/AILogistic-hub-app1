@@ -45,7 +45,8 @@ const mobileNavItems: MobileNavItem[] = [
   // Role-specific items
   { icon: <Package size={20} />, label: "Inventory", href: "/supply-chain", roles: ["warehouse_staff"] },
   { icon: <Calendar size={20} />, label: "Schedule", href: "/driver-dashboard?view=schedule", roles: ["driver"] },
-  { icon: <User size={20} />, label: "Clients", href: "/western-sydney-users", roles: ["sales", "business_owner"] },
+  { icon: <User size={20} />, label: "Clients", href: "/western-sydney-users", roles: ["sales"] },
+  { icon: <BarChart size={20} />, label: "Metrics", href: "/business-metrics", roles: ["business_owner"] },
   { icon: <TrendingUp size={20} />, label: "Forecast", href: "/demand-forecasting", roles: ["sales", "logistics_manager", "business_owner"] },
   { icon: <FileText size={20} />, label: "Reports", href: "/reports", roles: ["logistics_manager", "sales", "business_owner"] },
   
