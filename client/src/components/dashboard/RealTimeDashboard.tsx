@@ -92,20 +92,32 @@ export default function RealTimeDashboard() {
     refetchInterval: refreshInterval,
   });
 
+  // Update local metrics when API data changes
+  useEffect(() => {
+    if (metrics && typeof metrics === 'object' && 
+        'activeShipments' in metrics && 
+        'onTimeDelivery' in metrics && 
+        'delayAlerts' in metrics && 
+        'avgShippingCost' in metrics) {
+      setLocalMetrics(metrics as MetricData);
+      setLastUpdateTime(new Date());
+    }
+  }, [metrics]);
+
   // Generate AI insights based on current data
   useEffect(() => {
-    if (metrics && alerts && activities) {
+    if (localMetrics && alerts && Array.isArray(alerts) && activities && Array.isArray(activities)) {
       const newInsights: AIInsight[] = [];
       
       // Delivery insights
-      if (metrics.delayAlerts.value > 3) {
+      if (localMetrics.delayAlerts.value > 3) {
         newInsights.push({
           id: Date.now() + 1,
           title: 'Delivery Delays Increasing',
-          description: `${metrics.delayAlerts.value} deliveries are currently delayed. Consider allocating additional resources.`,
+          description: `${localMetrics.delayAlerts.value} deliveries are currently delayed. Consider allocating additional resources.`,
           timestamp: new Date().toISOString(),
           type: 'delivery',
-          priority: metrics.delayAlerts.value > 10 ? 'critical' : 'high',
+          priority: localMetrics.delayAlerts.value > 10 ? 'critical' : 'high',
           confidence: 0.92,
           action: 'View delayed shipments'
         });
@@ -127,12 +139,12 @@ export default function RealTimeDashboard() {
       }
       
       // On-time delivery insights
-      const onTimePercentage = parseFloat(metrics.onTimeDelivery.value.replace('%', ''));
+      const onTimePercentage = parseFloat(localMetrics.onTimeDelivery.value.replace('%', ''));
       if (onTimePercentage < 90) {
         newInsights.push({
           id: Date.now() + 3,
           title: 'On-Time Delivery Below Target',
-          description: `Current on-time delivery rate at ${metrics.onTimeDelivery.value}. Target is 95%. Analyze affected routes.`,
+          description: `Current on-time delivery rate at ${localMetrics.onTimeDelivery.value}. Target is 95%. Analyze affected routes.`,
           timestamp: new Date().toISOString(),
           type: 'delivery',
           priority: onTimePercentage < 85 ? 'high' : 'medium',
@@ -143,15 +155,46 @@ export default function RealTimeDashboard() {
       
       // Update insights
       setInsights(newInsights);
-      setLastUpdateTime(new Date());
     }
-  }, [metrics, alerts, activities]);
+  }, [localMetrics, alerts, activities]);
 
-  const handleRefreshClick = () => {
-    toast({
-      title: "Dashboard Refreshed",
-      description: "Real-time data has been updated",
-    });
+  // Define query client refetch functions
+  const { refetch: refetchMetrics } = useQuery({ 
+    queryKey: ['/api/dashboard/metrics'],
+    enabled: false
+  });
+  
+  const { refetch: refetchAlerts } = useQuery({
+    queryKey: ['/api/weather/alerts'],
+    enabled: false
+  });
+  
+  const { refetch: refetchActivities } = useQuery({
+    queryKey: ['/api/activities'],
+    enabled: false
+  });
+
+  const handleRefreshClick = async () => {
+    try {
+      await Promise.all([
+        refetchMetrics(),
+        refetchAlerts(),
+        refetchActivities()
+      ]);
+      
+      setLastUpdateTime(new Date());
+      
+      toast({
+        title: "Dashboard Refreshed",
+        description: "Real-time data has been updated",
+      });
+    } catch (error) {
+      toast({
+        title: "Refresh Failed",
+        description: "Could not refresh dashboard data",
+        variant: "destructive"
+      });
+    }
   };
 
   const priorityColor = (priority: string) => {
@@ -260,48 +303,48 @@ export default function RealTimeDashboard() {
                   </CardContent>
                 </Card>
               ))
-            ) : metrics ? (
+            ) : localMetrics ? (
               <>
                 <MetricCard
                   title="Active Shipments"
-                  value={metrics.activeShipments.value.toString()}
+                  value={localMetrics.activeShipments.value.toString()}
                   icon={<Truck className="h-5 w-5" />}
                   change={{
-                    value: metrics.activeShipments.change,
-                    trend: metrics.activeShipments.trend
+                    value: localMetrics.activeShipments.change,
+                    trend: localMetrics.activeShipments.trend
                   }}
                   iconBgColor="bg-blue-500/20"
                   iconColor="text-blue-500"
                 />
                 <MetricCard
                   title="On-Time Delivery"
-                  value={metrics.onTimeDelivery.value}
+                  value={localMetrics.onTimeDelivery.value}
                   icon={<Activity className="h-5 w-5" />}
                   change={{
-                    value: metrics.onTimeDelivery.change,
-                    trend: metrics.onTimeDelivery.trend
+                    value: localMetrics.onTimeDelivery.change,
+                    trend: localMetrics.onTimeDelivery.trend
                   }}
                   iconBgColor="bg-green-500/20"
                   iconColor="text-green-500"
                 />
                 <MetricCard
                   title="Delay Alerts"
-                  value={metrics.delayAlerts.value.toString()}
+                  value={localMetrics.delayAlerts.value.toString()}
                   icon={<AlertTriangle className="h-5 w-5" />}
                   change={{
-                    value: metrics.delayAlerts.change,
-                    trend: metrics.delayAlerts.trend === 'up' ? 'down' : 'up' // Invert because fewer delays is better
+                    value: localMetrics.delayAlerts.change,
+                    trend: localMetrics.delayAlerts.trend === 'up' ? 'down' : 'up' // Invert because fewer delays is better
                   }}
                   iconBgColor="bg-red-500/20"
                   iconColor="text-red-500"
                 />
                 <MetricCard
                   title="Avg Shipping Cost"
-                  value={metrics.avgShippingCost.value}
+                  value={localMetrics.avgShippingCost.value}
                   icon={<BarChart2 className="h-5 w-5" />}
                   change={{
-                    value: metrics.avgShippingCost.change,
-                    trend: metrics.avgShippingCost.trend === 'up' ? 'down' : 'up' // Invert because lower cost is better
+                    value: localMetrics.avgShippingCost.change,
+                    trend: localMetrics.avgShippingCost.trend === 'up' ? 'down' : 'up' // Invert because lower cost is better
                   }}
                   iconBgColor="bg-purple-500/20"
                   iconColor="text-purple-500"
@@ -337,8 +380,8 @@ export default function RealTimeDashboard() {
                       </div>
                     </div>
                   ))
-                ) : activities ? (
-                  activities.map((activity: ActivityItem) => (
+                ) : activities && Array.isArray(activities) ? (
+                  (activities as ActivityItem[]).map((activity: ActivityItem) => (
                     <div key={activity.id} className="flex items-start gap-4">
                       <div className={`rounded-full p-2 ${
                         activity.type === 'primary' 
