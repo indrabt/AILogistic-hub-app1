@@ -64,24 +64,24 @@ export default function WarehouseDashboard() {
     }
   }, [setLocation]);
 
-  const { data: inventoryAlerts = [] } = useQuery({
+  const { data: inventoryAlerts = [] } = useQuery<InventoryAlert[]>({
     queryKey: ["/api/inventory/alerts"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
-  const { data: shipments = [] } = useQuery({
+  const { data: shipments = [] } = useQuery<Shipment[]>({
     queryKey: ["/api/shipments"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
   // Filter incoming shipments (for demonstration purposes)
-  const incomingShipments = shipments.filter((s: Shipment) => s.status === "on-schedule").slice(0, 4);
+  const incomingShipments = (shipments as Shipment[]).filter(s => s.status === "on-schedule").slice(0, 4);
   
   // Filter outgoing shipments (for demonstration purposes)
-  const outgoingShipments = shipments.filter((s: Shipment) => s.status !== "delivered").slice(0, 4);
+  const outgoingShipments = (shipments as Shipment[]).filter(s => s.status !== "delivered").slice(0, 4);
   
   // Implementation of search functionality
-  const filteredInventoryAlerts = inventoryAlerts.filter((alert: InventoryAlert) =>
+  const filteredInventoryAlerts = (inventoryAlerts as InventoryAlert[]).filter(alert =>
     alert.product.toLowerCase().includes(searchQuery.toLowerCase()) ||
     alert.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -145,11 +145,11 @@ export default function WarehouseDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex justify-between items-center">
-              <div className="text-2xl font-bold">{inventoryAlerts.length}</div>
+              <div className="text-2xl font-bold">{(inventoryAlerts as InventoryAlert[]).length}</div>
               <AlertTriangle className="h-4 w-4 text-amber-500" />
             </div>
             <p className="text-xs text-muted-foreground">
-              {inventoryAlerts.filter((a: InventoryAlert) => a.severity === "critical").length} critical items
+              {(inventoryAlerts as InventoryAlert[]).filter(a => a.severity === "critical").length} critical items
             </p>
           </CardContent>
         </Card>
@@ -220,14 +220,13 @@ export default function WarehouseDashboard() {
                       <div className="flex items-center space-x-2">
                         <Progress 
                           value={alert.percentage} 
-                          className="h-2 w-20" 
-                          indicatorColor={
+                          className={`h-2 w-20 ${
                             alert.severity === "critical" 
-                              ? "bg-red-500" 
+                              ? "[--progress-fill:theme(colors.red.500)]" 
                               : alert.severity === "low" 
-                              ? "bg-amber-500" 
-                              : "bg-green-500"
-                          }
+                              ? "[--progress-fill:theme(colors.amber.500)]" 
+                              : "[--progress-fill:theme(colors.green.500)]"
+                          }`}
                         />
                         <span className="text-xs">{alert.current}/{alert.minimum}</span>
                       </div>

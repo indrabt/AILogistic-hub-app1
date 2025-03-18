@@ -63,26 +63,26 @@ export default function DriverDashboard() {
     }
   }, [setLocation]);
 
-  const { data: routes = [] } = useQuery({
+  const { data: routes = [] } = useQuery<Route[]>({
     queryKey: ["/api/routes"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
-  const { data: shipments = [] } = useQuery({
+  const { data: shipments = [] } = useQuery<Shipment[]>({
     queryKey: ["/api/shipments"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
   
-  const { data: weatherAlerts = [] } = useQuery({
+  const { data: weatherAlerts = [] } = useQuery<WeatherAlert[]>({
     queryKey: ["/api/weather/alerts"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
   // Driver's assigned routes (for demonstration purposes, we'll filter by ID < 3)
-  const assignedRoutes = routes.filter((route: Route) => route.id < 3);
+  const assignedRoutes = (routes as Route[]).filter(route => route.id < 3);
   
   // Current shipment (for demonstration purposes, we'll use the first shipment)
-  const currentShipment = shipments[0];
+  const currentShipment = (shipments as Shipment[])[0];
   
   // Route status color mapping
   const getStatusColor = (status: string) => {
@@ -315,9 +315,9 @@ export default function DriverDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {weatherAlerts.length > 0 ? (
+            {(weatherAlerts as WeatherAlert[]).length > 0 ? (
               <div className="space-y-4 max-h-[250px] overflow-y-auto">
-                {weatherAlerts.map((alert: WeatherAlert) => (
+                {(weatherAlerts as WeatherAlert[]).map((alert) => (
                   <div key={alert.id} className="border rounded-lg p-3 space-y-2">
                     <div className="flex justify-between items-start">
                       <h4 className="font-medium text-sm">{alert.title}</h4>
@@ -411,7 +411,7 @@ export default function DriverDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {routes.slice(0, 5).map((route: Route) => (
+                  {(routes as Route[]).slice(0, 5).map((route) => (
                     <TableRow key={route.id}>
                       <TableCell className="font-medium">{route.id}</TableCell>
                       <TableCell>{route.name}</TableCell>
