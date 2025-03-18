@@ -29,19 +29,20 @@ interface SidebarItemProps {
 const SidebarItem = ({ icon, href, label, active }: SidebarItemProps) => {
   return (
     <li className="mb-2">
-      <Link href={href}>
-        <a
-          className={cn(
-            "flex items-center py-2 px-4 rounded-r-lg transition-colors duration-200",
-            active
-              ? "bg-primary-light text-white font-medium"
-              : "hover:bg-primary-light/70 text-white"
-          )}
-        >
-          <span className="mr-3">{icon}</span>
-          {label}
-        </a>
-      </Link>
+      <div
+        className={cn(
+          "flex items-center py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
+          active
+            ? "bg-primary-light text-white font-medium"
+            : "hover:bg-primary-light/70 text-white"
+        )}
+        onClick={() => {
+          window.location.href = href;
+        }}
+      >
+        <span className="mr-3">{icon}</span>
+        {label}
+      </div>
     </li>
   );
 };
