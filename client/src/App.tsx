@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
@@ -19,29 +19,47 @@ import Cybersecurity from "@/pages/cybersecurity";
 import MultiModalLogistics from "@/pages/multi-modal-logistics";
 import BusinessDashboard from "@/pages/business-dashboard";
 import WesternSydneyUsers from "@/pages/western-sydney-users";
+import Login from "@/pages/login";
+import DriverDashboard from "@/pages/driver-dashboard";
+import WarehouseDashboard from "@/pages/warehouse-dashboard";
 
 function Router() {
-  return (
+  const [location] = useLocation();
+  
+  // Don't use SidebarLayout for the login page
+  const noSidebarPaths = ['/login'];
+  const showSidebar = !noSidebarPaths.includes(location);
+  
+  const RouterContent = () => (
+    <Switch>
+      <Route path="/" component={Dashboard} />
+      <Route path="/login" component={Login} />
+      <Route path="/routes" component={Routes} />
+      <Route path="/supply-chain" component={SupplyChain} />
+      <Route path="/demand-forecasting" component={DemandForecasting} />
+      <Route path="/weather-impact" component={WeatherImpact} />
+      <Route path="/ai-analytics" component={AIAnalytics} />
+      <Route path="/hyper-local-routing" component={HyperLocalRouting} />
+      <Route path="/supply-chain-resilience" component={SupplyChainResilience} />
+      <Route path="/sustainability" component={Sustainability} />
+      <Route path="/cybersecurity" component={Cybersecurity} />
+      <Route path="/multi-modal-logistics" component={MultiModalLogistics} />
+      <Route path="/business-dashboard" component={BusinessDashboard} />
+      <Route path="/western-sydney-users" component={WesternSydneyUsers} />
+      <Route path="/driver-dashboard" component={DriverDashboard} />
+      <Route path="/warehouse-dashboard" component={WarehouseDashboard} />
+      <Route path="/reports" component={Reports} />
+      <Route path="/settings" component={Settings} />
+      <Route component={NotFound} />
+    </Switch>
+  );
+  
+  return showSidebar ? (
     <SidebarLayout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/routes" component={Routes} />
-        <Route path="/supply-chain" component={SupplyChain} />
-        <Route path="/demand-forecasting" component={DemandForecasting} />
-        <Route path="/weather-impact" component={WeatherImpact} />
-        <Route path="/ai-analytics" component={AIAnalytics} />
-        <Route path="/hyper-local-routing" component={HyperLocalRouting} />
-        <Route path="/supply-chain-resilience" component={SupplyChainResilience} />
-        <Route path="/sustainability" component={Sustainability} />
-        <Route path="/cybersecurity" component={Cybersecurity} />
-        <Route path="/multi-modal-logistics" component={MultiModalLogistics} />
-        <Route path="/business-dashboard" component={BusinessDashboard} />
-        <Route path="/western-sydney-users" component={WesternSydneyUsers} />
-        <Route path="/reports" component={Reports} />
-        <Route path="/settings" component={Settings} />
-        <Route component={NotFound} />
-      </Switch>
+      <RouterContent />
     </SidebarLayout>
+  ) : (
+    <RouterContent />
   );
 }
 
