@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "@/lib/queryClient";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Brain,
   LineChart,
@@ -16,7 +17,12 @@ import {
   Lightbulb,
   BarChart4,
   Gauge,
-  CircleDot
+  CircleDot,
+  Droplets,
+  MapPin,
+  CloudRain,
+  Clock,
+  AlertCircle
 } from "lucide-react";
 
 // Define types for the AI Analytics data
@@ -211,12 +217,35 @@ export default function AIAnalytics() {
         </TabsList>
         
         <TabsContent value="models" className="space-y-4">
+          {/* Featured Western Sydney Model */}
+          {models.some(m => m.name === "Hawkesbury-Nepean Flood Prediction System") && (
+            <Alert className="bg-blue-50 border-blue-300 dark:bg-blue-950 dark:border-blue-800 mb-6">
+              <BrainCircuit className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <AlertTitle className="text-blue-800 dark:text-blue-300 font-semibold text-lg">
+                Featured Western Sydney AI Model
+              </AlertTitle>
+              <AlertDescription className="text-blue-700 dark:text-blue-400">
+                Our latest AI model specifically designed for the Western Sydney region - the Hawkesbury-Nepean Flood Prediction System - provides critical flood prediction capabilities with 94.2% accuracy.
+              </AlertDescription>
+            </Alert>
+          )}
+        
           <div className="grid gap-4 md:grid-cols-2">
             {models.map((model) => (
-              <Card key={model.id}>
+              <Card key={model.id} className={model.name === "Hawkesbury-Nepean Flood Prediction System" ? 
+                "border-blue-500 border-2 shadow-md" : ""}>
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg font-semibold">{model.name}</CardTitle>
+                    <CardTitle className="text-lg font-semibold">
+                      {model.name === "Hawkesbury-Nepean Flood Prediction System" ? (
+                        <div className="flex items-center gap-2">
+                          <span>{model.name}</span>
+                          <Droplets className="h-5 w-5 text-blue-500" />
+                        </div>
+                      ) : (
+                        model.name
+                      )}
+                    </CardTitle>
                     <Badge variant={
                       model.status === "active" ? "default" : 
                       model.status === "training" ? "secondary" : "outline"
@@ -232,7 +261,9 @@ export default function AIAnalytics() {
                       <span className="text-sm font-medium">Accuracy</span>
                       <div className="flex items-center gap-2">
                         <Gauge className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-semibold">{model.accuracy}%</span>
+                        <span className={`font-semibold ${model.accuracy > 94 ? "text-green-600" : ""}`}>
+                          {model.accuracy}%
+                        </span>
                       </div>
                     </div>
                     <div className="space-y-1">
@@ -249,7 +280,14 @@ export default function AIAnalytics() {
                       <div className="text-xs font-medium mb-1">Features</div>
                       <div className="flex flex-wrap gap-1">
                         {model.features.map((feature, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
+                          <Badge 
+                            key={index} 
+                            variant={model.name === "Hawkesbury-Nepean Flood Prediction System" ? 
+                              (feature === "Warragamba Dam levels" || feature === "Rainfall data" || feature === "River gauges") 
+                                ? "default" : "outline" 
+                              : "outline"} 
+                            className="text-xs"
+                          >
                             {feature}
                           </Badge>
                         ))}
@@ -389,13 +427,68 @@ export default function AIAnalytics() {
         </TabsContent>
         
         <TabsContent value="scenarios" className="space-y-4">
+          {/* Hawkesbury-Nepean Flood Alert System - Featured Component */}
+          {scenarios.some(s => s.name === "Hawkesbury-Nepean Flood Response Plan") && (
+            <Alert className="bg-blue-50 border-blue-300 dark:bg-blue-950 dark:border-blue-800 mb-6">
+              <Droplets className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <AlertTitle className="text-blue-800 dark:text-blue-300 font-semibold text-lg">
+                Western Sydney Flood Intelligence System
+              </AlertTitle>
+              <AlertDescription className="text-blue-700 dark:text-blue-400">
+                <div className="mt-2 space-y-3">
+                  <p>The Hawkesbury-Nepean Flood Prediction System is currently active and monitoring water levels in the Western Sydney region.</p>
+                  
+                  <div className="flex items-center gap-4 mt-3">
+                    <div className="flex items-center gap-2">
+                      <CloudRain className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm font-medium">Predicted Rainfall: 150-200mm</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-red-500" />
+                      <span className="text-sm font-medium">Alert Level: High</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-orange-500" />
+                      <span className="text-sm font-medium">Timeframe: 48-72 hours</span>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-blue-200 dark:bg-blue-900 rounded-full h-2 w-full overflow-hidden">
+                    <div 
+                      className="bg-blue-600 dark:bg-blue-500 h-full transition-all duration-300 ease-in-out"
+                      style={{ width: `82%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span>Prediction Probability: 82%</span>
+                    <span className="font-medium text-blue-800 dark:text-blue-300">Updated: Today, 06:30 AM</span>
+                  </div>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+        
           <div className="grid gap-4 md:grid-cols-2">
             {scenarios.map((scenario) => (
-              <Card key={scenario.id}>
+              <Card key={scenario.id} className={scenario.name === "Hawkesbury-Nepean Flood Response Plan" ? 
+                "border-blue-500 border-2 shadow-md" : ""}>
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg font-semibold">{scenario.name}</CardTitle>
-                    <div className="bg-primary/10 text-primary rounded-md px-2 py-1 text-sm font-medium">
+                    <CardTitle className="text-lg font-semibold">
+                      {scenario.name === "Hawkesbury-Nepean Flood Response Plan" ? (
+                        <div className="flex items-center gap-2">
+                          <span>{scenario.name}</span>
+                          <AlertCircle className="h-5 w-5 text-blue-500" />
+                        </div>
+                      ) : (
+                        scenario.name
+                      )}
+                    </CardTitle>
+                    <div className={`rounded-md px-2 py-1 text-sm font-medium ${
+                      scenario.probability > 80 ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400" :
+                      scenario.probability > 60 ? "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-400" :
+                      "bg-primary/10 text-primary"
+                    }`}>
                       {scenario.probability}% probability
                     </div>
                   </div>

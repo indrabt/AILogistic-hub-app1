@@ -547,7 +547,7 @@ export class MemStorage implements IStorage {
         id: 1,
         name: "Blue Mountains Severe Rain Scenario",
         description: "Impact analysis of severe rainfall and flooding in the Blue Mountains region",
-        createdAt: "2023-02-15T08:00:00",
+        createdAt: "2025-03-10T08:00:00",
         variables: [
           {
             name: "Rainfall",
@@ -585,7 +585,7 @@ export class MemStorage implements IStorage {
         id: 2,
         name: "Supply Chain Disruption",
         description: "Analysis of major supplier disruption on inventory and operations",
-        createdAt: "2023-02-10T14:30:00",
+        createdAt: "2025-02-10T14:30:00",
         variables: [
           {
             name: "Disruption Length",
@@ -624,6 +624,77 @@ export class MemStorage implements IStorage {
           }
         ],
         probability: 30
+      },
+      {
+        id: 3,
+        name: "Hawkesbury-Nepean Flood Response Plan",
+        description: "Comprehensive scenario analysis of major flooding event in Hawkesbury-Nepean Valley and impact on Western Sydney logistics",
+        createdAt: "2025-03-18T06:15:00",
+        variables: [
+          {
+            name: "Rainfall",
+            value: "150-200mm",
+            type: "weather"
+          },
+          {
+            name: "Warragamba Dam Level",
+            value: "97.5%",
+            type: "weather"
+          },
+          {
+            name: "Flood Duration",
+            value: "72 hours",
+            type: "weather"
+          },
+          {
+            name: "Affected Distribution Centers",
+            value: 2,
+            type: "logistics"
+          },
+          {
+            name: "Critical Route Closures",
+            value: 8,
+            type: "logistics"
+          },
+          {
+            name: "Bridge Accessibility",
+            value: "Limited",
+            type: "logistics"
+          }
+        ],
+        outcomes: [
+          {
+            metric: "Distribution Center Accessibility",
+            value: 40,
+            change: -60,
+            impact: "negative"
+          },
+          {
+            metric: "Western Sydney Delivery Times",
+            value: 185,
+            change: 85,
+            impact: "negative"
+          },
+          {
+            metric: "Rerouting Efficiency",
+            value: 68,
+            change: -32,
+            impact: "negative"
+          },
+          {
+            metric: "Additional Fuel Costs",
+            value: 127,
+            change: 27,
+            impact: "negative"
+          },
+          {
+            metric: "Eastern Distribution Center Utilization",
+            value: 142,
+            change: 42,
+            impact: "positive"
+          }
+        ],
+        probability: 82
       }
     ];
     this.metrics = {
