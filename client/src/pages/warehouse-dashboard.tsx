@@ -122,7 +122,7 @@ export default function WarehouseDashboard() {
           <p className="text-muted-foreground">Welcome back, {user.name}</p>
         </div>
         
-        <Button variant="outline" onClick={() => navigate("/login")}>Sign Out</Button>
+        <Button variant="outline" onClick={() => setLocation("/login")}>Sign Out</Button>
       </header>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -231,7 +231,72 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.users = new Map();
-    this.currentId = 1;
+    this.currentId = 5; // Start with ID 5 to account for our predefined users
+    
+    // Initialize with predefined users for testing
+    this.users.set(1, {
+      id: 1,
+      username: "driver1",
+      password: "password",
+      role: "driver" as UserRole,
+      name: "John Driver",
+      email: "driver@example.com",
+      permissions: ["view_routes", "update_delivery_status"],
+      lastLogin: new Date().toISOString(),
+      preferences: {
+        theme: "light",
+        dashboardView: "routes",
+        notifications: true
+      }
+    });
+    
+    this.users.set(2, {
+      id: 2,
+      username: "warehouse1",
+      password: "password",
+      role: "warehouse_staff" as UserRole,
+      name: "Sarah Warehouse",
+      email: "warehouse@example.com",
+      permissions: ["manage_inventory", "process_shipments"],
+      lastLogin: new Date().toISOString(),
+      preferences: {
+        theme: "light",
+        dashboardView: "inventory",
+        notifications: true
+      }
+    });
+    
+    this.users.set(3, {
+      id: 3,
+      username: "owner1",
+      password: "password",
+      role: "business_owner" as UserRole,
+      name: "Alex Smith",
+      email: "owner@example.com",
+      permissions: ["view_all", "manage_users", "financial_reports"],
+      lastLogin: new Date().toISOString(),
+      preferences: {
+        theme: "light",
+        dashboardView: "overview",
+        notifications: true
+      }
+    });
+    
+    this.users.set(4, {
+      id: 4,
+      username: "manager1",
+      password: "password",
+      role: "logistics_manager" as UserRole,
+      name: "Mike Manager",
+      email: "manager@example.com",
+      permissions: ["manage_routes", "manage_drivers", "view_reports"],
+      lastLogin: new Date().toISOString(),
+      preferences: {
+        theme: "light",
+        dashboardView: "logistics",
+        notifications: true
+      }
+    });
     
     // Initialize with empty data structures
     // Initialize AI predictive analytics data
