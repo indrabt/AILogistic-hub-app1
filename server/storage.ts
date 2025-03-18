@@ -656,9 +656,9 @@ export class MemStorage implements IStorage {
     ];
     
     this.inventoryAlerts = [
-      { id: 1, product: "Electronic Components", location: "Chicago Distribution Center", current: 52, minimum: 200, severity: "critical", percentage: 26 },
-      { id: 2, product: "Packaging Supplies", location: "Dallas Regional Center", current: 120, minimum: 200, severity: "low", percentage: 60 },
-      { id: 3, product: "Winter Clothing", location: "Boston Local Center", current: 85, minimum: 150, severity: "low", percentage: 56 }
+      { id: 1, product: "Electronic Components", location: "Western Sydney Distribution Center", current: 52, minimum: 200, severity: "critical", percentage: 26 },
+      { id: 2, product: "Packaging Supplies", location: "Parramatta Regional Center", current: 120, minimum: 200, severity: "low", percentage: 60 },
+      { id: 3, product: "Summer Clothing", location: "Liverpool Local Center", current: 85, minimum: 150, severity: "low", percentage: 56 }
     ];
     
     this.productForecasts = [
@@ -669,9 +669,9 @@ export class MemStorage implements IStorage {
     ];
     
     this.weatherEvents = [
-      { id: 1, type: "snow", severity: "severe", region: "Northeast", affectedRoutes: 14, startTime: "2023-02-15T12:00:00", endTime: "2023-02-16T03:00:00", description: "Heavy snowfall with accumulation of 8-12 inches expected" },
-      { id: 2, type: "fog", severity: "moderate", region: "West Coast", affectedRoutes: 8, startTime: "2023-02-15T06:00:00", endTime: "2023-02-15T11:00:00", description: "Dense fog reducing visibility to less than 1/4 mile" },
-      { id: 3, type: "rain", severity: "minor", region: "Southeast", affectedRoutes: 5, startTime: "2023-02-15T14:00:00", endTime: "2023-02-15T20:00:00", description: "Heavy rain causing minor flooding in low-lying areas" }
+      { id: 1, type: "flood", severity: "severe", region: "Hawkesbury-Nepean Valley", affectedRoutes: 14, startTime: "2025-03-15T12:00:00", endTime: "2025-03-18T03:00:00", description: "Heavy rainfall causing significant flooding in the Hawkesbury-Nepean Valley" },
+      { id: 2, type: "fog", severity: "moderate", region: "Blue Mountains", affectedRoutes: 8, startTime: "2025-03-18T06:00:00", endTime: "2025-03-18T11:00:00", description: "Dense fog reducing visibility to less than 500 meters on mountain roads" },
+      { id: 3, type: "extreme-heat", severity: "severe", region: "Western Sydney", affectedRoutes: 5, startTime: "2025-03-20T10:00:00", endTime: "2025-03-20T18:00:00", description: "Extreme heat with temperatures exceeding 40°C affecting road conditions and vehicle performance" }
     ];
     
     this.weatherImpactMetrics = {
@@ -682,17 +682,17 @@ export class MemStorage implements IStorage {
     };
     
     this.alternativeRoutes = [
-      { id: 1, originalRoute: "I-95 North", alternativeRoute: "US-1 North", timeSaved: "45 min", weatherCondition: "Heavy Snow", confidence: 87 },
-      { id: 2, originalRoute: "I-5 South", alternativeRoute: "CA-101 South", timeSaved: "30 min", weatherCondition: "Dense Fog", confidence: 92 },
-      { id: 3, originalRoute: "I-75 South", alternativeRoute: "US-41 South", timeSaved: "15 min", weatherCondition: "Heavy Rain", confidence: 78 }
+      { id: 1, originalRoute: "M4 Motorway", alternativeRoute: "Great Western Highway", timeSaved: "45 min", weatherCondition: "Flooding", confidence: 87 },
+      { id: 2, originalRoute: "M7 Motorway", alternativeRoute: "Westlink M7 Alternate", timeSaved: "30 min", weatherCondition: "Dense Fog", confidence: 92 },
+      { id: 3, originalRoute: "M5 Motorway", alternativeRoute: "King Georges Road", timeSaved: "15 min", weatherCondition: "Heavy Rain", confidence: 78 }
     ];
     
     this.reports = [
-      { id: 1, name: "Monthly Logistics Performance", type: "logistics", lastGenerated: "2023-01-31", frequency: "monthly", format: "pdf", size: "2.4 MB" },
-      { id: 2, name: "Weekly Inventory Status", type: "inventory", lastGenerated: "2023-02-12", frequency: "weekly", format: "excel", size: "1.8 MB" },
-      { id: 3, name: "Q1 Demand Forecast", type: "forecast", lastGenerated: "2023-01-15", frequency: "quarterly", format: "pdf", size: "3.2 MB" },
-      { id: 4, name: "Route Optimization Summary", type: "routes", lastGenerated: "2023-02-14", frequency: "daily", format: "csv", size: "1.1 MB" },
-      { id: 5, name: "Custom Supply Chain Analysis", type: "custom", lastGenerated: "2023-01-20", frequency: "custom", format: "excel", size: "4.5 MB" }
+      { id: 1, name: "Monthly Logistics Performance", type: "logistics", lastGenerated: "2025-02-28", frequency: "monthly", format: "pdf", size: "2.4 MB" },
+      { id: 2, name: "Weekly Inventory Status", type: "inventory", lastGenerated: "2025-03-15", frequency: "weekly", format: "excel", size: "1.8 MB" },
+      { id: 3, name: "Q1 Demand Forecast", type: "forecast", lastGenerated: "2025-01-15", frequency: "quarterly", format: "pdf", size: "3.2 MB" },
+      { id: 4, name: "Western Sydney Route Optimization", type: "routes", lastGenerated: "2025-03-17", frequency: "daily", format: "csv", size: "1.1 MB" },
+      { id: 5, name: "Supply Chain Resilience Analysis", type: "custom", lastGenerated: "2025-03-10", frequency: "custom", format: "excel", size: "4.5 MB" }
     ];
     
     this.userSettings = {
