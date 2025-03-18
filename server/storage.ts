@@ -420,10 +420,10 @@ export class MemStorage implements IStorage {
         insights: [
           {
             id: 3,
-            title: "Northeast Route Congestion",
-            description: "Predicted heavy traffic on I-95 corridor due to construction",
+            title: "M4 Motorway Congestion",
+            description: "Predicted heavy traffic on M4 corridor due to construction",
             importance: "critical",
-            relatedEntity: "Northeast Routes"
+            relatedEntity: "Western Sydney Routes"
           }
         ],
         impactAreas: [
@@ -449,12 +449,12 @@ export class MemStorage implements IStorage {
       {
         id: 1,
         title: "Unusual Delivery Delay Pattern",
-        description: "AI has detected an unusual pattern of delivery delays in the Chicago region",
+        description: "AI has detected an unusual pattern of delivery delays in the Western Sydney region",
         detectedAt: "2023-02-15T10:23:00",
         severity: "high",
         category: "logistics",
         status: "investigating",
-        affectedAreas: ["Chicago Distribution Center", "Midwest Deliveries"]
+        affectedAreas: ["Western Sydney Distribution Center", "Parramatta Deliveries"]
       },
       {
         id: 2,
@@ -481,13 +481,13 @@ export class MemStorage implements IStorage {
     this.scenarioAnalyses = [
       {
         id: 1,
-        name: "Northeast Snowstorm Scenario",
-        description: "Impact analysis of severe snowstorm in the Northeast region",
+        name: "Blue Mountains Severe Rain Scenario",
+        description: "Impact analysis of severe rainfall and flooding in the Blue Mountains region",
         createdAt: "2023-02-15T08:00:00",
         variables: [
           {
-            name: "Snow Accumulation",
-            value: "12-18 inches",
+            name: "Rainfall",
+            value: "120-180mm",
             type: "weather"
           },
           {
@@ -1623,11 +1623,11 @@ export class MemStorage implements IStorage {
         confidence: 89.4,
         prediction: {
           optimizedRoutes: [
-            { from: "Chicago", to: "Detroit", timeSaved: "52 minutes", fuelSaved: "12%" },
-            { from: "Los Angeles", to: "San Francisco", timeSaved: "45 minutes", fuelSaved: "9%" }
+            { from: "Penrith, NSW", to: "Sydney CBD, NSW", timeSaved: "52 minutes", fuelSaved: "12%" },
+            { from: "Liverpool, NSW", to: "Parramatta, NSW", timeSaved: "45 minutes", fuelSaved: "9%" }
           ],
           weatherImpacts: [
-            { region: "Northeast", severity: "moderate", recommendation: "Delay shipments by 24 hours" }
+            { region: "Blue Mountains, NSW", severity: "moderate", recommendation: "Delay shipments by 24 hours" }
           ]
         }
       };
@@ -1652,9 +1652,9 @@ export class MemStorage implements IStorage {
         confidence: 85.3,
         prediction: {
           insights: [
-            "Consider increasing warehouse capacity in Chicago region",
+            "Consider increasing warehouse capacity in Western Sydney region",
             "Monitor supplier delivery times for potential disruptions",
-            "Weather patterns may impact Northeast delivery schedules"
+            "Weather patterns may impact Blue Mountains delivery schedules"
           ],
           timeline: "90 days",
           reliability: "medium"
