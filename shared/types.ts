@@ -183,6 +183,79 @@ export interface Report {
   size: string;
 }
 
+// AI Predictive Analytics types
+export interface PredictiveModel {
+  id: number;
+  name: string;
+  description: string;
+  type: "demand" | "routing" | "inventory" | "weather" | "custom";
+  accuracy: number;
+  lastTrained: string;
+  status: "active" | "training" | "draft";
+  features: string[];
+}
+
+export interface ModelPrediction {
+  id: number;
+  modelId: number;
+  modelName: string;
+  createdAt: string;
+  predictionType: "demand" | "routing" | "inventory" | "weather" | "custom";
+  confidence: number;
+  insights: PredictionInsight[];
+  impactAreas: PredictionImpact[];
+}
+
+export interface PredictionInsight {
+  id: number;
+  title: string;
+  description: string;
+  importance: "critical" | "high" | "medium" | "low";
+  relatedEntity?: string;
+}
+
+export interface PredictionImpact {
+  area: string;
+  metric: string;
+  impact: "positive" | "negative" | "neutral";
+  value: number;
+  unit: string;
+}
+
+export interface AnomalyDetection {
+  id: number;
+  title: string;
+  description: string;
+  detectedAt: string;
+  severity: "critical" | "high" | "medium" | "low";
+  category: "demand" | "supply" | "logistics" | "weather" | "other";
+  status: "new" | "investigating" | "resolved";
+  affectedAreas: string[];
+}
+
+export interface ScenarioAnalysis {
+  id: number;
+  name: string;
+  description: string;
+  createdAt: string;
+  variables: ScenarioVariable[];
+  outcomes: ScenarioOutcome[];
+  probability: number;
+}
+
+export interface ScenarioVariable {
+  name: string;
+  value: string | number;
+  type: "demand" | "supply" | "logistics" | "weather" | "cost" | "other";
+}
+
+export interface ScenarioOutcome {
+  metric: string;
+  value: number;
+  change: number;
+  impact: "positive" | "negative" | "neutral";
+}
+
 // Settings types
 export interface UserSettings {
   notifications: {

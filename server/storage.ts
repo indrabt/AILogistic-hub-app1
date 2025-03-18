@@ -16,7 +16,11 @@ import {
   WeatherImpactMetrics,
   AlternativeRoute,
   Report,
-  UserSettings
+  UserSettings,
+  PredictiveModel,
+  ModelPrediction,
+  AnomalyDetection,
+  ScenarioAnalysis
 } from "@shared/types";
 
 // modify the interface with any CRUD methods
@@ -59,6 +63,25 @@ export interface IStorage {
   // Settings data
   getUserSettings(): Promise<UserSettings>;
   updateUserSettings(settings: Partial<UserSettings>): Promise<UserSettings>;
+  
+  // AI Predictive Analytics data
+  getPredictiveModels(): Promise<PredictiveModel[]>;
+  getPredictiveModelById(id: number): Promise<PredictiveModel | undefined>;
+  createPredictiveModel(model: Omit<PredictiveModel, 'id'>): Promise<PredictiveModel>;
+  updatePredictiveModel(id: number, model: Partial<PredictiveModel>): Promise<PredictiveModel | undefined>;
+  deletePredictiveModel(id: number): Promise<boolean>;
+  
+  getModelPredictions(modelId?: number): Promise<ModelPrediction[]>;
+  getModelPredictionById(id: number): Promise<ModelPrediction | undefined>;
+  createModelPrediction(prediction: Omit<ModelPrediction, 'id'>): Promise<ModelPrediction>;
+  
+  getAnomalyDetections(status?: string): Promise<AnomalyDetection[]>;
+  resolveAnomaly(id: number, resolution: string): Promise<AnomalyDetection | undefined>;
+  
+  getScenarioAnalyses(): Promise<ScenarioAnalysis[]>;
+  getScenarioAnalysisById(id: number): Promise<ScenarioAnalysis | undefined>;
+  createScenarioAnalysis(scenario: Omit<ScenarioAnalysis, 'id'>): Promise<ScenarioAnalysis>;
+  runPredictiveAnalysis(data: any): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -81,6 +104,12 @@ export class MemStorage implements IStorage {
   private reports: Report[];
   private userSettings: UserSettings;
   
+  // AI Predictive Analytics data
+  private predictiveModels: PredictiveModel[];
+  private modelPredictions: ModelPrediction[];
+  private anomalyDetections: AnomalyDetection[];
+  private scenarioAnalyses: ScenarioAnalysis[];
+  
   currentId: number;
 
   constructor() {
@@ -88,6 +117,253 @@ export class MemStorage implements IStorage {
     this.currentId = 1;
     
     // Initialize with empty data structures
+    // Initialize AI predictive analytics data
+    this.predictiveModels = [
+      {
+        id: 1,
+        name: "Demand Forecasting AI",
+        description: "Advanced ML model for predicting product demand across categories",
+        type: "demand",
+        accuracy: 93.5,
+        lastTrained: "2023-02-10",
+        status: "active",
+        features: ["Historical sales", "Seasonality", "Market trends", "Promotional events"]
+      },
+      {
+        id: 2,
+        name: "Route Optimization AI",
+        description: "Neural network for real-time route optimization considering weather and traffic",
+        type: "routing",
+        accuracy: 89.2,
+        lastTrained: "2023-02-05",
+        status: "active",
+        features: ["Distance", "Weather conditions", "Traffic patterns", "Fuel consumption"]
+      },
+      {
+        id: 3,
+        name: "Inventory Management AI",
+        description: "Predictive model for optimal inventory levels and reordering",
+        type: "inventory",
+        accuracy: 91.7,
+        lastTrained: "2023-01-25",
+        status: "active",
+        features: ["Stock levels", "Supplier lead times", "Seasonal demand", "Storage costs"]
+      },
+      {
+        id: 4,
+        name: "Weather Impact Prediction",
+        description: "AI model that predicts severe weather impacts on logistics operations",
+        type: "weather",
+        accuracy: 87.4,
+        lastTrained: "2023-02-12",
+        status: "active",
+        features: ["Weather forecasts", "Historical delays", "Route vulnerability", "Shipment priority"]
+      },
+      {
+        id: 5,
+        name: "Custom Risk Assessment",
+        description: "Custom AI model for supply chain risk assessment and mitigation",
+        type: "custom",
+        accuracy: 85.9,
+        lastTrained: "2023-01-15",
+        status: "training",
+        features: ["Supplier data", "Geopolitical factors", "Commodity prices", "Transportation modes"]
+      }
+    ];
+    
+    this.modelPredictions = [
+      {
+        id: 1,
+        modelId: 1,
+        modelName: "Demand Forecasting AI",
+        createdAt: "2023-02-15T09:30:00",
+        predictionType: "demand",
+        confidence: 92.4,
+        insights: [
+          {
+            id: 1,
+            title: "Increased Apparel Demand",
+            description: "Predicted 12% increase in apparel demand over next 30 days",
+            importance: "high",
+            relatedEntity: "Apparel"
+          },
+          {
+            id: 2,
+            title: "Seasonal Electronics Decline",
+            description: "Expected 5% reduction in electronics demand due to seasonal patterns",
+            importance: "medium",
+            relatedEntity: "Electronics"
+          }
+        ],
+        impactAreas: [
+          {
+            area: "Inventory",
+            metric: "Stock levels",
+            impact: "positive",
+            value: 15,
+            unit: "%"
+          },
+          {
+            area: "Revenue",
+            metric: "Sales forecast",
+            impact: "positive",
+            value: 8.5,
+            unit: "%"
+          }
+        ]
+      },
+      {
+        id: 2,
+        modelId: 2,
+        modelName: "Route Optimization AI",
+        createdAt: "2023-02-14T14:45:00",
+        predictionType: "routing",
+        confidence: 88.7,
+        insights: [
+          {
+            id: 3,
+            title: "Northeast Route Congestion",
+            description: "Predicted heavy traffic on I-95 corridor due to construction",
+            importance: "critical",
+            relatedEntity: "Northeast Routes"
+          }
+        ],
+        impactAreas: [
+          {
+            area: "Delivery Time",
+            metric: "On-time delivery",
+            impact: "negative",
+            value: 12.5,
+            unit: "%"
+          },
+          {
+            area: "Cost",
+            metric: "Fuel usage",
+            impact: "negative",
+            value: 8.2,
+            unit: "%"
+          }
+        ]
+      }
+    ];
+    
+    this.anomalyDetections = [
+      {
+        id: 1,
+        title: "Unusual Delivery Delay Pattern",
+        description: "AI has detected an unusual pattern of delivery delays in the Chicago region",
+        detectedAt: "2023-02-15T10:23:00",
+        severity: "high",
+        category: "logistics",
+        status: "investigating",
+        affectedAreas: ["Chicago Distribution Center", "Midwest Deliveries"]
+      },
+      {
+        id: 2,
+        title: "Unexpected Inventory Fluctuation",
+        description: "Significant unexpected deviation in inventory levels for electronic components",
+        detectedAt: "2023-02-14T16:30:00",
+        severity: "medium",
+        category: "supply",
+        status: "new",
+        affectedAreas: ["Electronics Inventory", "Manufacturing Schedule"]
+      },
+      {
+        id: 3,
+        title: "Demand Forecast Anomaly",
+        description: "Unusual spike in demand forecasted for furniture category",
+        detectedAt: "2023-02-13T09:15:00",
+        severity: "low",
+        category: "demand",
+        status: "resolved",
+        affectedAreas: ["Furniture Category", "Inventory Planning"]
+      }
+    ];
+    
+    this.scenarioAnalyses = [
+      {
+        id: 1,
+        name: "Northeast Snowstorm Scenario",
+        description: "Impact analysis of severe snowstorm in the Northeast region",
+        createdAt: "2023-02-15T08:00:00",
+        variables: [
+          {
+            name: "Snow Accumulation",
+            value: "12-18 inches",
+            type: "weather"
+          },
+          {
+            name: "Duration",
+            value: "36 hours",
+            type: "weather"
+          },
+          {
+            name: "Affected Routes",
+            value: 14,
+            type: "logistics"
+          }
+        ],
+        outcomes: [
+          {
+            metric: "Delivery Delays",
+            value: 48,
+            change: 32,
+            impact: "negative"
+          },
+          {
+            metric: "Alternative Routes Used",
+            value: 8,
+            change: 8,
+            impact: "positive"
+          }
+        ],
+        probability: 75
+      },
+      {
+        id: 2,
+        name: "Supply Chain Disruption",
+        description: "Analysis of major supplier disruption on inventory and operations",
+        createdAt: "2023-02-10T14:30:00",
+        variables: [
+          {
+            name: "Disruption Length",
+            value: "2 weeks",
+            type: "supply"
+          },
+          {
+            name: "Affected Categories",
+            value: "Electronics, Components",
+            type: "supply"
+          },
+          {
+            name: "Available Alternatives",
+            value: 3,
+            type: "supply"
+          }
+        ],
+        outcomes: [
+          {
+            metric: "Inventory Levels",
+            value: 35,
+            change: -65,
+            impact: "negative"
+          },
+          {
+            metric: "Production Impact",
+            value: 40,
+            change: -60,
+            impact: "negative"
+          },
+          {
+            metric: "Revenue Impact",
+            value: 82,
+            change: -18,
+            impact: "negative"
+          }
+        ],
+        probability: 30
+      }
+    ];
     this.metrics = {
       activeShipments: { value: 247, change: "12% from last week", trend: "up" },
       onTimeDelivery: { value: "94%", change: "3% from last week", trend: "up" },
