@@ -9,7 +9,47 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import MetricCard from "./MetricCard";
-import { ActivityItem, MetricData, WeatherAlert } from "../../../shared/types";
+
+interface MetricData {
+  activeShipments: {
+    value: number;
+    change: string;
+    trend: "up" | "down";
+  };
+  onTimeDelivery: {
+    value: string;
+    change: string;
+    trend: "up" | "down";
+  };
+  delayAlerts: {
+    value: number;
+    change: string;
+    trend: "up" | "down";
+  };
+  avgShippingCost: {
+    value: string;
+    change: string;
+    trend: "up" | "down";
+  };
+}
+
+interface WeatherAlert {
+  id: number;
+  severity: "severe" | "advisory";
+  title: string;
+  description: string;
+  time: string;
+  affectedShipments?: number;
+  region: string;
+}
+
+interface ActivityItem {
+  id: number;
+  title: string;
+  description: string;
+  time: string;
+  type: "primary" | "accent" | "secondary" | "default";
+}
 
 interface AIInsight {
   id: number;
@@ -30,7 +70,7 @@ export default function RealTimeDashboard() {
 
   // Fetch dashboard metrics
   const { data: metrics, isLoading: metricsLoading } = useQuery({
-    queryKey: ['/api/metrics'],
+    queryKey: ['/api/dashboard/metrics'],
     refetchInterval: refreshInterval,
   });
 

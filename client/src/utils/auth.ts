@@ -29,6 +29,7 @@ export const routePermissions: Record<string, UserRole[]> = {
   "/supply-chain": ["warehouse_staff", "logistics_manager"],
   "/demand-forecasting": ["logistics_manager", "business_owner"],
   "/weather-impact": ["warehouse_staff", "logistics_manager", "driver"],
+  "/real-time-dashboard": ["logistics_manager", "business_owner"],
   "/ai-analytics": ["logistics_manager", "business_owner"],
   "/supply-chain-resilience": ["logistics_manager", "business_owner"],
   "/sustainability": ["logistics_manager", "business_owner"],

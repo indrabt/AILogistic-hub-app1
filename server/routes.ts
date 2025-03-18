@@ -9,6 +9,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // prefix all routes with /api
   
   // Dashboard endpoints
+  app.get("/api/dashboard/metrics", async (req, res) => {
+    try {
+      const metrics = await storage.getDashboardMetrics();
+      res.json(metrics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch metrics" });
+    }
+  });
+  
+  // Legacy endpoint for backward compatibility
   app.get("/api/metrics", async (req, res) => {
     try {
       const metrics = await storage.getDashboardMetrics();
