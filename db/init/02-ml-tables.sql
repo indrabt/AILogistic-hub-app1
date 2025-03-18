@@ -1,175 +1,267 @@
--- Set search path
-SET search_path TO ai_logistics, public;
+-- Create schema for machine learning data
+CREATE SCHEMA IF NOT EXISTS ml_data;
 
--- Hyper-local routing data
-CREATE TABLE IF NOT EXISTS hyper_local_routes (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  status VARCHAR(50) NOT NULL,
-  region VARCHAR(100) NOT NULL,
-  traffic_conditions VARCHAR(50),
-  weather_conditions VARCHAR(100),
-  fuel_savings VARCHAR(50),
-  time_reduction VARCHAR(50),
-  route_efficiency DOUBLE PRECISION,
-  last_updated TIMESTAMPTZ DEFAULT NOW(),
-  edge_device_status VARCHAR(50),
-  metadata JSONB
+-- Create predictive models table
+CREATE TABLE IF NOT EXISTS ml_data.predictive_models (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    type VARCHAR(50) CHECK (type IN ('demand', 'routing', 'inventory', 'weather', 'custom')),
+    accuracy NUMERIC(5,2),
+    last_trained TIMESTAMPTZ,
+    status VARCHAR(50) CHECK (status IN ('active', 'training', 'draft')),
+    features TEXT[],
+    model_path VARCHAR(255),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Construction zones (affecting routes)
-CREATE TABLE IF NOT EXISTS construction_zones (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  latitude DOUBLE PRECISION NOT NULL,
-  longitude DOUBLE PRECISION NOT NULL,
-  start_date TIMESTAMPTZ NOT NULL,
-  end_date TIMESTAMPTZ,
-  impact VARCHAR(50) NOT NULL,
-  description TEXT,
-  hyper_local_route_id INTEGER REFERENCES hyper_local_routes(id)
+-- Create model predictions table (time-series)
+CREATE TABLE IF NOT EXISTS ml_data.model_predictions (
+    id SERIAL PRIMARY KEY,
+    model_id INTEGER REFERENCES ml_data.predictive_models(id) ON DELETE CASCADE,
+    model_name VARCHAR(255),
+    prediction_type VARCHAR(50) CHECK (prediction_type IN ('demand', 'routing', 'inventory', 'weather', 'custom')),
+    confidence NUMERIC(5,2),
+    prediction_data JSONB NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Route telemetry data (time-series data)
-CREATE TABLE IF NOT EXISTS route_telemetry (
-  id SERIAL PRIMARY KEY,
-  route_id INTEGER,
-  vehicle_id INTEGER,
-  latitude DOUBLE PRECISION NOT NULL,
-  longitude DOUBLE PRECISION NOT NULL,
-  speed DOUBLE PRECISION,
-  heading DOUBLE PRECISION,
-  traffic_density VARCHAR(50),
-  recorded_at TIMESTAMPTZ NOT NULL,
-  fuel_consumption DOUBLE PRECISION,
-  road_condition VARCHAR(50),
-  metadata JSONB
+-- Convert to hypertable for time-series analysis
+SELECT create_hypertable('ml_data.model_predictions', 'created_at', if_not_exists => TRUE);
+
+-- Create prediction insights table
+CREATE TABLE IF NOT EXISTS ml_data.prediction_insights (
+    id SERIAL PRIMARY KEY,
+    prediction_id INTEGER REFERENCES ml_data.model_predictions(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    importance VARCHAR(50) CHECK (importance IN ('critical', 'high', 'medium', 'low')),
+    related_entity VARCHAR(255),
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Create hypertable for route telemetry
-SELECT create_hypertable('route_telemetry', 'recorded_at');
-
--- Feature engineering table for ML
-CREATE TABLE IF NOT EXISTS feature_engineering (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  description TEXT,
-  feature_type VARCHAR(50) NOT NULL,
-  source_table VARCHAR(100),
-  transformation_code TEXT,
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+-- Create prediction impacts table
+CREATE TABLE IF NOT EXISTS ml_data.prediction_impacts (
+    id SERIAL PRIMARY KEY,
+    prediction_id INTEGER REFERENCES ml_data.model_predictions(id) ON DELETE CASCADE,
+    area VARCHAR(255) NOT NULL,
+    metric VARCHAR(255) NOT NULL,
+    impact VARCHAR(50) CHECK (impact IN ('positive', 'negative', 'neutral')),
+    value NUMERIC(10,2),
+    unit VARCHAR(50),
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Computed features (time-series data)
-CREATE TABLE IF NOT EXISTS computed_features (
-  id SERIAL PRIMARY KEY,
-  feature_id INTEGER REFERENCES feature_engineering(id),
-  entity_id INTEGER,
-  entity_type VARCHAR(50),
-  value_numeric DOUBLE PRECISION,
-  value_text TEXT,
-  computed_at TIMESTAMPTZ NOT NULL,
-  is_anomaly BOOLEAN DEFAULT FALSE,
-  anomaly_score DOUBLE PRECISION
+-- Create anomaly detections table (time-series)
+CREATE TABLE IF NOT EXISTS ml_data.anomaly_detections (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    detected_at TIMESTAMPTZ DEFAULT NOW(),
+    severity VARCHAR(50) CHECK (severity IN ('critical', 'high', 'medium', 'low')),
+    category VARCHAR(50) CHECK (category IN ('demand', 'supply', 'logistics', 'weather', 'other')),
+    status VARCHAR(50) CHECK (status IN ('new', 'investigating', 'resolved')),
+    affected_areas TEXT[],
+    resolution TEXT
 );
 
--- Create hypertable for computed features
-SELECT create_hypertable('computed_features', 'computed_at');
+-- Convert to hypertable for time-series analysis
+SELECT create_hypertable('ml_data.anomaly_detections', 'detected_at', if_not_exists => TRUE);
 
--- Autonomous vehicle data
-CREATE TABLE IF NOT EXISTS autonomous_vehicles (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  type VARCHAR(50) NOT NULL,
-  autonomy_level INTEGER NOT NULL,
-  status VARCHAR(50) NOT NULL,
-  current_lat DOUBLE PRECISION,
-  current_lng DOUBLE PRECISION,
-  battery_level INTEGER,
-  next_maintenance TIMESTAMPTZ,
-  current_route_id INTEGER,
-  cargo_capacity VARCHAR(50),
-  operational_hours INTEGER,
-  last_updated TIMESTAMPTZ DEFAULT NOW()
+-- Create scenario analyses table
+CREATE TABLE IF NOT EXISTS ml_data.scenario_analyses (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    probability NUMERIC(5,2),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Time-series sensor data from autonomous vehicles
-CREATE TABLE IF NOT EXISTS vehicle_sensor_data (
-  id SERIAL PRIMARY KEY,
-  vehicle_id INTEGER REFERENCES autonomous_vehicles(id),
-  sensor_type VARCHAR(50) NOT NULL,
-  value_numeric DOUBLE PRECISION,
-  value_text TEXT,
-  recorded_at TIMESTAMPTZ NOT NULL,
-  metadata JSONB
+-- Create scenario variables table
+CREATE TABLE IF NOT EXISTS ml_data.scenario_variables (
+    id SERIAL PRIMARY KEY,
+    scenario_id INTEGER REFERENCES ml_data.scenario_analyses(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    value VARCHAR(255),
+    type VARCHAR(50) CHECK (type IN ('demand', 'supply', 'logistics', 'weather', 'cost', 'other'))
 );
 
--- Create hypertable for vehicle sensor data
-SELECT create_hypertable('vehicle_sensor_data', 'recorded_at');
-
--- ML training jobs
-CREATE TABLE IF NOT EXISTS ml_training_jobs (
-  id SERIAL PRIMARY KEY,
-  model_id INTEGER REFERENCES ml_models(id),
-  status VARCHAR(50) NOT NULL,
-  start_time TIMESTAMPTZ,
-  end_time TIMESTAMPTZ,
-  training_parameters JSONB,
-  validation_metrics JSONB,
-  logs TEXT
+-- Create scenario outcomes table
+CREATE TABLE IF NOT EXISTS ml_data.scenario_outcomes (
+    id SERIAL PRIMARY KEY,
+    scenario_id INTEGER REFERENCES ml_data.scenario_analyses(id) ON DELETE CASCADE,
+    metric VARCHAR(255) NOT NULL,
+    value NUMERIC(10,2),
+    change NUMERIC(10,2),
+    impact VARCHAR(50) CHECK (impact IN ('positive', 'negative', 'neutral'))
 );
 
--- Continuous learning feedback
-CREATE TABLE IF NOT EXISTS ml_feedback (
-  id SERIAL PRIMARY KEY,
-  model_id INTEGER REFERENCES ml_models(id),
-  prediction_id INTEGER REFERENCES ml_predictions(id),
-  actual_outcome TEXT,
-  feedback_source VARCHAR(50),
-  feedback_time TIMESTAMPTZ DEFAULT NOW(),
-  incorporated BOOLEAN DEFAULT FALSE
+-- Create resilience forecasts table
+CREATE TABLE IF NOT EXISTS ml_data.resilience_forecasts (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    forecast_type VARCHAR(50) CHECK (forecast_type IN ('demand', 'disaster', 'delay')),
+    probability NUMERIC(5,2),
+    impact VARCHAR(50) CHECK (impact IN ('low', 'medium', 'high', 'critical')),
+    time_window VARCHAR(255),
+    affected_regions TEXT[],
+    suggested_actions TEXT[],
+    accuracy NUMERIC(5,2),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Create indexes for ML-specific query patterns
-CREATE INDEX IF NOT EXISTS idx_route_telemetry_vehicle_id ON route_telemetry (vehicle_id);
-CREATE INDEX IF NOT EXISTS idx_computed_features_entity ON computed_features (entity_type, entity_id);
-CREATE INDEX IF NOT EXISTS idx_vehicle_sensor_data_vehicle_id ON vehicle_sensor_data (vehicle_id);
-CREATE INDEX IF NOT EXISTS idx_ml_feedback_model_id ON ml_feedback (model_id);
+-- Create inventory recommendations table
+CREATE TABLE IF NOT EXISTS ml_data.inventory_recommendations (
+    id SERIAL PRIMARY KEY,
+    forecast_id INTEGER REFERENCES ml_data.resilience_forecasts(id) ON DELETE CASCADE,
+    product VARCHAR(255) NOT NULL,
+    current_level INTEGER NOT NULL,
+    recommended_level INTEGER NOT NULL,
+    priority VARCHAR(50) CHECK (priority IN ('low', 'medium', 'high')),
+    location VARCHAR(255) NOT NULL,
+    rationale TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
--- Function to update ML model accuracy based on feedback
-CREATE OR REPLACE FUNCTION update_model_accuracy()
-RETURNS TRIGGER AS $$
-DECLARE
-  model_id_val INTEGER;
-  accuracy_val DOUBLE PRECISION;
-BEGIN
-  model_id_val := NEW.model_id;
-  
-  -- Calculate new accuracy value based on feedback
-  SELECT AVG(
-    CASE 
-      WHEN p.prediction_type = 'demand' THEN 
-        (1.0 - ABS(EXTRACT(EPOCH FROM (f.feedback_time - p.prediction_time)) / 86400.0))
-      ELSE 0.8
-    END
-  ) INTO accuracy_val
-  FROM ml_predictions p
-  JOIN ml_feedback f ON p.id = f.prediction_id
-  WHERE p.model_id = model_id_val;
-  
-  -- Update the model accuracy
-  UPDATE ml_models 
-  SET accuracy = accuracy_val
-  WHERE id = model_id_val;
-  
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- Create historical data table for training (time-series)
+CREATE TABLE IF NOT EXISTS ml_data.training_data (
+    id SERIAL PRIMARY KEY,
+    data_type VARCHAR(50) NOT NULL,
+    time_point TIMESTAMPTZ NOT NULL,
+    features JSONB NOT NULL,
+    labels JSONB,
+    source VARCHAR(255),
+    batch_id VARCHAR(255),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
--- Create trigger for ML feedback
-CREATE TRIGGER update_model_accuracy_trigger
-AFTER INSERT ON ml_feedback
-FOR EACH ROW
-EXECUTE FUNCTION update_model_accuracy();
+-- Convert to hypertable for time-series analysis
+SELECT create_hypertable('ml_data.training_data', 'time_point', if_not_exists => TRUE);
+
+-- Create model performance metrics table (time-series)
+CREATE TABLE IF NOT EXISTS ml_data.model_performance (
+    id SERIAL PRIMARY KEY,
+    model_id INTEGER REFERENCES ml_data.predictive_models(id) ON DELETE CASCADE,
+    metric_name VARCHAR(255) NOT NULL,
+    metric_value NUMERIC(10,4) NOT NULL,
+    timestamp TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Convert to hypertable for time-series analysis
+SELECT create_hypertable('ml_data.model_performance', 'timestamp', if_not_exists => TRUE);
+
+-- Create continuous aggregate for model performance trends
+CREATE MATERIALIZED VIEW IF NOT EXISTS ml_data.model_performance_trends
+WITH (timescaledb.continuous) AS
+SELECT 
+    model_id,
+    time_bucket('1 day', timestamp) AS day,
+    AVG(metric_value) AS avg_value,
+    MIN(metric_value) AS min_value,
+    MAX(metric_value) AS max_value
+FROM ml_data.model_performance
+GROUP BY model_id, day;
+
+-- Create feature importance table
+CREATE TABLE IF NOT EXISTS ml_data.feature_importance (
+    id SERIAL PRIMARY KEY,
+    model_id INTEGER REFERENCES ml_data.predictive_models(id) ON DELETE CASCADE,
+    feature_name VARCHAR(255) NOT NULL,
+    importance_value NUMERIC(10,4) NOT NULL,
+    timestamp TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create weather impact analysis table (time-series)
+CREATE TABLE IF NOT EXISTS ml_data.weather_impacts (
+    id SERIAL PRIMARY KEY,
+    event_type VARCHAR(50) CHECK (event_type IN ('storm', 'fog', 'snow', 'rain', 'extreme-heat', 'flood')),
+    region VARCHAR(255) NOT NULL,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ,
+    impact_score NUMERIC(5,2),
+    affected_routes INTEGER,
+    delay_minutes INTEGER,
+    alternate_routes JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Convert to hypertable for time-series analysis
+SELECT create_hypertable('ml_data.weather_impacts', 'start_time', if_not_exists => TRUE);
+
+-- Create digital twins table
+CREATE TABLE IF NOT EXISTS ml_data.digital_twins (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    client_id INTEGER,
+    status VARCHAR(50) CHECK (status IN ('initializing', 'active', 'simulating', 'archived')),
+    accuracy NUMERIC(5,2),
+    components JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create digital twin scenarios table
+CREATE TABLE IF NOT EXISTS ml_data.digital_twin_scenarios (
+    id SERIAL PRIMARY KEY,
+    twin_id INTEGER REFERENCES ml_data.digital_twins(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    parameters JSONB,
+    status VARCHAR(50) CHECK (status IN ('pending', 'running', 'completed', 'failed')),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create digital twin results table
+CREATE TABLE IF NOT EXISTS ml_data.digital_twin_results (
+    id SERIAL PRIMARY KEY,
+    scenario_id INTEGER REFERENCES ml_data.digital_twin_scenarios(id) ON DELETE CASCADE,
+    metric VARCHAR(255) NOT NULL,
+    baseline NUMERIC(10,2),
+    projected NUMERIC(10,2),
+    change VARCHAR(50),
+    confidence NUMERIC(5,2),
+    recommendation TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create function to update timestamp on ML tables
+CREATE TRIGGER update_predictive_models_timestamp
+BEFORE UPDATE ON ml_data.predictive_models
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER update_scenario_analyses_timestamp
+BEFORE UPDATE ON ml_data.scenario_analyses
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER update_resilience_forecasts_timestamp
+BEFORE UPDATE ON ml_data.resilience_forecasts
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER update_digital_twins_timestamp
+BEFORE UPDATE ON ml_data.digital_twins
+FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+
+-- Create indexes for ML data tables
+CREATE INDEX IF NOT EXISTS idx_predictive_models_type ON ml_data.predictive_models(type);
+CREATE INDEX IF NOT EXISTS idx_predictive_models_status ON ml_data.predictive_models(status);
+CREATE INDEX IF NOT EXISTS idx_model_predictions_model_id ON ml_data.model_predictions(model_id);
+CREATE INDEX IF NOT EXISTS idx_model_predictions_type ON ml_data.model_predictions(prediction_type);
+CREATE INDEX IF NOT EXISTS idx_anomaly_detections_status ON ml_data.anomaly_detections(status);
+CREATE INDEX IF NOT EXISTS idx_anomaly_detections_category ON ml_data.anomaly_detections(category);
+CREATE INDEX IF NOT EXISTS idx_resilience_forecasts_type ON ml_data.resilience_forecasts(forecast_type);
+CREATE INDEX IF NOT EXISTS idx_resilience_forecasts_impact ON ml_data.resilience_forecasts(impact);
+CREATE INDEX IF NOT EXISTS idx_training_data_type ON ml_data.training_data(data_type);
+CREATE INDEX IF NOT EXISTS idx_weather_impacts_region ON ml_data.weather_impacts(region);
+CREATE INDEX IF NOT EXISTS idx_weather_impacts_event_type ON ml_data.weather_impacts(event_type);
+CREATE INDEX IF NOT EXISTS idx_digital_twins_status ON ml_data.digital_twins(status);
+
+-- Insert some sample ML models for Western Sydney logistics
+INSERT INTO ml_data.predictive_models (name, description, type, accuracy, last_trained, status, features)
+VALUES 
+    ('Western Sydney Flood Prediction', 'Predicts flood risks in Western Sydney areas and potential impacts on logistics operations', 'weather', 94.2, NOW() - INTERVAL '3 days', 'active', ARRAY['rainfall_mm', 'river_levels', 'historical_patterns', 'terrain_data', 'infrastructure_vulnerability']),
+    ('Parramatta Route Optimization', 'Optimizes delivery routes in the Parramatta area based on traffic patterns', 'routing', 89.2, NOW() - INTERVAL '5 days', 'active', ARRAY['traffic_patterns', 'time_of_day', 'historical_delivery_times', 'construction_zones', 'special_events']),
+    ('Penrith Warehouse Inventory Prediction', 'Predicts inventory needs for Penrith warehouse based on seasonal demand', 'inventory', 91.5, NOW() - INTERVAL '7 days', 'active', ARRAY['historical_orders', 'seasonal_patterns', 'local_events', 'supplier_lead_times', 'stock_thresholds'])
+ON CONFLICT DO NOTHING;

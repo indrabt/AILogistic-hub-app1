@@ -1,61 +1,73 @@
 version: '3.8'
 
 services:
+  # Main application with ML capabilities
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-logistics-hub
+    restart: unless-stopped
     ports:
       - "5000:5000"
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgres://ailogistics:${DB_PASSWORD:-passwordToChange}@timescaledb:5432/ai_logistics_hub
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${PORT:-5000}
+      - JWT_SECRET=${JWT_SECRET:-defaultsecretchangeme}
+      - POSTGRES_USER=${POSTGRES_USER:-ailogistics}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-passwordToChange}
+      - POSTGRES_DB=${POSTGRES_DB:-ai_logistics_hub}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-ailogistics}:${POSTGRES_PASSWORD:-passwordToChange}@timescaledb:5432/${POSTGRES_DB:-ai_logistics_hub}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - MAPBOX_API_KEY=${MAPBOX_API_KEY:-}
+      - WEATHER_API_KEY=${WEATHER_API_KEY:-}
+    volumes:
+      - ./ml_models:/app/ml_models
+      - ./logs:/app/logs
     depends_on:
       - timescaledb
-    volumes:
-      - ./logs:/app/logs
-    restart: unless-stopped
     networks:
-      - app-network
+      - ai-logistics-network
 
+  # TimescaleDB for time-series data and ML workloads
   timescaledb:
-    image: timescale/timescaledb:latest-pg15
+    image: timescale/timescaledb:latest-pg14
+    container_name: timescaledb
+    restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=ailogistics
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-passwordToChange}
-      - POSTGRES_DB=ai_logistics_hub
+      - POSTGRES_USER=${POSTGRES_USER:-ailogistics}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-passwordToChange}
+      - POSTGRES_DB=${POSTGRES_DB:-ai_logistics_hub}
     volumes:
-      - timescale-data:/var/lib/postgresql/data
+      - timescaledb-data:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d
-    command: postgres -c shared_preload_libraries=timescaledb -c max_connections=300
-    restart: unless-stopped
+    command: postgres -c max_connections=200 -c shared_buffers=1GB -c effective_cache_size=3GB -c maintenance_work_mem=256MB -c random_page_cost=1.1 -c effective_io_concurrency=200 -c work_mem=16MB -c min_wal_size=1GB -c max_wal_size=4GB -c checkpoint_timeout=30min -c max_locks_per_transaction=256
     networks:
-      - app-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ailogistics -d ai_logistics_hub"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      - ai-logistics-network
 
+  # PgAdmin for database management
   pgadmin:
     image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
     environment:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@ailogistics.com}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-adminPassword}
-    ports:
-      - "5050:80"
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     depends_on:
       - timescaledb
-    restart: unless-stopped
     networks:
-      - app-network
+      - ai-logistics-network
 
 volumes:
-  timescale-data:
+  timescaledb-data:
   pgadmin-data:
 
 networks:
-  app-network:
+  ai-logistics-network:
     driver: bridge
