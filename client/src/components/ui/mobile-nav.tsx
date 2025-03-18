@@ -55,7 +55,8 @@ const MobileNav = ({ currentPath }: MobileNavProps) => {
       <div 
         className={cn(
           "p-2 flex flex-col items-center cursor-pointer",
-          ["/demand-forecasting", "/weather-impact", "/ai-analytics", "/reports", "/settings"].includes(currentPath) 
+          ["/demand-forecasting", "/weather-impact", "/ai-analytics", "/reports", "/settings", 
+           "/supply-chain-resilience", "/sustainability", "/cybersecurity", "/multi-modal-logistics"].includes(currentPath) 
             ? "text-primary" 
             : "text-gray-500"
         )}
