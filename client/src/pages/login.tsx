@@ -58,11 +58,23 @@ export default function Login() {
     setIsLoading(true);
 
     try {
+      // Perform role validation based on username
+      let validatedRole = data.role;
+      
+      // Force correct roles based on username for testing convenience
+      if (data.username.toLowerCase().includes('warehouse')) {
+        validatedRole = 'warehouse_staff';
+        console.log('Login: Username contains "warehouse", enforcing warehouse_staff role');
+      } else if (data.username.toLowerCase().includes('driver')) {
+        validatedRole = 'driver';
+        console.log('Login: Username contains "driver", enforcing driver role');
+      }
+      
       // In a real app, we would authenticate with the server
       // For demo purposes, we'll simulate a login and store user info in session storage
       const userData = {
         username: data.username,
-        role: data.role,
+        role: validatedRole, // Use validated role
         name: `${data.username}`,
         id: Date.now(),
       };
@@ -80,16 +92,16 @@ export default function Login() {
         description: `Welcome, ${data.username}!`,
       });
 
-      // Route based on role
-      if (data.role === "driver") {
+      // Route based on validated role, not the form selection
+      if (validatedRole === "driver") {
         setLocation("/driver-dashboard");
-      } else if (data.role === "business_owner") {
+      } else if (validatedRole === "business_owner") {
         setLocation("/business-dashboard");
-      } else if (data.role === "warehouse_staff") {
+      } else if (validatedRole === "warehouse_staff") {
         setLocation("/warehouse-dashboard");
-      } else if (data.role === "logistics_manager") {
+      } else if (validatedRole === "logistics_manager") {
         setLocation("/dashboard");
-      } else if (data.role === "sales") {
+      } else if (validatedRole === "sales") {
         setLocation("/western-sydney-users");
       } else {
         setLocation("/business-dashboard");

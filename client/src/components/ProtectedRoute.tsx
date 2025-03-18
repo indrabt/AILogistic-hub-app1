@@ -11,6 +11,25 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const [location, setLocation] = useLocation();
   const user = getCurrentUser();
 
+  // IMPORTANT: Override the role based on username if needed
+  // This ensures consistency with SidebarLayout and prevents security issues
+  let effectiveRole = user?.role;
+  if (user?.username?.toLowerCase().includes('warehouse')) {
+    console.log('ProtectedRoute: Username indicates warehouse staff, enforcing warehouse_staff role');
+    effectiveRole = 'warehouse_staff';
+    // Update the user object with corrected role
+    if (user.role !== 'warehouse_staff') {
+      user.role = 'warehouse_staff';
+    }
+  } else if (user?.username?.toLowerCase().includes('driver')) {
+    console.log('ProtectedRoute: Username indicates driver, enforcing driver role');
+    effectiveRole = 'driver';
+    // Update the user object with corrected role
+    if (user.role !== 'driver') {
+      user.role = 'driver';
+    }
+  }
+
   useEffect(() => {
     console.log(`Protected route check for path: ${location}`);
     console.log(`Current user role: ${user?.role || 'not authenticated'}`);

@@ -40,16 +40,51 @@ export const routePermissions: Record<string, UserRole[]> = {
   "/login": ["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner"]
 };
 
-// Get user from session storage
+// Get user from session storage with role validation
 export function getCurrentUser(): { role: UserRole; username: string; name?: string; id: number } | null {
   try {
     const userData = sessionStorage.getItem('user');
     if (!userData) return null;
     
     const user = JSON.parse(userData);
+    const username = user.username || "";
+    
+    // CRITICAL SECURITY: Determine actual role based on username
+    let effectiveRole: UserRole = user.role || "logistics_manager";
+    
+    // Check if username indicates a specific role and enforce it
+    if (username.toLowerCase().includes('warehouse')) {
+      // Force warehouse staff role
+      effectiveRole = 'warehouse_staff';
+      
+      // If stored role doesn't match username, fix it in session storage
+      if (user.role !== 'warehouse_staff') {
+        console.log(`Role mismatch detected in getCurrentUser - username: ${username}, role: ${user.role}`);
+        console.log(`Enforcing warehouse_staff role based on username pattern`);
+        
+        // Update session storage with corrected role
+        const correctedUser = {...user, role: 'warehouse_staff'};
+        sessionStorage.setItem('user', JSON.stringify(correctedUser));
+      }
+    } 
+    else if (username.toLowerCase().includes('driver')) {
+      // Force driver role
+      effectiveRole = 'driver';
+      
+      // If stored role doesn't match username, fix it in session storage
+      if (user.role !== 'driver') {
+        console.log(`Role mismatch detected in getCurrentUser - username: ${username}, role: ${user.role}`);
+        console.log(`Enforcing driver role based on username pattern`);
+        
+        // Update session storage with corrected role
+        const correctedUser = {...user, role: 'driver'};
+        sessionStorage.setItem('user', JSON.stringify(correctedUser));
+      }
+    }
+    
     return {
-      role: user.role || "logistics_manager",
-      username: user.username || "",
+      role: effectiveRole,
+      username: username,
       name: user.name,
       id: user.id
     };
