@@ -18,7 +18,10 @@ import {
   Shield,
   Leaf,
   ShieldAlert,
-  ArrowUpDown
+  ArrowUpDown,
+  BarChart,
+  LineChart,
+  PieChart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -149,6 +152,12 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
               href="/multi-modal-logistics" 
               label="Multi-Modal Logistics" 
               active={location === "/multi-modal-logistics"} 
+            />
+            <SidebarItem 
+              icon={<BarChart size={20} />} 
+              href="/business-dashboard" 
+              label="Business Dashboard" 
+              active={location === "/business-dashboard"} 
             />
             <SidebarItem 
               icon={<FileText size={20} />} 

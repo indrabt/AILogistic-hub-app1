@@ -56,7 +56,8 @@ const MobileNav = ({ currentPath }: MobileNavProps) => {
         className={cn(
           "p-2 flex flex-col items-center cursor-pointer",
           ["/demand-forecasting", "/weather-impact", "/ai-analytics", "/reports", "/settings", 
-           "/supply-chain-resilience", "/sustainability", "/cybersecurity", "/multi-modal-logistics"].includes(currentPath) 
+           "/supply-chain-resilience", "/sustainability", "/cybersecurity", "/multi-modal-logistics", 
+           "/business-dashboard"].includes(currentPath) 
             ? "text-primary" 
             : "text-gray-500"
         )}
