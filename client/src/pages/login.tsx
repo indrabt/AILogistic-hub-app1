@@ -68,6 +68,15 @@ export default function Login() {
       } else if (data.username.toLowerCase().includes('driver')) {
         validatedRole = 'driver';
         console.log('Login: Username contains "driver", enforcing driver role');
+      } else if (data.username.toLowerCase().includes('manager')) {
+        validatedRole = 'logistics_manager';
+        console.log('Login: Username contains "manager", enforcing logistics_manager role');
+      } else if (data.username.toLowerCase().includes('owner')) {
+        validatedRole = 'business_owner';
+        console.log('Login: Username contains "owner", enforcing business_owner role');
+      } else if (data.username.toLowerCase().includes('sales')) {
+        validatedRole = 'sales';
+        console.log('Login: Username contains "sales", enforcing sales role');
       }
       
       // In a real app, we would authenticate with the server

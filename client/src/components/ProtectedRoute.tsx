@@ -28,6 +28,27 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     if (user.role !== 'driver') {
       user.role = 'driver';
     }
+  } else if (user?.username?.toLowerCase().includes('manager')) {
+    console.log('ProtectedRoute: Username indicates logistics manager, enforcing logistics_manager role');
+    effectiveRole = 'logistics_manager';
+    // Update the user object with corrected role
+    if (user.role !== 'logistics_manager') {
+      user.role = 'logistics_manager';
+    }
+  } else if (user?.username?.toLowerCase().includes('owner')) {
+    console.log('ProtectedRoute: Username indicates business owner, enforcing business_owner role');
+    effectiveRole = 'business_owner';
+    // Update the user object with corrected role
+    if (user.role !== 'business_owner') {
+      user.role = 'business_owner';
+    }
+  } else if (user?.username?.toLowerCase().includes('sales')) {
+    console.log('ProtectedRoute: Username indicates sales role, enforcing sales role');
+    effectiveRole = 'sales';
+    // Update the user object with corrected role
+    if (user.role !== 'sales') {
+      user.role = 'sales';
+    }
   }
 
   useEffect(() => {

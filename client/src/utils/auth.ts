@@ -81,6 +81,48 @@ export function getCurrentUser(): { role: UserRole; username: string; name?: str
         sessionStorage.setItem('user', JSON.stringify(correctedUser));
       }
     }
+    else if (username.toLowerCase().includes('manager')) {
+      // Force logistics manager role
+      effectiveRole = 'logistics_manager';
+      
+      // If stored role doesn't match username, fix it in session storage
+      if (user.role !== 'logistics_manager') {
+        console.log(`Role mismatch detected in getCurrentUser - username: ${username}, role: ${user.role}`);
+        console.log(`Enforcing logistics_manager role based on username pattern`);
+        
+        // Update session storage with corrected role
+        const correctedUser = {...user, role: 'logistics_manager'};
+        sessionStorage.setItem('user', JSON.stringify(correctedUser));
+      }
+    }
+    else if (username.toLowerCase().includes('owner')) {
+      // Force business owner role
+      effectiveRole = 'business_owner';
+      
+      // If stored role doesn't match username, fix it in session storage
+      if (user.role !== 'business_owner') {
+        console.log(`Role mismatch detected in getCurrentUser - username: ${username}, role: ${user.role}`);
+        console.log(`Enforcing business_owner role based on username pattern`);
+        
+        // Update session storage with corrected role
+        const correctedUser = {...user, role: 'business_owner'};
+        sessionStorage.setItem('user', JSON.stringify(correctedUser));
+      }
+    }
+    else if (username.toLowerCase().includes('sales')) {
+      // Force sales role
+      effectiveRole = 'sales';
+      
+      // If stored role doesn't match username, fix it in session storage
+      if (user.role !== 'sales') {
+        console.log(`Role mismatch detected in getCurrentUser - username: ${username}, role: ${user.role}`);
+        console.log(`Enforcing sales role based on username pattern`);
+        
+        // Update session storage with corrected role
+        const correctedUser = {...user, role: 'sales'};
+        sessionStorage.setItem('user', JSON.stringify(correctedUser));
+      }
+    }
     
     return {
       role: effectiveRole,

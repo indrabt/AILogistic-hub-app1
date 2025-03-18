@@ -32,32 +32,43 @@ function Router() {
   const noSidebarPaths = ['/login'];
   const showSidebar = !noSidebarPaths.includes(location);
   
-  const RouterContent = () => (
-    <ProtectedRoute>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/login" component={Login} />
-        <Route path="/routes" component={Routes} />
-        <Route path="/supply-chain" component={SupplyChain} />
-        <Route path="/demand-forecasting" component={DemandForecasting} />
-        <Route path="/weather-impact" component={WeatherImpact} />
-        <Route path="/ai-analytics" component={AIAnalytics} />
-        <Route path="/hyper-local-routing" component={HyperLocalRouting} />
-        <Route path="/supply-chain-resilience" component={SupplyChainResilience} />
-        <Route path="/sustainability" component={Sustainability} />
-        <Route path="/cybersecurity" component={Cybersecurity} />
-        <Route path="/multi-modal-logistics" component={MultiModalLogistics} />
-        <Route path="/business-dashboard" component={BusinessDashboard} />
-        <Route path="/business-metrics" component={BusinessMetrics} />
-        <Route path="/western-sydney-users" component={WesternSydneyUsers} />
-        <Route path="/driver-dashboard" component={DriverDashboard} />
-        <Route path="/warehouse-dashboard" component={WarehouseDashboard} />
-        <Route path="/reports" component={Reports} />
-        <Route path="/settings" component={Settings} />
-        <Route component={NotFound} />
-      </Switch>
-    </ProtectedRoute>
-  );
+  const RouterContent = () => {
+    console.log('Rendering route component for path:', location);
+    
+    return (
+      <ProtectedRoute>
+        <Switch>
+          <Route path="/" component={() => {
+            console.log('Root path component rendered');
+            return <Dashboard />;
+          }} />
+          <Route path="/login" component={Login} />
+          <Route path="/dashboard" component={() => {
+            console.log('Dashboard component rendered for logistics manager');
+            return <Dashboard />;
+          }} />
+          <Route path="/routes" component={Routes} />
+          <Route path="/supply-chain" component={SupplyChain} />
+          <Route path="/demand-forecasting" component={DemandForecasting} />
+          <Route path="/weather-impact" component={WeatherImpact} />
+          <Route path="/ai-analytics" component={AIAnalytics} />
+          <Route path="/hyper-local-routing" component={HyperLocalRouting} />
+          <Route path="/supply-chain-resilience" component={SupplyChainResilience} />
+          <Route path="/sustainability" component={Sustainability} />
+          <Route path="/cybersecurity" component={Cybersecurity} />
+          <Route path="/multi-modal-logistics" component={MultiModalLogistics} />
+          <Route path="/business-dashboard" component={BusinessDashboard} />
+          <Route path="/business-metrics" component={BusinessMetrics} />
+          <Route path="/western-sydney-users" component={WesternSydneyUsers} />
+          <Route path="/driver-dashboard" component={DriverDashboard} />
+          <Route path="/warehouse-dashboard" component={WarehouseDashboard} />
+          <Route path="/reports" component={Reports} />
+          <Route path="/settings" component={Settings} />
+          <Route component={NotFound} />
+        </Switch>
+      </ProtectedRoute>
+    );
+  };
   
   return showSidebar ? (
     <SidebarLayout>
