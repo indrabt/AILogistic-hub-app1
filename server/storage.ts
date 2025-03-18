@@ -634,6 +634,643 @@ export class MemStorage implements IStorage {
         analytics: false
       }
     };
+    
+    // Initialize Hyper-Local Route Optimization data
+    this.hyperLocalRoutes = [
+      {
+        id: 1,
+        name: "Western Sydney M12 Corridor",
+        status: "active",
+        region: "Western Sydney",
+        trafficConditions: "moderate",
+        weatherConditions: "Clear",
+        constructionZones: [
+          {
+            id: 1,
+            name: "M12 Motorway Construction",
+            latitude: -33.8688,
+            longitude: 151.0578,
+            startDate: "2023-11-15",
+            endDate: "2025-06-30",
+            impact: "high",
+            description: "Major motorway construction impacting multiple logistics routes"
+          }
+        ],
+        fuelSavings: "15.2%",
+        timeReduction: "22 min",
+        routeEfficiency: 87,
+        lastUpdated: "2025-03-18T08:45:00",
+        edgeDeviceStatus: "online"
+      },
+      {
+        id: 2,
+        name: "Parramatta-Penrith Route",
+        status: "active",
+        region: "Western Sydney",
+        trafficConditions: "heavy",
+        weatherConditions: "Light rain",
+        constructionZones: [],
+        fuelSavings: "12.7%",
+        timeReduction: "18 min",
+        routeEfficiency: 83,
+        lastUpdated: "2025-03-18T09:15:00",
+        edgeDeviceStatus: "online"
+      }
+    ];
+    
+    this.constructionZones = [
+      {
+        id: 1,
+        name: "M12 Motorway Construction",
+        latitude: -33.8688,
+        longitude: 151.0578,
+        startDate: "2023-11-15",
+        endDate: "2025-06-30",
+        impact: "high",
+        description: "Major motorway construction impacting multiple logistics routes"
+      },
+      {
+        id: 2,
+        name: "Badgerys Creek Airport Access",
+        latitude: -33.8825,
+        longitude: 150.7500,
+        startDate: "2024-05-20",
+        endDate: "2025-12-15",
+        impact: "medium",
+        description: "Construction of access roads to Western Sydney Airport"
+      }
+    ];
+    
+    // Initialize Predictive Supply Chain Resilience data
+    this.resilienceForecasts = [
+      {
+        id: 1,
+        name: "Flood Risk Assessment",
+        forecastType: "disaster",
+        probability: 68,
+        impact: "high",
+        timeWindow: "72 hours",
+        affectedRegions: ["Hawkesbury-Nepean Valley", "Western Sydney"],
+        suggestedActions: [
+          "Reroute deliveries away from flood-prone areas",
+          "Increase inventory at Eastern Sydney distribution centers",
+          "Activate emergency delivery protocols"
+        ],
+        alternateRoutes: [3, 5, 7],
+        inventoryRecommendations: [
+          {
+            id: 1,
+            product: "Household Essentials",
+            currentLevel: 5200,
+            recommendedLevel: 7500,
+            priority: "high",
+            location: "Eastern Sydney Distribution Center",
+            rationale: "Anticipated surge demand due to flood warnings"
+          }
+        ],
+        accuracy: 92
+      },
+      {
+        id: 2,
+        name: "Heat Wave Impact",
+        forecastType: "disaster",
+        probability: 85,
+        impact: "medium",
+        timeWindow: "7 days",
+        affectedRegions: ["Western Sydney", "Blue Mountains"],
+        suggestedActions: [
+          "Schedule deliveries during early morning hours",
+          "Ensure cooling systems in vehicles and warehouses",
+          "Prioritize temperature-sensitive inventory"
+        ],
+        alternateRoutes: [2, 4],
+        inventoryRecommendations: [
+          {
+            id: 2,
+            product: "Perishable Goods",
+            currentLevel: 3800,
+            recommendedLevel: 3000,
+            priority: "medium",
+            location: "Penrith Distribution Center",
+            rationale: "Reduce stock of heat-sensitive items in affected locations"
+          }
+        ],
+        accuracy: 89
+      }
+    ];
+    
+    this.inventoryRecommendations = [
+      {
+        id: 1,
+        product: "Household Essentials",
+        currentLevel: 5200,
+        recommendedLevel: 7500,
+        priority: "high",
+        location: "Eastern Sydney Distribution Center",
+        rationale: "Anticipated surge demand due to flood warnings"
+      },
+      {
+        id: 2,
+        product: "Perishable Goods",
+        currentLevel: 3800,
+        recommendedLevel: 3000,
+        priority: "medium",
+        location: "Penrith Distribution Center",
+        rationale: "Reduce stock of heat-sensitive items in affected locations"
+      },
+      {
+        id: 3,
+        product: "Emergency Supplies",
+        currentLevel: 1200,
+        recommendedLevel: 2500,
+        priority: "high",
+        location: "Liverpool Distribution Center",
+        rationale: "Bushfire season preparedness recommended by AI forecast"
+      }
+    ];
+    
+    // Initialize Sustainable AI-Driven Operations data
+    this.sustainabilityMetrics = {
+      id: 1,
+      totalCarbonEmissions: 12450,
+      emissionReduction: "18.5%",
+      energyEfficiency: 82,
+      emptyMilesPercentage: 13.2,
+      carbonOffsets: 3200,
+      sustainabilityScore: 78,
+      recommendations: [
+        {
+          id: 1,
+          title: "Route Consolidation",
+          description: "Consolidate deliveries to neighboring suburbs to reduce empty miles",
+          potentialImpact: "5% reduction in carbon emissions",
+          difficulty: "medium",
+          timeToImplement: "4-6 weeks",
+          costSavings: "$15,000 monthly"
+        },
+        {
+          id: 2,
+          title: "Electric Vehicle Adoption",
+          description: "Transition 20% of the fleet to electric vehicles",
+          potentialImpact: "12% reduction in carbon emissions",
+          difficulty: "complex",
+          timeToImplement: "12-18 months",
+          costSavings: "$120,000 annually"
+        }
+      ]
+    };
+    
+    this.sustainabilityRecommendations = [
+      {
+        id: 1,
+        title: "Route Consolidation",
+        description: "Consolidate deliveries to neighboring suburbs to reduce empty miles",
+        potentialImpact: "5% reduction in carbon emissions",
+        difficulty: "medium",
+        timeToImplement: "4-6 weeks",
+        costSavings: "$15,000 monthly"
+      },
+      {
+        id: 2,
+        title: "Electric Vehicle Adoption",
+        description: "Transition 20% of the fleet to electric vehicles",
+        potentialImpact: "12% reduction in carbon emissions",
+        difficulty: "complex",
+        timeToImplement: "12-18 months",
+        costSavings: "$120,000 annually"
+      },
+      {
+        id: 3,
+        title: "Solar-Powered Warehouses",
+        description: "Install solar panels on warehouse facilities",
+        potentialImpact: "20% reduction in facility energy costs",
+        difficulty: "complex",
+        timeToImplement: "6-8 months",
+        costSavings: "$85,000 annually"
+      }
+    ];
+    
+    // Initialize Integrated Cybersecurity Suite data
+    this.securityAlerts = [
+      {
+        id: 1,
+        type: "phishing",
+        severity: "high",
+        timestamp: "2025-03-17T14:32:00",
+        description: "Sophisticated phishing attempt targeting logistics management credentials",
+        status: "investigating",
+        affectedSystems: ["Email Server", "User Authentication"],
+        mitigationSteps: [
+          "Reset affected user passwords",
+          "Enable 2FA for all users",
+          "Block sender domains"
+        ],
+        responseTime: "45 seconds"
+      },
+      {
+        id: 2,
+        type: "suspicious_access",
+        severity: "medium",
+        timestamp: "2025-03-18T02:15:00",
+        description: "Multiple failed login attempts from unrecognized IP address",
+        status: "resolved",
+        affectedSystems: ["Admin Portal"],
+        mitigationSteps: [
+          "IP address blocked",
+          "Account lockout protocols activated",
+          "Security audit performed"
+        ],
+        responseTime: "38 seconds"
+      }
+    ];
+    
+    this.securityCompliance = [
+      {
+        id: 1,
+        framework: "australian_privacy",
+        status: "compliant",
+        lastAudit: "2025-02-10",
+        findings: [],
+        nextAuditDue: "2025-08-10",
+        responsibleParty: "Cybersecurity Team"
+      },
+      {
+        id: 2,
+        framework: "iso_27001",
+        status: "partially_compliant",
+        lastAudit: "2025-01-15",
+        findings: [
+          "Mobile device management not fully implemented",
+          "Disaster recovery testing overdue"
+        ],
+        nextAuditDue: "2025-07-15",
+        responsibleParty: "IT Compliance Officer"
+      }
+    ];
+    
+    // Initialize Multi-Modal Logistics Orchestration data
+    this.multiModalRoutes = [
+      {
+        id: 1,
+        name: "Sydney-to-Penrith Multi-Modal",
+        status: "in_progress",
+        originType: "warehouse",
+        destinationType: "customer",
+        transportModes: [
+          {
+            id: 1,
+            mode: "truck",
+            origin: "Sydney Port",
+            destination: "Western Sydney Distribution Center",
+            distance: "35 km",
+            duration: "45 min",
+            cost: "$120",
+            status: "completed",
+            carrier: "FastLogistics"
+          },
+          {
+            id: 2,
+            mode: "drone",
+            origin: "Western Sydney Distribution Center",
+            destination: "Penrith Business Park",
+            distance: "15 km",
+            duration: "20 min",
+            cost: "$85",
+            status: "in_transit",
+            carrier: "AeroDrone"
+          }
+        ],
+        totalDistance: "50 km",
+        totalDuration: "65 min",
+        totalCost: "$205",
+        co2Emissions: "15.2 kg",
+        reliability: 92
+      }
+    ];
+    
+    this.transportSegments = [
+      {
+        id: 1,
+        mode: "truck",
+        origin: "Sydney Port",
+        destination: "Western Sydney Distribution Center",
+        distance: "35 km",
+        duration: "45 min",
+        cost: "$120",
+        status: "completed",
+        carrier: "FastLogistics"
+      },
+      {
+        id: 2,
+        mode: "drone",
+        origin: "Western Sydney Distribution Center",
+        destination: "Penrith Business Park",
+        distance: "15 km",
+        duration: "20 min",
+        cost: "$85",
+        status: "in_transit",
+        carrier: "AeroDrone"
+      },
+      {
+        id: 3,
+        mode: "rail",
+        origin: "Sydney Port",
+        destination: "Western Sydney Intermodal Terminal",
+        distance: "45 km",
+        duration: "30 min",
+        cost: "$95",
+        status: "pending",
+        carrier: "SydneyRail"
+      }
+    ];
+    
+    // Initialize SME-Centric Customization and Affordability data
+    this.smeClients = [
+      {
+        id: 1,
+        name: "Western Sydney Fresh Produce",
+        industry: "Food & Agriculture",
+        size: "medium",
+        subscribedModules: ["Route Optimization", "Weather Impact", "Demand Forecasting"],
+        monthlyFee: 5500,
+        onboardingDate: "2025-01-15",
+        deploymentDuration: "10 days",
+        activeUsers: 12,
+        satisfaction: 92,
+        apiUsage: 2450
+      },
+      {
+        id: 2,
+        name: "Parramatta Medical Supplies",
+        industry: "Healthcare",
+        size: "small",
+        subscribedModules: ["Route Optimization", "Supply Chain"],
+        monthlyFee: 3200,
+        onboardingDate: "2025-02-20",
+        deploymentDuration: "7 days",
+        activeUsers: 5,
+        satisfaction: 88,
+        apiUsage: 1200
+      }
+    ];
+    
+    this.subscriptionTiers = [
+      {
+        id: 1,
+        name: "Starter",
+        price: 2000,
+        billingCycle: "monthly",
+        features: ["Route Optimization", "Basic Weather Alerts", "5 User Accounts"],
+        maxUsers: 5,
+        apiCallLimit: 5000,
+        storageLimit: "50 GB",
+        supportLevel: "basic"
+      },
+      {
+        id: 2,
+        name: "Professional",
+        price: 5000,
+        billingCycle: "monthly",
+        features: ["All Starter Features", "Demand Forecasting", "Supply Chain Visibility", "Multi-Modal Options", "15 User Accounts"],
+        maxUsers: 15,
+        apiCallLimit: 20000,
+        storageLimit: "200 GB",
+        supportLevel: "standard"
+      },
+      {
+        id: 3,
+        name: "Enterprise",
+        price: 12000,
+        billingCycle: "monthly",
+        features: ["All Professional Features", "AI Predictive Analytics", "Digital Twin", "Custom Integrations", "Unlimited Users"],
+        maxUsers: 100,
+        apiCallLimit: 100000,
+        storageLimit: "1 TB",
+        supportLevel: "premium"
+      }
+    ];
+    
+    // Initialize Digital Twin for Scenario Planning data
+    this.digitalTwins = [
+      {
+        id: 1,
+        name: "Western Sydney Distribution Network",
+        clientId: 1,
+        status: "active",
+        accuracy: 92,
+        lastUpdated: "2025-03-15",
+        components: [
+          {
+            id: 1,
+            type: "warehouse",
+            name: "Penrith Distribution Center",
+            properties: {
+              capacity: "15000 sqm",
+              inventory: 12500,
+              staffing: 45
+            },
+            connections: [2, 3]
+          },
+          {
+            id: 2,
+            type: "vehicle",
+            name: "Delivery Fleet A",
+            properties: {
+              vehicles: 12,
+              capacity: "120 ton",
+              fuelEfficiency: "12L/100km"
+            },
+            connections: [1, 4]
+          }
+        ],
+        scenarios: [
+          {
+            id: 1,
+            name: "Peak Season Demand Surge",
+            description: "Simulation of holiday season demand increase",
+            parameters: {
+              demandIncrease: "35%",
+              duration: "6 weeks",
+              staffingIncrease: "20%"
+            },
+            results: [
+              {
+                metric: "Warehouse Utilization",
+                baseline: 65,
+                projected: 92,
+                change: "+27%",
+                confidence: 88,
+                recommendation: "Secure temporary overflow storage"
+              },
+              {
+                metric: "Delivery Time",
+                baseline: 24,
+                projected: 36,
+                change: "+50%",
+                confidence: 85,
+                recommendation: "Implement night shifts for deliveries"
+              }
+            ],
+            createdAt: "2025-03-10",
+            status: "completed"
+          }
+        ]
+      }
+    ];
+    
+    // Initialize Autonomous Fleet Integration data
+    this.autonomousVehicles = [
+      {
+        id: 1,
+        name: "AV-Truck-001",
+        type: "truck",
+        autonomyLevel: 3,
+        status: "en_route",
+        currentLocation: {
+          lat: -33.8688,
+          lng: 151.1058
+        },
+        batteryLevel: 78,
+        nextMaintenance: "2025-04-15",
+        currentRoute: 3,
+        cargoCapacity: "12 tonnes",
+        operationalHours: 3120
+      },
+      {
+        id: 2,
+        name: "Delivery-Drone-005",
+        type: "drone",
+        autonomyLevel: 4,
+        status: "charging",
+        currentLocation: {
+          lat: -33.7486,
+          lng: 150.9942
+        },
+        batteryLevel: 22,
+        nextMaintenance: "2025-03-30",
+        currentRoute: null,
+        cargoCapacity: "5 kg",
+        operationalHours: 580
+      }
+    ];
+    
+    this.fleetMetrics = {
+      totalVehicles: 48,
+      autonomousPercentage: 12,
+      averageUtilization: 76,
+      maintenanceEfficiency: 92,
+      fuelSavings: "14.5%",
+      incidentRate: 0.5,
+      averageDeliveryTime: "32 minutes"
+    };
+    
+    // Initialize Real-Time Client Dashboard with AI Insights data
+    this.dashboardInsights = [
+      {
+        id: 1,
+        title: "Route Efficiency Opportunity",
+        description: "AI has identified potential for 15% improvement in Penrith-Liverpool routes by adjusting departure times",
+        insightType: "efficiency",
+        priority: "high",
+        relatedMetrics: ["Fuel Consumption", "Delivery Time", "Cost per Delivery"],
+        suggestedActions: [
+          "Adjust departure schedule to 6:30 AM instead of 7:15 AM",
+          "Reroute through M7 instead of local roads during peak hours"
+        ],
+        generatedAt: "2025-03-18T08:15:00"
+      },
+      {
+        id: 2,
+        title: "Demand Forecast Alert",
+        description: "Predicted 22% spike in construction materials deliveries for Western Sydney area in next 2 weeks",
+        insightType: "trend",
+        priority: "medium",
+        relatedMetrics: ["Order Volume", "Warehouse Capacity", "Fleet Utilization"],
+        suggestedActions: [
+          "Temporarily reassign 4 vehicles from eastern routes",
+          "Extend warehouse operating hours to accommodate increased volume"
+        ],
+        generatedAt: "2025-03-18T07:30:00"
+      }
+    ];
+    
+    this.clientDashboardSettings = [
+      {
+        id: 1,
+        clientId: 1,
+        visibleWidgets: ["RouteMap", "DeliveryStatus", "WeatherAlerts", "FleetOverview", "CarbonFootprint"],
+        refreshInterval: 5,
+        alertThresholds: {
+          delayWarning: 15,
+          criticalDelay: 30,
+          lowInventory: 25,
+          fuelEfficiency: 85
+        },
+        favoriteReports: [2, 5],
+        customKpis: ["On-time performance", "Cost per mile", "Customer satisfaction"]
+      }
+    ];
+    
+    // Initialize Partnerships and Ecosystem Integration data
+    this.partnerships = [
+      {
+        id: 1,
+        partnerName: "Western Sydney University",
+        partnerType: "university",
+        status: "active",
+        startDate: "2024-09-01",
+        endDate: null,
+        projectFocus: ["AI Research", "Logistics Optimization", "Sustainability Analytics"],
+        contactPerson: "Prof. Sarah Johnson",
+        dataShared: ["Anonymized Route Data", "Traffic Patterns", "Emissions Metrics"],
+        benefitsRealized: ["Improved AI Models", "Academic Publications", "Talent Recruitment"]
+      },
+      {
+        id: 2,
+        partnerName: "Transport for NSW",
+        partnerType: "government",
+        status: "active",
+        startDate: "2024-11-15",
+        endDate: null,
+        projectFocus: ["Smart Traffic Management", "Infrastructure Planning"],
+        contactPerson: "Michael Chen",
+        dataShared: ["Congestion Data", "Route Optimization Insights"],
+        benefitsRealized: ["Improved Traffic Flow", "Reduced Emissions", "Better Road Planning"]
+      }
+    ];
+    
+    this.grantApplications = [
+      {
+        id: 1,
+        name: "Sustainable Logistics Innovation Grant",
+        organization: "NSW Environmental Authority",
+        amount: 250000,
+        status: "approved",
+        submissionDate: "2024-10-15",
+        decisionDate: "2025-01-20",
+        projectTimeline: "18 months",
+        requiredDeliverables: [
+          "Quarterly emissions reduction reports",
+          "Electric vehicle integration plan",
+          "Community impact assessment"
+        ]
+      },
+      {
+        id: 2,
+        name: "Smart Cities Transportation Technology Grant",
+        organization: "Federal Innovation Fund",
+        amount: 500000,
+        status: "under_review",
+        submissionDate: "2025-02-10",
+        decisionDate: null,
+        projectTimeline: "24 months",
+        requiredDeliverables: [
+          "Edge AI implementation for traffic management",
+          "Autonomous vehicle integration protocol",
+          "Public-private partnership framework"
+        ]
+      }
+    ];
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -925,6 +1562,297 @@ export class MemStorage implements IStorage {
         }
       };
     }
+  }
+
+  // 1. Hyper-Local Route Optimization with Real-Time Adaptation
+  async getHyperLocalRoutes(): Promise<HyperLocalRoutingData[]> {
+    return this.hyperLocalRoutes;
+  }
+
+  async getHyperLocalRouteById(id: number): Promise<HyperLocalRoutingData | undefined> {
+    return this.hyperLocalRoutes.find(route => route.id === id);
+  }
+
+  async getConstructionZones(region?: string): Promise<ConstructionZone[]> {
+    if (region) {
+      return this.constructionZones.filter(zone => 
+        this.hyperLocalRoutes.some(route => 
+          route.region === region && 
+          route.constructionZones.some(routeZone => routeZone.id === zone.id)
+        )
+      );
+    }
+    return this.constructionZones;
+  }
+
+  async updateRouteWithRealTimeData(routeId: number, data: Partial<HyperLocalRoutingData>): Promise<HyperLocalRoutingData> {
+    const routeIndex = this.hyperLocalRoutes.findIndex(route => route.id === routeId);
+    if (routeIndex === -1) {
+      throw new Error(`Route with ID ${routeId} not found`);
+    }
+
+    this.hyperLocalRoutes[routeIndex] = {
+      ...this.hyperLocalRoutes[routeIndex],
+      ...data,
+      lastUpdated: new Date().toISOString()
+    };
+
+    return this.hyperLocalRoutes[routeIndex];
+  }
+
+  // 2. Predictive Supply Chain Resilience
+  async getResilienceForecasts(): Promise<ResilienceForecast[]> {
+    return this.resilienceForecasts;
+  }
+
+  async getResilienceForecastById(id: number): Promise<ResilienceForecast | undefined> {
+    return this.resilienceForecasts.find(forecast => forecast.id === id);
+  }
+
+  async getInventoryRecommendations(forecastId?: number): Promise<InventoryRecommendation[]> {
+    if (forecastId) {
+      const forecast = this.resilienceForecasts.find(f => f.id === forecastId);
+      return forecast?.inventoryRecommendations || [];
+    }
+    return this.inventoryRecommendations;
+  }
+
+  async createResilienceForecast(forecast: Omit<ResilienceForecast, 'id'>): Promise<ResilienceForecast> {
+    const id = this.resilienceForecasts.length > 0 
+      ? Math.max(...this.resilienceForecasts.map(f => f.id)) + 1 
+      : 1;
+    
+    const newForecast: ResilienceForecast = {
+      ...forecast,
+      id
+    };
+    
+    this.resilienceForecasts.push(newForecast);
+    return newForecast;
+  }
+
+  // 3. Sustainable AI-Driven Operations
+  async getSustainabilityMetrics(): Promise<SustainabilityMetrics> {
+    return this.sustainabilityMetrics;
+  }
+
+  async getSustainabilityRecommendations(): Promise<SustainabilityRecommendation[]> {
+    return this.sustainabilityRecommendations;
+  }
+
+  async updateSustainabilityMetrics(metrics: Partial<SustainabilityMetrics>): Promise<SustainabilityMetrics> {
+    this.sustainabilityMetrics = {
+      ...this.sustainabilityMetrics,
+      ...metrics
+    };
+
+    return this.sustainabilityMetrics;
+  }
+
+  // 4. Integrated Cybersecurity Suite
+  async getSecurityAlerts(status?: string): Promise<SecurityAlert[]> {
+    if (status) {
+      return this.securityAlerts.filter(alert => alert.status === status);
+    }
+    return this.securityAlerts;
+  }
+
+  async updateSecurityAlert(id: number, update: Partial<SecurityAlert>): Promise<SecurityAlert | undefined> {
+    const alertIndex = this.securityAlerts.findIndex(alert => alert.id === id);
+    if (alertIndex === -1) {
+      return undefined;
+    }
+
+    this.securityAlerts[alertIndex] = {
+      ...this.securityAlerts[alertIndex],
+      ...update
+    };
+
+    return this.securityAlerts[alertIndex];
+  }
+
+  async getSecurityCompliance(): Promise<SecurityCompliance[]> {
+    return this.securityCompliance;
+  }
+
+  // 5. Multi-Modal Logistics Orchestration
+  async getMultiModalRoutes(): Promise<MultiModalRoute[]> {
+    return this.multiModalRoutes;
+  }
+
+  async getMultiModalRouteById(id: number): Promise<MultiModalRoute | undefined> {
+    return this.multiModalRoutes.find(route => route.id === id);
+  }
+
+  async getTransportSegments(routeId: number): Promise<TransportSegment[]> {
+    const route = this.multiModalRoutes.find(r => r.id === routeId);
+    if (route) {
+      return route.transportModes;
+    }
+    return [];
+  }
+
+  async createMultiModalRoute(route: Omit<MultiModalRoute, 'id'>): Promise<MultiModalRoute> {
+    const id = this.multiModalRoutes.length > 0 
+      ? Math.max(...this.multiModalRoutes.map(r => r.id)) + 1 
+      : 1;
+    
+    const newRoute: MultiModalRoute = {
+      ...route,
+      id
+    };
+    
+    this.multiModalRoutes.push(newRoute);
+    return newRoute;
+  }
+
+  // 6. SME-Centric Customization and Affordability
+  async getSMEClients(): Promise<SMEClient[]> {
+    return this.smeClients;
+  }
+
+  async getSMEClientById(id: number): Promise<SMEClient | undefined> {
+    return this.smeClients.find(client => client.id === id);
+  }
+
+  async getSubscriptionTiers(): Promise<SubscriptionTier[]> {
+    return this.subscriptionTiers;
+  }
+
+  // 7. Digital Twin for Scenario Planning
+  async getDigitalTwins(clientId?: number): Promise<DigitalTwin[]> {
+    if (clientId) {
+      return this.digitalTwins.filter(twin => twin.clientId === clientId);
+    }
+    return this.digitalTwins;
+  }
+
+  async getDigitalTwinById(id: number): Promise<DigitalTwin | undefined> {
+    return this.digitalTwins.find(twin => twin.id === id);
+  }
+
+  async runDigitalTwinScenario(twinId: number, scenario: Omit<DigitalTwinScenario, 'id' | 'results'>): Promise<DigitalTwinScenario> {
+    const twinIndex = this.digitalTwins.findIndex(twin => twin.id === twinId);
+    if (twinIndex === -1) {
+      throw new Error(`Digital Twin with ID ${twinId} not found`);
+    }
+
+    // Generate random scenario ID
+    const scenarioId = this.digitalTwins[twinIndex].scenarios.length > 0
+      ? Math.max(...this.digitalTwins[twinIndex].scenarios.map(s => s.id)) + 1
+      : 1;
+
+    // Simulate the results generation based on the parameters
+    const simulatedResults: DigitalTwinResult[] = [
+      {
+        metric: "Warehouse Utilization",
+        baseline: 65,
+        projected: 85,
+        change: "+20%",
+        confidence: 90,
+        recommendation: "Increase storage capacity"
+      },
+      {
+        metric: "Delivery Time",
+        baseline: 45,
+        projected: 32,
+        change: "-29%",
+        confidence: 85,
+        recommendation: "Implement optimized routing algorithm"
+      }
+    ];
+
+    const newScenario: DigitalTwinScenario = {
+      ...scenario,
+      id: scenarioId,
+      results: simulatedResults,
+      status: "completed"
+    };
+
+    this.digitalTwins[twinIndex].scenarios.push(newScenario);
+    return newScenario;
+  }
+
+  // 8. Autonomous Fleet Integration
+  async getAutonomousVehicles(): Promise<AutonomousVehicle[]> {
+    return this.autonomousVehicles;
+  }
+
+  async getAutonomousVehicleById(id: number): Promise<AutonomousVehicle | undefined> {
+    return this.autonomousVehicles.find(vehicle => vehicle.id === id);
+  }
+
+  async getFleetMetrics(): Promise<FleetMetrics> {
+    return this.fleetMetrics;
+  }
+
+  async updateAutonomousVehicle(id: number, update: Partial<AutonomousVehicle>): Promise<AutonomousVehicle | undefined> {
+    const vehicleIndex = this.autonomousVehicles.findIndex(vehicle => vehicle.id === id);
+    if (vehicleIndex === -1) {
+      return undefined;
+    }
+
+    this.autonomousVehicles[vehicleIndex] = {
+      ...this.autonomousVehicles[vehicleIndex],
+      ...update
+    };
+
+    return this.autonomousVehicles[vehicleIndex];
+  }
+
+  // 9. Real-Time Client Dashboard with AI Insights
+  async getDashboardInsights(clientId?: number): Promise<DashboardInsight[]> {
+    // In a real implementation, we would filter by client
+    // For now, return all insights
+    return this.dashboardInsights;
+  }
+
+  async getClientDashboardSettings(clientId: number): Promise<ClientDashboardSettings | undefined> {
+    return this.clientDashboardSettings.find(settings => settings.clientId === clientId);
+  }
+
+  async updateClientDashboardSettings(clientId: number, settings: Partial<ClientDashboardSettings>): Promise<ClientDashboardSettings | undefined> {
+    const settingsIndex = this.clientDashboardSettings.findIndex(s => s.clientId === clientId);
+    if (settingsIndex === -1) {
+      return undefined;
+    }
+
+    this.clientDashboardSettings[settingsIndex] = {
+      ...this.clientDashboardSettings[settingsIndex],
+      ...settings
+    };
+
+    return this.clientDashboardSettings[settingsIndex];
+  }
+
+  // 10. Partnerships and Ecosystem Integration
+  async getPartnerships(): Promise<Partnership[]> {
+    return this.partnerships;
+  }
+
+  async getPartnershipById(id: number): Promise<Partnership | undefined> {
+    return this.partnerships.find(partnership => partnership.id === id);
+  }
+
+  async getGrantApplications(status?: string): Promise<GrantApplication[]> {
+    if (status) {
+      return this.grantApplications.filter(app => app.status === status);
+    }
+    return this.grantApplications;
+  }
+
+  async createPartnership(partnership: Omit<Partnership, 'id'>): Promise<Partnership> {
+    const id = this.partnerships.length > 0 
+      ? Math.max(...this.partnerships.map(p => p.id)) + 1 
+      : 1;
+    
+    const newPartnership: Partnership = {
+      ...partnership,
+      id
+    };
+    
+    this.partnerships.push(newPartnership);
+    return newPartnership;
   }
 }
 

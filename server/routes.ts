@@ -446,6 +446,576 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 1. Hyper-Local Route Optimization with Real-Time Adaptation
+  app.get("/api/hyper-local/routes", async (req, res) => {
+    try {
+      const routes = await storage.getHyperLocalRoutes();
+      res.json(routes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch hyper-local routes" });
+    }
+  });
+
+  app.get("/api/hyper-local/routes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const route = await storage.getHyperLocalRouteById(id);
+      
+      if (!route) {
+        return res.status(404).json({ message: "Hyper-local route not found" });
+      }
+      
+      res.json(route);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch hyper-local route" });
+    }
+  });
+
+  app.get("/api/hyper-local/construction-zones", async (req, res) => {
+    try {
+      const region = req.query.region as string | undefined;
+      const zones = await storage.getConstructionZones(region);
+      res.json(zones);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch construction zones" });
+    }
+  });
+
+  app.patch("/api/hyper-local/routes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const routeSchema = z.object({
+        name: z.string().optional(),
+        status: z.enum(["active", "scheduled", "completed"]).optional(),
+        region: z.string().optional(),
+        trafficConditions: z.enum(["light", "moderate", "heavy", "gridlock"]).optional(),
+        weatherConditions: z.string().optional(),
+        constructionZones: z.array(z.object({
+          id: z.number(),
+          name: z.string(),
+          latitude: z.number(),
+          longitude: z.number(),
+          startDate: z.string(),
+          endDate: z.string(),
+          impact: z.enum(["low", "medium", "high"]),
+          description: z.string()
+        })).optional(),
+        fuelSavings: z.string().optional(),
+        timeReduction: z.string().optional(),
+        routeEfficiency: z.number().optional(),
+        edgeDeviceStatus: z.enum(["online", "offline", "degraded"]).optional(),
+      });
+
+      const validatedData = routeSchema.parse(req.body);
+      const updatedRoute = await storage.updateRouteWithRealTimeData(id, validatedData);
+      res.json(updatedRoute);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid route data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update hyper-local route" });
+    }
+  });
+
+  // 2. Predictive Supply Chain Resilience
+  app.get("/api/resilience/forecasts", async (req, res) => {
+    try {
+      const forecasts = await storage.getResilienceForecasts();
+      res.json(forecasts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch resilience forecasts" });
+    }
+  });
+
+  app.get("/api/resilience/forecasts/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const forecast = await storage.getResilienceForecastById(id);
+      
+      if (!forecast) {
+        return res.status(404).json({ message: "Resilience forecast not found" });
+      }
+      
+      res.json(forecast);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch resilience forecast" });
+    }
+  });
+
+  app.get("/api/resilience/inventory-recommendations", async (req, res) => {
+    try {
+      const forecastId = req.query.forecastId ? parseInt(req.query.forecastId as string) : undefined;
+      const recommendations = await storage.getInventoryRecommendations(forecastId);
+      res.json(recommendations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inventory recommendations" });
+    }
+  });
+
+  app.post("/api/resilience/forecasts", async (req, res) => {
+    try {
+      const forecastSchema = z.object({
+        name: z.string(),
+        forecastType: z.enum(["demand", "disaster", "delay"]),
+        probability: z.number(),
+        impact: z.enum(["low", "medium", "high", "critical"]),
+        timeWindow: z.string(),
+        affectedRegions: z.array(z.string()),
+        suggestedActions: z.array(z.string()),
+        alternateRoutes: z.array(z.number()),
+        inventoryRecommendations: z.array(z.object({
+          id: z.number(),
+          product: z.string(),
+          currentLevel: z.number(),
+          recommendedLevel: z.number(),
+          priority: z.enum(["low", "medium", "high"]),
+          location: z.string(),
+          rationale: z.string()
+        })),
+        accuracy: z.number()
+      });
+
+      const validatedData = forecastSchema.parse(req.body);
+      const newForecast = await storage.createResilienceForecast(validatedData);
+      res.status(201).json(newForecast);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid forecast data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create resilience forecast" });
+    }
+  });
+
+  // 3. Sustainable AI-Driven Operations
+  app.get("/api/sustainability/metrics", async (req, res) => {
+    try {
+      const metrics = await storage.getSustainabilityMetrics();
+      res.json(metrics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch sustainability metrics" });
+    }
+  });
+
+  app.get("/api/sustainability/recommendations", async (req, res) => {
+    try {
+      const recommendations = await storage.getSustainabilityRecommendations();
+      res.json(recommendations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch sustainability recommendations" });
+    }
+  });
+
+  app.patch("/api/sustainability/metrics", async (req, res) => {
+    try {
+      const metricsSchema = z.object({
+        totalCarbonEmissions: z.number().optional(),
+        emissionReduction: z.string().optional(),
+        energyEfficiency: z.number().optional(),
+        emptyMilesPercentage: z.number().optional(),
+        carbonOffsets: z.number().optional(),
+        sustainabilityScore: z.number().optional(),
+        recommendations: z.array(z.object({
+          id: z.number(),
+          title: z.string(),
+          description: z.string(),
+          potentialImpact: z.string(),
+          difficulty: z.enum(["easy", "medium", "complex"]),
+          timeToImplement: z.string(),
+          costSavings: z.string()
+        })).optional()
+      });
+
+      const validatedData = metricsSchema.parse(req.body);
+      const updatedMetrics = await storage.updateSustainabilityMetrics(validatedData);
+      res.json(updatedMetrics);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid metrics data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update sustainability metrics" });
+    }
+  });
+
+  // 4. Integrated Cybersecurity Suite
+  app.get("/api/security/alerts", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const alerts = await storage.getSecurityAlerts(status);
+      res.json(alerts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch security alerts" });
+    }
+  });
+
+  app.patch("/api/security/alerts/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const alertSchema = z.object({
+        severity: z.enum(["low", "medium", "high", "critical"]).optional(),
+        status: z.enum(["new", "investigating", "resolved", "false_positive"]).optional(),
+        description: z.string().optional(),
+        mitigationSteps: z.array(z.string()).optional(),
+        responseTime: z.string().optional()
+      });
+
+      const validatedData = alertSchema.parse(req.body);
+      const updatedAlert = await storage.updateSecurityAlert(id, validatedData);
+      
+      if (!updatedAlert) {
+        return res.status(404).json({ message: "Security alert not found" });
+      }
+      
+      res.json(updatedAlert);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid alert data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update security alert" });
+    }
+  });
+
+  app.get("/api/security/compliance", async (req, res) => {
+    try {
+      const compliance = await storage.getSecurityCompliance();
+      res.json(compliance);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch security compliance" });
+    }
+  });
+
+  // 5. Multi-Modal Logistics Orchestration
+  app.get("/api/multi-modal/routes", async (req, res) => {
+    try {
+      const routes = await storage.getMultiModalRoutes();
+      res.json(routes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch multi-modal routes" });
+    }
+  });
+
+  app.get("/api/multi-modal/routes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const route = await storage.getMultiModalRouteById(id);
+      
+      if (!route) {
+        return res.status(404).json({ message: "Multi-modal route not found" });
+      }
+      
+      res.json(route);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch multi-modal route" });
+    }
+  });
+
+  app.get("/api/multi-modal/routes/:id/segments", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const segments = await storage.getTransportSegments(id);
+      res.json(segments);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch transport segments" });
+    }
+  });
+
+  app.post("/api/multi-modal/routes", async (req, res) => {
+    try {
+      const routeSchema = z.object({
+        name: z.string(),
+        status: z.enum(["planned", "in_progress", "completed"]),
+        originType: z.enum(["warehouse", "airport", "port", "distribution_center"]),
+        destinationType: z.enum(["warehouse", "airport", "port", "distribution_center", "customer"]),
+        transportModes: z.array(z.object({
+          id: z.number(),
+          mode: z.enum(["truck", "drone", "air_freight", "rail", "last_mile"]),
+          origin: z.string(),
+          destination: z.string(),
+          distance: z.string(),
+          duration: z.string(),
+          cost: z.string(),
+          status: z.enum(["pending", "in_transit", "completed", "delayed"]),
+          carrier: z.string()
+        })),
+        totalDistance: z.string(),
+        totalDuration: z.string(),
+        totalCost: z.string(),
+        co2Emissions: z.string(),
+        reliability: z.number()
+      });
+
+      const validatedData = routeSchema.parse(req.body);
+      const newRoute = await storage.createMultiModalRoute(validatedData);
+      res.status(201).json(newRoute);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid route data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create multi-modal route" });
+    }
+  });
+
+  // 6. SME-Centric Customization and Affordability
+  app.get("/api/sme/clients", async (req, res) => {
+    try {
+      const clients = await storage.getSMEClients();
+      res.json(clients);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch SME clients" });
+    }
+  });
+
+  app.get("/api/sme/clients/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const client = await storage.getSMEClientById(id);
+      
+      if (!client) {
+        return res.status(404).json({ message: "SME client not found" });
+      }
+      
+      res.json(client);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch SME client" });
+    }
+  });
+
+  app.get("/api/sme/subscription-tiers", async (req, res) => {
+    try {
+      const tiers = await storage.getSubscriptionTiers();
+      res.json(tiers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch subscription tiers" });
+    }
+  });
+
+  // 7. Digital Twin for Scenario Planning
+  app.get("/api/digital-twins", async (req, res) => {
+    try {
+      const clientId = req.query.clientId ? parseInt(req.query.clientId as string) : undefined;
+      const twins = await storage.getDigitalTwins(clientId);
+      res.json(twins);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch digital twins" });
+    }
+  });
+
+  app.get("/api/digital-twins/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const twin = await storage.getDigitalTwinById(id);
+      
+      if (!twin) {
+        return res.status(404).json({ message: "Digital twin not found" });
+      }
+      
+      res.json(twin);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch digital twin" });
+    }
+  });
+
+  app.post("/api/digital-twins/:id/scenarios", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const scenarioSchema = z.object({
+        name: z.string(),
+        description: z.string(),
+        parameters: z.record(z.any())
+      });
+
+      const validatedData = scenarioSchema.parse(req.body);
+      const newScenario = await storage.runDigitalTwinScenario(id, {
+        ...validatedData,
+        createdAt: new Date().toISOString(),
+        status: "pending"
+      });
+      
+      res.status(201).json(newScenario);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid scenario data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to run digital twin scenario" });
+    }
+  });
+
+  // 8. Autonomous Fleet Integration
+  app.get("/api/autonomous/vehicles", async (req, res) => {
+    try {
+      const vehicles = await storage.getAutonomousVehicles();
+      res.json(vehicles);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch autonomous vehicles" });
+    }
+  });
+
+  app.get("/api/autonomous/vehicles/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const vehicle = await storage.getAutonomousVehicleById(id);
+      
+      if (!vehicle) {
+        return res.status(404).json({ message: "Autonomous vehicle not found" });
+      }
+      
+      res.json(vehicle);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch autonomous vehicle" });
+    }
+  });
+
+  app.get("/api/autonomous/fleet-metrics", async (req, res) => {
+    try {
+      const metrics = await storage.getFleetMetrics();
+      res.json(metrics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch fleet metrics" });
+    }
+  });
+
+  app.patch("/api/autonomous/vehicles/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const vehicleSchema = z.object({
+        status: z.enum(["idle", "loading", "en_route", "unloading", "charging", "maintenance"]).optional(),
+        currentLocation: z.object({
+          lat: z.number(),
+          lng: z.number()
+        }).optional(),
+        batteryLevel: z.number().optional(),
+        nextMaintenance: z.string().optional(),
+        currentRoute: z.number().nullable().optional()
+      });
+
+      const validatedData = vehicleSchema.parse(req.body);
+      const updatedVehicle = await storage.updateAutonomousVehicle(id, validatedData);
+      
+      if (!updatedVehicle) {
+        return res.status(404).json({ message: "Autonomous vehicle not found" });
+      }
+      
+      res.json(updatedVehicle);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid vehicle data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update autonomous vehicle" });
+    }
+  });
+
+  // 9. Real-Time Client Dashboard with AI Insights
+  app.get("/api/dashboard/insights", async (req, res) => {
+    try {
+      const clientId = req.query.clientId ? parseInt(req.query.clientId as string) : undefined;
+      const insights = await storage.getDashboardInsights(clientId);
+      res.json(insights);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch dashboard insights" });
+    }
+  });
+
+  app.get("/api/dashboard/settings/:clientId", async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const settings = await storage.getClientDashboardSettings(clientId);
+      
+      if (!settings) {
+        return res.status(404).json({ message: "Dashboard settings not found" });
+      }
+      
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch dashboard settings" });
+    }
+  });
+
+  app.patch("/api/dashboard/settings/:clientId", async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const settingsSchema = z.object({
+        visibleWidgets: z.array(z.string()).optional(),
+        refreshInterval: z.number().optional(),
+        alertThresholds: z.record(z.number()).optional(),
+        favoriteReports: z.array(z.number()).optional(),
+        customKpis: z.array(z.string()).optional()
+      });
+
+      const validatedData = settingsSchema.parse(req.body);
+      const updatedSettings = await storage.updateClientDashboardSettings(clientId, validatedData);
+      
+      if (!updatedSettings) {
+        return res.status(404).json({ message: "Dashboard settings not found" });
+      }
+      
+      res.json(updatedSettings);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid settings data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update dashboard settings" });
+    }
+  });
+
+  // 10. Partnerships and Ecosystem Integration
+  app.get("/api/partnerships", async (req, res) => {
+    try {
+      const partnerships = await storage.getPartnerships();
+      res.json(partnerships);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch partnerships" });
+    }
+  });
+
+  app.get("/api/partnerships/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const partnership = await storage.getPartnershipById(id);
+      
+      if (!partnership) {
+        return res.status(404).json({ message: "Partnership not found" });
+      }
+      
+      res.json(partnership);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch partnership" });
+    }
+  });
+
+  app.get("/api/grant-applications", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const applications = await storage.getGrantApplications(status);
+      res.json(applications);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch grant applications" });
+    }
+  });
+
+  app.post("/api/partnerships", async (req, res) => {
+    try {
+      const partnershipSchema = z.object({
+        partnerName: z.string(),
+        partnerType: z.enum(["university", "government", "technology", "logistics", "other"]),
+        status: z.enum(["active", "pending", "completed"]),
+        startDate: z.string(),
+        endDate: z.string().nullable(),
+        projectFocus: z.array(z.string()),
+        contactPerson: z.string(),
+        dataShared: z.array(z.string()),
+        benefitsRealized: z.array(z.string())
+      });
+
+      const validatedData = partnershipSchema.parse(req.body);
+      const newPartnership = await storage.createPartnership(validatedData);
+      res.status(201).json(newPartnership);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid partnership data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create partnership" });
+    }
+  });
+
   // Create HTTP server
   const httpServer = createServer(app);
 
