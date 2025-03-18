@@ -61,18 +61,18 @@ const RouteOptimization = () => {
                 <div className="flex justify-between">
                   <div className="flex items-center">
                     <Route className="text-green-600 mr-2" size={16} />
-                    <span className="text-sm">Chicago to Detroit</span>
+                    <span className="text-sm">Penrith to Sydney CBD</span>
                   </div>
                   <span className="text-green-500 text-xs">-45 min</span>
                 </div>
-                <p className="text-xs text-gray-500 ml-6">Rerouted to avoid construction on I-94</p>
+                <p className="text-xs text-gray-500 ml-6">Rerouted to avoid construction on M4 Motorway</p>
               </div>
               
               <div className="border-b border-gray-100 pb-2 mb-2">
                 <div className="flex justify-between">
                   <div className="flex items-center">
                     <Route className="text-green-600 mr-2" size={16} />
-                    <span className="text-sm">Dallas to Houston</span>
+                    <span className="text-sm">Liverpool to Parramatta</span>
                   </div>
                   <span className="text-green-500 text-xs">-30 min</span>
                 </div>

@@ -214,7 +214,7 @@ export default function SupplyChain() {
                     </span>
                     <div>
                       <p className="font-medium">Shipment #A4589</p>
-                      <p className="text-sm text-gray-500">Chicago to Detroit</p>
+                      <p className="text-sm text-gray-500">Penrith to Sydney CBD</p>
                     </div>
                   </div>
                   <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">On Schedule</span>
@@ -233,7 +233,7 @@ export default function SupplyChain() {
                     </span>
                     <div>
                       <p className="font-medium">Shipment #B7813</p>
-                      <p className="text-sm text-gray-500">LA to Miami</p>
+                      <p className="text-sm text-gray-500">Sydney to Melbourne</p>
                     </div>
                   </div>
                   <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Delayed</span>
@@ -252,7 +252,7 @@ export default function SupplyChain() {
                     </span>
                     <div>
                       <p className="font-medium">Shipment #C3921</p>
-                      <p className="text-sm text-gray-500">New York to Boston</p>
+                      <p className="text-sm text-gray-500">Parramatta to Newcastle</p>
                     </div>
                   </div>
                   <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">On Schedule</span>
@@ -284,7 +284,7 @@ export default function SupplyChain() {
                     </span>
                     <div>
                       <p className="font-medium">Electronic Components</p>
-                      <p className="text-sm text-gray-500">Chicago Distribution Center</p>
+                      <p className="text-sm text-gray-500">Sydney Distribution Center</p>
                     </div>
                   </div>
                   <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Critical</span>
@@ -304,7 +304,7 @@ export default function SupplyChain() {
                     </span>
                     <div>
                       <p className="font-medium">Packaging Supplies</p>
-                      <p className="text-sm text-gray-500">Dallas Regional Center</p>
+                      <p className="text-sm text-gray-500">Parramatta Regional Center</p>
                     </div>
                   </div>
                   <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Low</span>
@@ -324,7 +324,7 @@ export default function SupplyChain() {
                     </span>
                     <div>
                       <p className="font-medium">Winter Clothing</p>
-                      <p className="text-sm text-gray-500">Boston Local Center</p>
+                      <p className="text-sm text-gray-500">Liverpool Local Center</p>
                     </div>
                   </div>
                   <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Low</span>
