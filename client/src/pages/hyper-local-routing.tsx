@@ -50,13 +50,19 @@ export default function HyperLocalRouting() {
   // Fetch hyper-local routes
   const { data: routes, isLoading: isLoadingRoutes } = useQuery({
     queryKey: ["/api/hyper-local/routes"],
-    queryFn: () => apiRequest<HyperLocalRoutingData[]>("/api/hyper-local/routes")
+    queryFn: async () => {
+      const response = await apiRequest("/api/hyper-local/routes");
+      return response as HyperLocalRoutingData[];
+    }
   });
   
   // Fetch construction zones
   const { data: constructionZones, isLoading: isLoadingZones } = useQuery({
     queryKey: ["/api/hyper-local/construction-zones"],
-    queryFn: () => apiRequest<ConstructionZone[]>("/api/hyper-local/construction-zones")
+    queryFn: async () => {
+      const response = await apiRequest("/api/hyper-local/construction-zones");
+      return response as ConstructionZone[];
+    }
   });
 
   // Route status color mapping
