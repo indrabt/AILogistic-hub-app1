@@ -11,7 +11,8 @@ import {
   Settings,
   Menu,
   Bell,
-  Search
+  Search,
+  BrainCircuit
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -106,6 +107,12 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
               href="/weather-impact" 
               label="Weather Impact" 
               active={location === "/weather-impact"} 
+            />
+            <SidebarItem 
+              icon={<BrainCircuit size={20} />} 
+              href="/ai-analytics" 
+              label="AI Analytics" 
+              active={location === "/ai-analytics"} 
             />
             <SidebarItem 
               icon={<FileText size={20} />} 

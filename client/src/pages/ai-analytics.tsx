@@ -238,11 +238,11 @@ export default function AIAnalytics() {
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs">
                         <span>Model Type</span>
-                        <span className="font-medium">{model.type}</span>
+                        <span className="font-medium capitalize">{model.type}</span>
                       </div>
                       <div className="flex justify-between text-xs">
                         <span>Last Trained</span>
-                        <span className="font-medium">{model.lastTrained}</span>
+                        <span className="font-medium">{new Date(model.lastTrained).toLocaleDateString()}</span>
                       </div>
                     </div>
                     <div>
@@ -269,7 +269,7 @@ export default function AIAnalytics() {
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-lg font-semibold">{prediction.modelName} Prediction</CardTitle>
-                    <Badge>{prediction.predictionType}</Badge>
+                    <Badge className="capitalize">{prediction.predictionType}</Badge>
                   </div>
                   <CardDescription>Generated on {new Date(prediction.createdAt).toLocaleDateString()}</CardDescription>
                 </CardHeader>
@@ -281,7 +281,7 @@ export default function AIAnalytics() {
                     </div>
                     <Progress value={prediction.confidence} className="h-2" />
                     
-                    {prediction.insights.length > 0 && (
+                    {prediction.insights && prediction.insights.length > 0 && (
                       <div className="space-y-2">
                         <div className="text-sm font-medium">Key Insights</div>
                         <ScrollArea className="h-24 w-full rounded-md border p-2">
@@ -305,7 +305,7 @@ export default function AIAnalytics() {
                       </div>
                     )}
                     
-                    {prediction.impactAreas.length > 0 && (
+                    {prediction.impactAreas && prediction.impactAreas.length > 0 && (
                       <div>
                         <div className="text-sm font-medium mb-1">Impact Areas</div>
                         <div className="grid grid-cols-2 gap-2">
@@ -410,7 +410,7 @@ export default function AIAnalytics() {
                           <div key={index} className="text-xs border rounded-md p-2">
                             <div className="font-medium">{variable.name}</div>
                             <div className="flex items-center justify-between">
-                              <span className="text-muted-foreground">{variable.type}</span>
+                              <span className="text-muted-foreground capitalize">{variable.type}</span>
                               <span className="font-medium">{variable.value}</span>
                             </div>
                           </div>
