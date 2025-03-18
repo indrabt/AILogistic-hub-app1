@@ -20,7 +20,30 @@ import {
   PredictiveModel,
   ModelPrediction,
   AnomalyDetection,
-  ScenarioAnalysis
+  ScenarioAnalysis,
+  // New features imports
+  HyperLocalRoutingData,
+  ConstructionZone,
+  ResilienceForecast,
+  InventoryRecommendation,
+  SustainabilityMetrics,
+  SustainabilityRecommendation,
+  SecurityAlert,
+  SecurityCompliance,
+  MultiModalRoute,
+  TransportSegment,
+  SMEClient,
+  SubscriptionTier,
+  DigitalTwin,
+  DigitalTwinComponent,
+  DigitalTwinScenario,
+  DigitalTwinResult,
+  AutonomousVehicle,
+  FleetMetrics,
+  DashboardInsight,
+  ClientDashboardSettings,
+  Partnership,
+  GrantApplication
 } from "@shared/types";
 
 // modify the interface with any CRUD methods
@@ -82,6 +105,61 @@ export interface IStorage {
   getScenarioAnalysisById(id: number): Promise<ScenarioAnalysis | undefined>;
   createScenarioAnalysis(scenario: Omit<ScenarioAnalysis, 'id'>): Promise<ScenarioAnalysis>;
   runPredictiveAnalysis(data: any): Promise<any>;
+
+  // 1. Hyper-Local Route Optimization with Real-Time Adaptation
+  getHyperLocalRoutes(): Promise<HyperLocalRoutingData[]>;
+  getHyperLocalRouteById(id: number): Promise<HyperLocalRoutingData | undefined>;
+  getConstructionZones(region?: string): Promise<ConstructionZone[]>;
+  updateRouteWithRealTimeData(routeId: number, data: Partial<HyperLocalRoutingData>): Promise<HyperLocalRoutingData>;
+  
+  // 2. Predictive Supply Chain Resilience
+  getResilienceForecasts(): Promise<ResilienceForecast[]>;
+  getResilienceForecastById(id: number): Promise<ResilienceForecast | undefined>;
+  getInventoryRecommendations(forecastId?: number): Promise<InventoryRecommendation[]>;
+  createResilienceForecast(forecast: Omit<ResilienceForecast, 'id'>): Promise<ResilienceForecast>;
+  
+  // 3. Sustainable AI-Driven Operations
+  getSustainabilityMetrics(): Promise<SustainabilityMetrics>;
+  getSustainabilityRecommendations(): Promise<SustainabilityRecommendation[]>;
+  updateSustainabilityMetrics(metrics: Partial<SustainabilityMetrics>): Promise<SustainabilityMetrics>;
+  
+  // 4. Integrated Cybersecurity Suite
+  getSecurityAlerts(status?: string): Promise<SecurityAlert[]>;
+  updateSecurityAlert(id: number, update: Partial<SecurityAlert>): Promise<SecurityAlert | undefined>;
+  getSecurityCompliance(): Promise<SecurityCompliance[]>;
+  
+  // 5. Multi-Modal Logistics Orchestration
+  getMultiModalRoutes(): Promise<MultiModalRoute[]>;
+  getMultiModalRouteById(id: number): Promise<MultiModalRoute | undefined>;
+  getTransportSegments(routeId: number): Promise<TransportSegment[]>;
+  createMultiModalRoute(route: Omit<MultiModalRoute, 'id'>): Promise<MultiModalRoute>;
+  
+  // 6. SME-Centric Customization and Affordability
+  getSMEClients(): Promise<SMEClient[]>;
+  getSMEClientById(id: number): Promise<SMEClient | undefined>;
+  getSubscriptionTiers(): Promise<SubscriptionTier[]>;
+  
+  // 7. Digital Twin for Scenario Planning
+  getDigitalTwins(clientId?: number): Promise<DigitalTwin[]>;
+  getDigitalTwinById(id: number): Promise<DigitalTwin | undefined>;
+  runDigitalTwinScenario(twinId: number, scenario: Omit<DigitalTwinScenario, 'id' | 'results'>): Promise<DigitalTwinScenario>;
+  
+  // 8. Autonomous Fleet Integration
+  getAutonomousVehicles(): Promise<AutonomousVehicle[]>;
+  getAutonomousVehicleById(id: number): Promise<AutonomousVehicle | undefined>;
+  getFleetMetrics(): Promise<FleetMetrics>;
+  updateAutonomousVehicle(id: number, update: Partial<AutonomousVehicle>): Promise<AutonomousVehicle | undefined>;
+  
+  // 9. Real-Time Client Dashboard with AI Insights
+  getDashboardInsights(clientId?: number): Promise<DashboardInsight[]>;
+  getClientDashboardSettings(clientId: number): Promise<ClientDashboardSettings | undefined>;
+  updateClientDashboardSettings(clientId: number, settings: Partial<ClientDashboardSettings>): Promise<ClientDashboardSettings | undefined>;
+  
+  // 10. Partnerships and Ecosystem Integration
+  getPartnerships(): Promise<Partnership[]>;
+  getPartnershipById(id: number): Promise<Partnership | undefined>;
+  getGrantApplications(status?: string): Promise<GrantApplication[]>;
+  createPartnership(partnership: Omit<Partnership, 'id'>): Promise<Partnership>;
 }
 
 export class MemStorage implements IStorage {
@@ -109,6 +187,45 @@ export class MemStorage implements IStorage {
   private modelPredictions: ModelPrediction[];
   private anomalyDetections: AnomalyDetection[];
   private scenarioAnalyses: ScenarioAnalysis[];
+  
+  // 1. Hyper-Local Route Optimization with Real-Time Adaptation
+  private hyperLocalRoutes: HyperLocalRoutingData[];
+  private constructionZones: ConstructionZone[];
+  
+  // 2. Predictive Supply Chain Resilience
+  private resilienceForecasts: ResilienceForecast[];
+  private inventoryRecommendations: InventoryRecommendation[];
+  
+  // 3. Sustainable AI-Driven Operations
+  private sustainabilityMetrics: SustainabilityMetrics;
+  private sustainabilityRecommendations: SustainabilityRecommendation[];
+  
+  // 4. Integrated Cybersecurity Suite
+  private securityAlerts: SecurityAlert[];
+  private securityCompliance: SecurityCompliance[];
+  
+  // 5. Multi-Modal Logistics Orchestration
+  private multiModalRoutes: MultiModalRoute[];
+  private transportSegments: TransportSegment[];
+  
+  // 6. SME-Centric Customization and Affordability
+  private smeClients: SMEClient[];
+  private subscriptionTiers: SubscriptionTier[];
+  
+  // 7. Digital Twin for Scenario Planning
+  private digitalTwins: DigitalTwin[];
+  
+  // 8. Autonomous Fleet Integration
+  private autonomousVehicles: AutonomousVehicle[];
+  private fleetMetrics: FleetMetrics;
+  
+  // 9. Real-Time Client Dashboard with AI Insights
+  private dashboardInsights: DashboardInsight[];
+  private clientDashboardSettings: ClientDashboardSettings[];
+  
+  // 10. Partnerships and Ecosystem Integration
+  private partnerships: Partnership[];
+  private grantApplications: GrantApplication[];
   
   currentId: number;
 

@@ -277,3 +277,269 @@ export interface UserSettings {
     analytics: boolean;
   };
 }
+
+// 1. Hyper-Local Route Optimization with Real-Time Adaptation
+export interface HyperLocalRoutingData {
+  id: number;
+  name: string;
+  status: "active" | "scheduled" | "completed";
+  region: string;
+  trafficConditions: "light" | "moderate" | "heavy" | "gridlock";
+  weatherConditions: string;
+  constructionZones: ConstructionZone[];
+  fuelSavings: string;
+  timeReduction: string;
+  routeEfficiency: number;
+  lastUpdated: string;
+  edgeDeviceStatus: "online" | "offline" | "degraded";
+}
+
+export interface ConstructionZone {
+  id: number;
+  name: string;
+  latitude: number;
+  longitude: number;
+  startDate: string;
+  endDate: string;
+  impact: "low" | "medium" | "high";
+  description: string;
+}
+
+// 2. Predictive Supply Chain Resilience
+export interface ResilienceForecast {
+  id: number;
+  name: string;
+  forecastType: "demand" | "disaster" | "delay";
+  probability: number;
+  impact: "low" | "medium" | "high" | "critical";
+  timeWindow: string;
+  affectedRegions: string[];
+  suggestedActions: string[];
+  alternateRoutes: number[];
+  inventoryRecommendations: InventoryRecommendation[];
+  accuracy: number;
+}
+
+export interface InventoryRecommendation {
+  id: number;
+  product: string;
+  currentLevel: number;
+  recommendedLevel: number;
+  priority: "low" | "medium" | "high";
+  location: string;
+  rationale: string;
+}
+
+// 3. Sustainable AI-Driven Operations
+export interface SustainabilityMetrics {
+  id: number;
+  totalCarbonEmissions: number;
+  emissionReduction: string;
+  energyEfficiency: number;
+  emptyMilesPercentage: number;
+  carbonOffsets: number;
+  sustainabilityScore: number;
+  recommendations: SustainabilityRecommendation[];
+}
+
+export interface SustainabilityRecommendation {
+  id: number;
+  title: string;
+  description: string;
+  potentialImpact: string;
+  difficulty: "easy" | "medium" | "complex";
+  timeToImplement: string;
+  costSavings: string;
+}
+
+// 4. Integrated Cybersecurity Suite
+export interface SecurityAlert {
+  id: number;
+  type: "phishing" | "breach" | "malware" | "suspicious_access" | "other";
+  severity: "low" | "medium" | "high" | "critical";
+  timestamp: string;
+  description: string;
+  status: "new" | "investigating" | "resolved" | "false_positive";
+  affectedSystems: string[];
+  mitigationSteps: string[];
+  responseTime: string;
+}
+
+export interface SecurityCompliance {
+  id: number;
+  framework: "australian_privacy" | "gdpr" | "pci_dss" | "iso_27001" | "custom";
+  status: "compliant" | "non_compliant" | "partially_compliant";
+  lastAudit: string;
+  findings: string[];
+  nextAuditDue: string;
+  responsibleParty: string;
+}
+
+// 5. Multi-Modal Logistics Orchestration
+export interface MultiModalRoute {
+  id: number;
+  name: string;
+  status: "planned" | "in_progress" | "completed";
+  originType: "warehouse" | "airport" | "port" | "distribution_center";
+  destinationType: "warehouse" | "airport" | "port" | "distribution_center" | "customer";
+  transportModes: TransportSegment[];
+  totalDistance: string;
+  totalDuration: string;
+  totalCost: string;
+  co2Emissions: string;
+  reliability: number;
+}
+
+export interface TransportSegment {
+  id: number;
+  mode: "truck" | "drone" | "air_freight" | "rail" | "last_mile";
+  origin: string;
+  destination: string;
+  distance: string;
+  duration: string;
+  cost: string;
+  status: "pending" | "in_transit" | "completed" | "delayed";
+  carrier: string;
+}
+
+// 6. SME-Centric Customization and Affordability
+export interface SMEClient {
+  id: number;
+  name: string;
+  industry: string;
+  size: "micro" | "small" | "medium";
+  subscribedModules: string[];
+  monthlyFee: number;
+  onboardingDate: string;
+  deploymentDuration: string;
+  activeUsers: number;
+  satisfaction: number;
+  apiUsage: number;
+}
+
+export interface SubscriptionTier {
+  id: number;
+  name: string;
+  price: number;
+  billingCycle: "monthly" | "quarterly" | "annually";
+  features: string[];
+  maxUsers: number;
+  apiCallLimit: number;
+  storageLimit: string;
+  supportLevel: "basic" | "standard" | "premium";
+}
+
+// 7. Digital Twin for Scenario Planning
+export interface DigitalTwin {
+  id: number;
+  name: string;
+  clientId: number;
+  status: "initializing" | "active" | "simulating" | "archived";
+  accuracy: number;
+  lastUpdated: string;
+  components: DigitalTwinComponent[];
+  scenarios: DigitalTwinScenario[];
+}
+
+export interface DigitalTwinComponent {
+  id: number;
+  type: "warehouse" | "vehicle" | "supplier" | "route" | "distribution_center";
+  name: string;
+  properties: Record<string, any>;
+  connections: number[];
+}
+
+export interface DigitalTwinScenario {
+  id: number;
+  name: string;
+  description: string;
+  parameters: Record<string, any>;
+  results: DigitalTwinResult[];
+  createdAt: string;
+  status: "pending" | "running" | "completed" | "failed";
+}
+
+export interface DigitalTwinResult {
+  metric: string;
+  baseline: number;
+  projected: number;
+  change: string;
+  confidence: number;
+  recommendation: string;
+}
+
+// 8. Autonomous Fleet Integration
+export interface AutonomousVehicle {
+  id: number;
+  name: string;
+  type: "truck" | "drone" | "robot" | "cart";
+  autonomyLevel: 1 | 2 | 3 | 4 | 5;
+  status: "idle" | "loading" | "en_route" | "unloading" | "charging" | "maintenance";
+  currentLocation: {
+    lat: number;
+    lng: number;
+  };
+  batteryLevel: number;
+  nextMaintenance: string;
+  currentRoute: number | null;
+  cargoCapacity: string;
+  operationalHours: number;
+}
+
+export interface FleetMetrics {
+  totalVehicles: number;
+  autonomousPercentage: number;
+  averageUtilization: number;
+  maintenanceEfficiency: number;
+  fuelSavings: string;
+  incidentRate: number;
+  averageDeliveryTime: string;
+}
+
+// 9. Real-Time Client Dashboard with AI Insights
+export interface DashboardInsight {
+  id: number;
+  title: string;
+  description: string;
+  insightType: "cost_saving" | "efficiency" | "risk" | "opportunity" | "trend";
+  priority: "low" | "medium" | "high";
+  relatedMetrics: string[];
+  suggestedActions: string[];
+  generatedAt: string;
+}
+
+export interface ClientDashboardSettings {
+  id: number;
+  clientId: number;
+  visibleWidgets: string[];
+  refreshInterval: number;
+  alertThresholds: Record<string, number>;
+  favoriteReports: number[];
+  customKpis: string[];
+}
+
+// 10. Partnerships and Ecosystem Integration
+export interface Partnership {
+  id: number;
+  partnerName: string;
+  partnerType: "university" | "government" | "technology" | "logistics" | "other";
+  status: "active" | "pending" | "completed";
+  startDate: string;
+  endDate: string | null;
+  projectFocus: string[];
+  contactPerson: string;
+  dataShared: string[];
+  benefitsRealized: string[];
+}
+
+export interface GrantApplication {
+  id: number;
+  name: string;
+  organization: string;
+  amount: number;
+  status: "drafting" | "submitted" | "under_review" | "approved" | "rejected";
+  submissionDate: string | null;
+  decisionDate: string | null;
+  projectTimeline: string;
+  requiredDeliverables: string[];
+}
