@@ -12,7 +12,9 @@ import {
   Menu,
   Bell,
   Search,
-  BrainCircuit
+  BrainCircuit,
+  Navigation,
+  Map
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -89,6 +91,12 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
               href="/routes" 
               label="Route Optimization" 
               active={location === "/routes"} 
+            />
+            <SidebarItem 
+              icon={<Navigation size={20} />} 
+              href="/hyper-local-routing" 
+              label="Hyper-Local Routing" 
+              active={location === "/hyper-local-routing"} 
             />
             <SidebarItem 
               icon={<Warehouse size={20} />} 

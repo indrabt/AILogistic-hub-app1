@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Route, Warehouse, MoreHorizontal } from "lucide-react";
+import { LayoutDashboard, Route, Warehouse, MoreHorizontal, Navigation } from "lucide-react";
 
 interface MobileNavProps {
   currentPath: string;
@@ -28,6 +28,17 @@ const MobileNav = ({ currentPath }: MobileNavProps) => {
       >
         <Route size={20} />
         <span className="text-xs mt-1">Routes</span>
+      </div>
+      
+      <div 
+        className={cn(
+          "p-2 flex flex-col items-center cursor-pointer",
+          currentPath === "/hyper-local-routing" ? "text-primary" : "text-gray-500"
+        )}
+        onClick={() => window.location.href = "/hyper-local-routing"}
+      >
+        <Navigation size={20} />
+        <span className="text-xs mt-1">Local</span>
       </div>
       
       <div 

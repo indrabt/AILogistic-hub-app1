@@ -12,12 +12,37 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AreaChart, BarChart } from "recharts";
 import { MapPin, Navigation, Map, AlertTriangle, Clock, PieChart, BarChart3, TrendingUp, Activity, Route } from "lucide-react";
 import { useState } from "react";
-import { HyperLocalRoutingData, ConstructionZone } from "../../shared/types";
 import { apiRequest } from "../lib/queryClient";
 import { cn } from "../lib/utils";
+
+// Define interfaces based on shared/types.ts
+interface ConstructionZone {
+  id: number;
+  name: string;
+  latitude: number;
+  longitude: number;
+  startDate: string;
+  endDate: string;
+  impact: "low" | "medium" | "high";
+  description: string;
+}
+
+interface HyperLocalRoutingData {
+  id: number;
+  name: string;
+  status: "active" | "scheduled" | "completed";
+  region: string;
+  trafficConditions: "light" | "moderate" | "heavy" | "gridlock";
+  weatherConditions: string;
+  constructionZones: ConstructionZone[];
+  fuelSavings: string;
+  timeReduction: string;
+  routeEfficiency: number;
+  lastUpdated: string;
+  edgeDeviceStatus: "online" | "offline" | "degraded";
+}
 
 export default function HyperLocalRouting() {
   const [activeTab, setActiveTab] = useState("routes");
