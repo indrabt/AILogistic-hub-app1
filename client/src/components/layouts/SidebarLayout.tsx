@@ -14,7 +14,11 @@ import {
   Search,
   BrainCircuit,
   Navigation,
-  Map
+  Map,
+  Shield,
+  Leaf,
+  ShieldAlert,
+  ArrowUpDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -121,6 +125,30 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
               href="/ai-analytics" 
               label="AI Analytics" 
               active={location === "/ai-analytics"} 
+            />
+            <SidebarItem 
+              icon={<Shield size={20} />} 
+              href="/supply-chain-resilience" 
+              label="Supply Chain Resilience" 
+              active={location === "/supply-chain-resilience"} 
+            />
+            <SidebarItem 
+              icon={<Leaf size={20} />} 
+              href="/sustainability" 
+              label="Sustainability" 
+              active={location === "/sustainability"} 
+            />
+            <SidebarItem 
+              icon={<ShieldAlert size={20} />} 
+              href="/cybersecurity" 
+              label="Cybersecurity" 
+              active={location === "/cybersecurity"} 
+            />
+            <SidebarItem 
+              icon={<ArrowUpDown size={20} />} 
+              href="/multi-modal-logistics" 
+              label="Multi-Modal Logistics" 
+              active={location === "/multi-modal-logistics"} 
             />
             <SidebarItem 
               icon={<FileText size={20} />} 

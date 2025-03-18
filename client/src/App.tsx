@@ -13,6 +13,10 @@ import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 import HyperLocalRouting from "@/pages/hyper-local-routing";
 import AIAnalytics from "@/pages/ai-analytics";
+import SupplyChainResilience from "@/pages/supply-chain-resilience";
+import Sustainability from "@/pages/sustainability";
+import Cybersecurity from "@/pages/cybersecurity";
+import MultiModalLogistics from "@/pages/multi-modal-logistics";
 
 function Router() {
   return (
@@ -25,6 +29,10 @@ function Router() {
         <Route path="/weather-impact" component={WeatherImpact} />
         <Route path="/ai-analytics" component={AIAnalytics} />
         <Route path="/hyper-local-routing" component={HyperLocalRouting} />
+        <Route path="/supply-chain-resilience" component={SupplyChainResilience} />
+        <Route path="/sustainability" component={Sustainability} />
+        <Route path="/cybersecurity" component={Cybersecurity} />
+        <Route path="/multi-modal-logistics" component={MultiModalLogistics} />
         <Route path="/reports" component={Reports} />
         <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
