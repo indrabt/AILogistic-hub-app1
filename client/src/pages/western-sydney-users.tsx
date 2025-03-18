@@ -791,6 +791,15 @@ export default function WesternSydneyUsers() {
                         ))}
                     </div>
                   </div>
+                  
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium">Key Benefits</h3>
+                    <div className="p-4 border border-green-100 bg-green-50 rounded-md">
+                      <p className="text-sm text-green-800">
+                        {userRoles.find((r) => r.id === selectedRole)?.benefits}
+                      </p>
+                    </div>
+                  </div>
 
                   <div className="space-y-2">
                     <h3 className="text-sm font-medium">Western Sydney Context</h3>
