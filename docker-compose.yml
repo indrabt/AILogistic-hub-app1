@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://ailogistics:${DB_PASSWORD:-passwordToChange}@timescaledb:5432/ai_logistics_hub
+    depends_on:
+      - timescaledb
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg15
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=ailogistics
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-passwordToChange}
+      - POSTGRES_DB=ai_logistics_hub
+    volumes:
+      - timescale-data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    command: postgres -c shared_preload_libraries=timescaledb -c max_connections=300
+    restart: unless-stopped
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ailogistics -d ai_logistics_hub"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@ailogistics.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-adminPassword}
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - timescaledb
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  timescale-data:
+  pgadmin-data:
+
+networks:
+  app-network:
+    driver: bridge
