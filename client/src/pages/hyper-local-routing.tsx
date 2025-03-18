@@ -323,7 +323,7 @@ export default function HyperLocalRouting() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {constructionZones?.slice(0, 4).map((zone) => (
+                    {constructionZones && constructionZones.slice(0, 4).map((zone: ConstructionZone) => (
                       <div key={zone.id} className="flex items-center space-x-4">
                         <div className={cn(
                           "w-3 h-3 rounded-full",
