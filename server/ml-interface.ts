@@ -5,21 +5,27 @@
  * either directly (using child_process) or via API calls.
  */
 
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import axios from 'axios';
-import { spawn } from 'child_process';
 import { log } from './vite';
 
+const execAsync = promisify(exec);
+
+// Define prediction request interfaces
 interface MLPredictionRequest {
   model: 'flood' | 'route';
   features: Record<string, any>;
 }
 
+// Define prediction response interfaces
 interface MLPredictionResponse {
   success: boolean;
   prediction?: any;
   error?: string;
 }
 
+// Define model info interface
 interface MLModelInfo {
   name: string;
   type: string;
@@ -28,28 +34,26 @@ interface MLModelInfo {
   features: string[];
 }
 
-// Configuration
-const ML_API_ENABLED = process.env.ML_API_ENABLED === 'true';
+// ML API configuration
 const ML_API_URL = process.env.ML_API_URL || 'http://localhost:5050';
-const ML_SCRIPTS_PATH = process.env.ML_SCRIPTS_PATH || './ml_models';
+const USE_API = process.env.USE_ML_API === 'true';
 
 /**
  * Get ML model prediction using either API or direct Python execution
  */
 export async function getPrediction(request: MLPredictionRequest): Promise<MLPredictionResponse> {
   try {
-    // Use API if enabled
-    if (ML_API_ENABLED) {
-      return await getPredictionViaAPI(request);
-    } else {
-      // Otherwise run Python script directly
-      return await getPredictionViaPython(request);
-    }
+    log(`Getting prediction for model: ${request.model}`, 'ml');
+
+    // Choose between API and direct Python execution
+    return USE_API 
+      ? await getPredictionViaAPI(request)
+      : await getPredictionViaPython(request);
   } catch (error) {
-    log(`ML prediction error: ${error}`, 'ml');
+    log(`Error getting prediction: ${error}`, 'ml');
     return {
       success: false,
-      error: `Error making prediction: ${error}`
+      error: `Failed to get prediction: ${error}`
     };
   }
 }
@@ -59,18 +63,26 @@ export async function getPrediction(request: MLPredictionRequest): Promise<MLPre
  */
 async function getPredictionViaAPI(request: MLPredictionRequest): Promise<MLPredictionResponse> {
   try {
-    const endpoint = request.model === 'flood' ? '/predict/flood' : '/predict/route';
-    const response = await axios.post(`${ML_API_URL}${endpoint}`, request.features);
-    
-    return {
-      success: true,
-      prediction: response.data.prediction
-    };
-  } catch (error: any) {
-    log(`ML API error: ${error.message}`, 'ml');
+    const endpoint = `${ML_API_URL}/predict/${request.model}`;
+    const response = await axios.post(endpoint, request.features);
+
+    if (response.status === 200 && response.data.success) {
+      log(`Prediction received from API for ${request.model}`, 'ml');
+      return {
+        success: true,
+        prediction: response.data.prediction
+      };
+    } else {
+      return {
+        success: false,
+        error: response.data.error || 'Unknown API error'
+      };
+    }
+  } catch (error) {
+    log(`API prediction error: ${error}`, 'ml');
     return {
       success: false,
-      error: error.response?.data?.error || error.message
+      error: `API prediction failed: ${error}`
     };
   }
 }
@@ -79,64 +91,53 @@ async function getPredictionViaAPI(request: MLPredictionRequest): Promise<MLPred
  * Get ML model prediction via direct Python execution
  */
 async function getPredictionViaPython(request: MLPredictionRequest): Promise<MLPredictionResponse> {
-  return new Promise((resolve) => {
-    const scriptName = request.model === 'flood' ? 'flood_prediction.py' : 'route_optimization.py';
+  try {
+    // Convert features to JSON string for command line
+    const featuresJson = JSON.stringify(request.features).replace(/"/g, '\\"');
     
-    // Spawn Python process
-    const pythonProcess = spawn('python3', [`${ML_SCRIPTS_PATH}/${scriptName}`]);
+    // Construct Python command
+    let pythonCommand: string;
     
-    let resultData = '';
-    let errorData = '';
-    
-    // Collect output
-    pythonProcess.stdout.on('data', (data) => {
-      resultData += data.toString();
-    });
-    
-    // Collect errors
-    pythonProcess.stderr.on('data', (data) => {
-      errorData += data.toString();
-      log(`Python error: ${data}`, 'ml');
-    });
-    
-    // Handle process completion
-    pythonProcess.on('close', (code) => {
-      if (code !== 0) {
-        resolve({
-          success: false,
-          error: `Python process exited with code ${code}: ${errorData}`
-        });
-      } else {
-        try {
-          // Parse JSON output from Python script
-          const predictionData = JSON.parse(resultData);
-          resolve({
-            success: true,
-            prediction: predictionData
-          });
-        } catch (error) {
-          resolve({
-            success: false,
-            error: `Failed to parse Python output: ${error}`
-          });
-        }
-      }
-    });
-    
-    // Handle any other errors
-    pythonProcess.on('error', (error) => {
-      resolve({
+    if (request.model === 'flood') {
+      pythonCommand = `python ml_models/flood_prediction.py predict '${featuresJson}'`;
+    } else if (request.model === 'route') {
+      pythonCommand = `python ml_models/route_optimization.py predict '${featuresJson}'`;
+    } else {
+      return {
         success: false,
-        error: `Failed to start Python process: ${error}`
-      });
-    });
-    
-    // Send input features to Python process
-    if (request.features) {
-      pythonProcess.stdin.write(JSON.stringify(request.features));
-      pythonProcess.stdin.end();
+        error: `Unknown model: ${request.model}`
+      };
     }
-  });
+    
+    // Execute Python script
+    const { stdout, stderr } = await execAsync(pythonCommand);
+    
+    if (stderr) {
+      log(`Python stderr: ${stderr}`, 'ml');
+    }
+    
+    // Parse output
+    const result = JSON.parse(stdout.trim());
+    
+    if (result.success) {
+      log(`Prediction received from Python for ${request.model}`, 'ml');
+      return {
+        success: true,
+        prediction: result.prediction
+      };
+    } else {
+      return {
+        success: false,
+        error: result.error || 'Unknown Python execution error'
+      };
+    }
+  } catch (error) {
+    log(`Python prediction error: ${error}`, 'ml');
+    return {
+      success: false,
+      error: `Python prediction failed: ${error}`
+    };
+  }
 }
 
 /**
@@ -144,49 +145,66 @@ async function getPredictionViaPython(request: MLPredictionRequest): Promise<MLP
  */
 export async function getModelInfo(modelType?: string): Promise<MLModelInfo[]> {
   try {
-    if (ML_API_ENABLED) {
-      // Get model info from API
-      const url = modelType 
-        ? `${ML_API_URL}/models/info?type=${modelType}`
-        : `${ML_API_URL}/models/info`;
-        
-      const response = await axios.get(url);
-      return response.data.available_models;
+    if (USE_API) {
+      // Get model info via API
+      const endpoint = `${ML_API_URL}/models/info${modelType ? `?type=${modelType}` : ''}`;
+      const response = await axios.get(endpoint);
+      
+      if (response.status === 200) {
+        return response.data.models;
+      }
+      
+      return [];
     } else {
-      // Return hardcoded model info when API is not available
-      const allModels = [
+      // Hard-coded model info when API is not available
+      const models: MLModelInfo[] = [
         {
           name: 'Western Sydney Flood Prediction',
-          type: 'weather',
-          description: 'Predicts flood risks in Western Sydney areas',
-          accuracy: 94.2,
+          type: 'flood',
+          description: 'Predicts flood risk and impact on logistics operations in Western Sydney areas',
+          accuracy: 0.942,
           features: [
-            'rainfall_mm_24h', 'rainfall_mm_72h', 'river_level_m',
-            'soil_moisture', 'temperature_c', 'wind_speed_kmh',
-            'elevation_m', 'distance_to_river_km', 'impervious_surface_pct',
+            'rainfall_mm_24h',
+            'rainfall_mm_72h',
+            'river_level_m',
+            'soil_moisture',
+            'temperature_c',
+            'wind_speed_kmh',
+            'elevation_m',
+            'distance_to_river_km',
+            'impervious_surface_pct',
             'drainage_capacity'
           ]
         },
         {
-          name: 'Parramatta Route Optimization',
-          type: 'routing',
-          description: 'Optimizes delivery routes in the Parramatta area',
-          accuracy: 89.2,
+          name: 'Route Optimization',
+          type: 'route',
+          description: 'Optimizes delivery routes based on traffic, weather, and historical data',
+          accuracy: 0.892,
           features: [
-            'time_of_day', 'day_of_week', 'is_holiday', 'rainfall_mm',
-            'temperature', 'traffic_index', 'road_type', 'distance_km', 
-            'construction_zones', 'special_events'
+            'time_of_day',
+            'day_of_week',
+            'distance_km',
+            'is_holiday',
+            'rainfall_mm',
+            'temperature',
+            'traffic_index',
+            'road_type',
+            'construction_zones',
+            'special_events'
           ]
         }
       ];
       
-      // Filter by model type if specified
-      return modelType 
-        ? allModels.filter(model => model.type === modelType)
-        : allModels;
+      // Filter by type if provided
+      if (modelType) {
+        return models.filter(model => model.type === modelType);
+      }
+      
+      return models;
     }
   } catch (error) {
-    log(`Error getting ML model info: ${error}`, 'ml');
+    log(`Error fetching model info: ${error}`, 'ml');
     return [];
   }
 }
@@ -196,39 +214,55 @@ export async function getModelInfo(modelType?: string): Promise<MLModelInfo[]> {
  */
 export async function trainModel(modelType: 'flood' | 'route'): Promise<{
   success: boolean;
-  result?: any;
+  message?: string;
   error?: string;
 }> {
   try {
-    if (ML_API_ENABLED) {
-      // Trigger training via API
-      const response = await axios.post(`${ML_API_URL}/models/train`, {
-        model_type: modelType
-      });
+    if (USE_API) {
+      // Train model via API
+      const endpoint = `${ML_API_URL}/models/train`;
+      const response = await axios.post(endpoint, { model: modelType });
+      
+      if (response.status === 200) {
+        return {
+          success: true,
+          message: response.data.message
+        };
+      }
       
       return {
-        success: true,
-        result: response.data
+        success: false,
+        error: response.data.error || 'Unknown API error'
       };
     } else {
-      // Return mock response when API is not available
+      // Train model via Python execution
+      const pythonCommand = `python ml_models/${modelType === 'flood' ? 'flood_prediction.py' : 'route_optimization.py'} train`;
+      
+      const { stdout, stderr } = await execAsync(pythonCommand);
+      
+      if (stderr) {
+        log(`Python stderr during training: ${stderr}`, 'ml');
+      }
+      
+      const result = JSON.parse(stdout.trim());
+      
+      if (result.success) {
+        return {
+          success: true,
+          message: result.message
+        };
+      }
+      
       return {
-        success: true,
-        result: {
-          status: 'success',
-          model: modelType === 'flood' ? 'flood_prediction' : 'route_optimization',
-          training_results: {
-            train_score: modelType === 'flood' ? 0.942 : 0.892,
-            test_score: modelType === 'flood' ? 0.938 : 0.887
-          }
-        }
+        success: false,
+        error: result.error || 'Unknown Python execution error'
       };
     }
-  } catch (error: any) {
-    log(`Error training ML model: ${error}`, 'ml');
+  } catch (error) {
+    log(`Error training model: ${error}`, 'ml');
     return {
       success: false,
-      error: error.response?.data?.error || error.message
+      error: `Training failed: ${error}`
     };
   }
 }
@@ -238,52 +272,102 @@ export async function trainModel(modelType: 'flood' | 'route'): Promise<{
  * This is a mock implementation that would be replaced with actual API calls
  */
 export function getRealtimeData() {
-  // This would normally call weather and traffic APIs
-  const timestamp = new Date().toISOString();
+  // Mock implementation - in production this would connect to real APIs
+  const now = new Date();
   
-  return {
-    weather: {
-      timestamp,
-      regions: {
-        Penrith: {
-          temperature_c: 22 + Math.random() * 5,
-          rainfall_mm_1h: Math.random() * 2,
-          humidity_pct: 60 + Math.random() * 20,
-          wind_speed_kmh: 10 + Math.random() * 15
-        },
-        Parramatta: {
-          temperature_c: 23 + Math.random() * 5,
-          rainfall_mm_1h: Math.random() * 1.5,
-          humidity_pct: 65 + Math.random() * 15,
-          wind_speed_kmh: 8 + Math.random() * 12
-        },
-        Liverpool: {
-          temperature_c: 24 + Math.random() * 4,
-          rainfall_mm_1h: Math.random() * 1,
-          humidity_pct: 62 + Math.random() * 18,
-          wind_speed_kmh: 9 + Math.random() * 14
-        }
-      }
-    },
-    traffic: {
-      timestamp,
-      regions: {
-        'Penrith-Sydney': {
-          congestion_level: 40 + Math.random() * 40,
-          average_speed_kmh: 60 - Math.random() * 30,
-          incidents: Math.random() > 0.8 ? 1 : 0
-        },
-        'Parramatta-CBD': {
-          congestion_level: 50 + Math.random() * 45,
-          average_speed_kmh: 50 - Math.random() * 35,
-          incidents: Math.random() > 0.7 ? 1 : 0
-        },
-        'Liverpool-Airport': {
-          congestion_level: 45 + Math.random() * 35,
-          average_speed_kmh: 55 - Math.random() * 25,
-          incidents: Math.random() > 0.85 ? 1 : 0
-        }
+  // Mock weather data for Western Sydney regions
+  const weather = {
+    timestamp: now.toISOString(),
+    regions: {
+      'Parramatta': {
+        temperature: 22 + Math.random() * 5,
+        rainfall: Math.random() < 0.3 ? Math.random() * 5 : 0,
+        wind_speed: 5 + Math.random() * 10,
+        humidity: 60 + Math.random() * 20,
+        conditions: Math.random() < 0.7 ? 'clear' : 'rain'
+      },
+      'Penrith': {
+        temperature: 23 + Math.random() * 6,
+        rainfall: Math.random() < 0.25 ? Math.random() * 8 : 0,
+        wind_speed: 8 + Math.random() * 12,
+        humidity: 55 + Math.random() * 25,
+        conditions: Math.random() < 0.8 ? 'clear' : 'rain'
+      },
+      'Liverpool': {
+        temperature: 22 + Math.random() * 5,
+        rainfall: Math.random() < 0.2 ? Math.random() * 6 : 0,
+        wind_speed: 6 + Math.random() * 8,
+        humidity: 65 + Math.random() * 15,
+        conditions: Math.random() < 0.75 ? 'clear' : 'rain'
+      },
+      'Blacktown': {
+        temperature: 21 + Math.random() * 6,
+        rainfall: Math.random() < 0.15 ? Math.random() * 7 : 0,
+        wind_speed: 4 + Math.random() * 9,
+        humidity: 60 + Math.random() * 20,
+        conditions: Math.random() < 0.8 ? 'clear' : 'rain'
+      },
+      'Camden': {
+        temperature: 20 + Math.random() * 7,
+        rainfall: Math.random() < 0.3 ? Math.random() * 10 : 0,
+        wind_speed: 7 + Math.random() * 15,
+        humidity: 70 + Math.random() * 15,
+        conditions: Math.random() < 0.7 ? 'clear' : 'rain'
       }
     }
+  };
+  
+  // Mock traffic data for Western Sydney routes
+  const traffic = {
+    timestamp: now.toISOString(),
+    regions: {
+      'M4 Motorway': {
+        congestion: 30 + Math.random() * 50,
+        incidents: Math.random() < 0.2 ? 1 : 0,
+        speed: 60 + Math.random() * 40,
+        volume: 'medium'
+      },
+      'M7 Motorway': {
+        congestion: 40 + Math.random() * 40,
+        incidents: Math.random() < 0.15 ? 1 : 0,
+        speed: 70 + Math.random() * 30,
+        volume: 'high'
+      },
+      'Great Western Highway': {
+        congestion: 50 + Math.random() * 30,
+        incidents: Math.random() < 0.25 ? 1 : 0,
+        speed: 50 + Math.random() * 30,
+        volume: 'high'
+      },
+      'Parramatta Road': {
+        congestion: 60 + Math.random() * 30,
+        incidents: Math.random() < 0.3 ? 1 : 0,
+        speed: 40 + Math.random() * 20,
+        volume: 'very high'
+      },
+      'Elizabeth Drive': {
+        congestion: 30 + Math.random() * 40,
+        incidents: Math.random() < 0.2 ? 1 : 0,
+        speed: 50 + Math.random() * 30,
+        volume: 'medium'
+      },
+      'M12 Motorway': {
+        congestion: 20 + Math.random() * 30,
+        incidents: Math.random() < 0.1 ? 1 : 0,
+        speed: 80 + Math.random() * 20,
+        volume: 'low'
+      },
+      'The Northern Road': {
+        congestion: 40 + Math.random() * 30,
+        incidents: Math.random() < 0.2 ? 1 : 0,
+        speed: 60 + Math.random() * 20,
+        volume: 'medium'
+      }
+    }
+  };
+  
+  return {
+    weather,
+    traffic
   };
 }

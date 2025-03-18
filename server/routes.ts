@@ -2,6 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
+import { webSocketManager } from "./websocket-simplified";
+import { log } from "./vite";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // prefix all routes with /api
@@ -1018,6 +1020,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Create HTTP server
   const httpServer = createServer(app);
+  
+  // Initialize WebSocket server for real-time updates
+  webSocketManager.initialize(httpServer);
+  log('WebSocket server initialized for real-time client dashboard updates', 'server');
 
   return httpServer;
 }
