@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser } from "@shared/schema";
+import { users, type User, type InsertUser, type UserRole, type LoginUser } from "@shared/schema";
 import {
   MetricData,
   MapLocation,
@@ -1285,7 +1285,17 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentId++;
-    const user: User = { ...insertUser, id };
+    const user: User = {
+      ...insertUser,
+      id,
+      permissions: [],
+      lastLogin: new Date().toISOString(),
+      preferences: {
+        theme: "light",
+        dashboardView: "overview",
+        notifications: true
+      }
+    };
     this.users.set(id, user);
     return user;
   }
