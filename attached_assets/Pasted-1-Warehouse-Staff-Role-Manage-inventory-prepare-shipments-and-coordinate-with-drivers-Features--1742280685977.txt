@@ -1,0 +1,38 @@
+1. Warehouse Staff
+Role: Manage inventory, prepare shipments, and coordinate with drivers.
+Features Used:
+Predictive Supply Chain Resilience (Feature 2): Alerts them to stock up or shift inventory before disruptions (e.g., floods).
+Multi-Modal Logistics Orchestration (Feature 5): Guides them on loading for road, drone, or air transport.
+Real-Time Client Dashboard (Feature 9): Shows shipment readiness status.
+How They Benefit: Fewer last-minute rushes, clearer instructions, reduced errors.
+Interaction: Use dashboard on warehouse tablets to execute AI recommendations.
+2. Logistics Managers
+Role: Oversee supply chain operations, optimize workflows, and ensure timely deliveries.
+Features Used:
+Hyper-Local Route Optimization (Feature 1): Plans efficient routes for drivers/drones.
+Digital Twin for Scenario Planning (Feature 7): Simulates “what-if” scenarios (e.g., airport delays) for better decisions.
+Sustainable AI-Driven Operations (Feature 3): Tracks carbon impact and adjusts operations.
+How They Benefit: Data-driven decisions, cost savings, compliance with green goals.
+Interaction: Access full platform via desktop or mobile app for planning and oversight.
+3. Drivers (Human and Autonomous)
+Role: Deliver goods to clients, either manually or via autonomous vehicles.
+Features Used:
+Hyper-Local Route Optimization (Feature 1): Provides real-time, traffic-adjusted routes via in-vehicle systems.
+Autonomous Fleet Integration (Feature 8): Coordinates with autonomous trucks/drones, managing handoffs or maintenance alerts.
+Real-Time Client Dashboard (Feature 9): Updates delivery status on the go.
+How They Benefit: Less time on the road, safer routes, seamless autonomy transition.
+Interaction: Use mobile app or vehicle-integrated AI for navigation and updates.
+4. Salespeople
+Role: Sell logistics services to clients, pitch efficiency and cost benefits.
+Features Used:
+SME-Centric Customization (Feature 6): Highlights affordable, tailored options for SMEs.
+Real-Time Client Dashboard (Feature 9): Demos actionable insights to prospects.
+Sustainable AI-Driven Operations (Feature 3): Emphasizes eco-friendly selling points.
+How They Benefit: Tangible proof of value, stronger pitches, alignment with client priorities.
+Interaction: Use demo dashboards and case studies from the platform in sales meetings.
+5. Business Owners
+Role: Invest in the solution, oversee ROI, and set strategic goals.
+Features Used:
+Integrated Cybersecurity Suite (Feature 4): Ensures data security, protecting their reputation.
+Partnerships and Ecosystem Integration (Feature 10): Leverages grants and local ties for growth.
+All Features: Monitors overall performance via dashboard (Feature 9) and simulations (Feature 7).
