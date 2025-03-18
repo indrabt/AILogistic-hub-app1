@@ -18,6 +18,7 @@ import Sustainability from "@/pages/sustainability";
 import Cybersecurity from "@/pages/cybersecurity";
 import MultiModalLogistics from "@/pages/multi-modal-logistics";
 import BusinessDashboard from "@/pages/business-dashboard";
+import WesternSydneyUsers from "@/pages/western-sydney-users";
 
 function Router() {
   return (
@@ -35,6 +36,7 @@ function Router() {
         <Route path="/cybersecurity" component={Cybersecurity} />
         <Route path="/multi-modal-logistics" component={MultiModalLogistics} />
         <Route path="/business-dashboard" component={BusinessDashboard} />
+        <Route path="/western-sydney-users" component={WesternSydneyUsers} />
         <Route path="/reports" component={Reports} />
         <Route path="/settings" component={Settings} />
         <Route component={NotFound} />

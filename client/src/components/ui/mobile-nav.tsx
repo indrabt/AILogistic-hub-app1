@@ -57,7 +57,7 @@ const MobileNav = ({ currentPath }: MobileNavProps) => {
           "p-2 flex flex-col items-center cursor-pointer",
           ["/demand-forecasting", "/weather-impact", "/ai-analytics", "/reports", "/settings", 
            "/supply-chain-resilience", "/sustainability", "/cybersecurity", "/multi-modal-logistics", 
-           "/business-dashboard"].includes(currentPath) 
+           "/business-dashboard", "/western-sydney-users"].includes(currentPath) 
             ? "text-primary" 
             : "text-gray-500"
         )}

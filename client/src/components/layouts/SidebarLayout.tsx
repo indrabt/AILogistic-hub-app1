@@ -21,7 +21,9 @@ import {
   ArrowUpDown,
   BarChart,
   LineChart,
-  PieChart
+  PieChart,
+  MapPin,
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -158,6 +160,12 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
               href="/business-dashboard" 
               label="Business Dashboard" 
               active={location === "/business-dashboard"} 
+            />
+            <SidebarItem 
+              icon={<MapPin size={20} />} 
+              href="/western-sydney-users" 
+              label="Western Sydney Users" 
+              active={location === "/western-sydney-users"} 
             />
             <SidebarItem 
               icon={<FileText size={20} />} 
