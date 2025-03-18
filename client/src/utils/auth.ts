@@ -73,11 +73,27 @@ export function canAccessRoute(route: string): boolean {
   // Get allowed roles for this route
   const allowedRoles = routePermissions[baseRoute];
   
+  // Additional logging to help with debugging
+  console.log(`Checking access for route: ${baseRoute}`);
+  console.log(`User role: ${user.role}`);
+  console.log(`Allowed roles: ${allowedRoles ? allowedRoles.join(', ') : 'none'}`);
+  
   // If route isn't defined in permissions, deny access
-  if (!allowedRoles) return false;
+  if (!allowedRoles) {
+    console.log('Route not in permissions, access denied');
+    return false;
+  }
+  
+  // Explicit check for warehouse staff trying to access driver dashboard
+  if (user.role === 'warehouse_staff' && baseRoute === '/driver-dashboard') {
+    console.log('Explicitly blocking warehouse staff from driver dashboard');
+    return false;
+  }
   
   // Check if user's role can access this route
-  return allowedRoles.includes(user.role);
+  const hasAccess = allowedRoles.includes(user.role);
+  console.log(`Access ${hasAccess ? 'granted' : 'denied'}`);
+  return hasAccess;
 }
 
 // Note: The UserRole type is defined at the top of this file

@@ -68,7 +68,11 @@ export default function Login() {
       };
 
       // Store user data in sessionStorage
+      console.log('Storing user data with role:', userData.role);
       sessionStorage.setItem("user", JSON.stringify(userData));
+      
+      // Force clear any stale permissions
+      sessionStorage.removeItem("permissions");
 
       // Show success message
       toast({

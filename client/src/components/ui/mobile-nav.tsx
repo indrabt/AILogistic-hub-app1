@@ -74,7 +74,13 @@ const MobileNav = ({ currentPath }: MobileNavProps) => {
 
   // Filter navigation items by user role
   const filteredNavItems = mobileNavItems
-    .filter(item => item.roles.includes(userRole))
+    .filter(item => {
+      // Extra check to prevent warehouse staff from seeing driver dashboard
+      if (userRole === 'warehouse_staff' && item.href.includes('driver-dashboard')) {
+        return false;
+      }
+      return item.roles.includes(userRole);
+    })
     // Remove duplicates based on href to ensure we only show each destination once
     .filter((item, index, self) => 
       index === self.findIndex(t => t.href === item.href)
