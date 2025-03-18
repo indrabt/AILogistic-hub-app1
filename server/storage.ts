@@ -630,6 +630,185 @@ export class MemStorage implements IStorage {
     };
     return this.userSettings;
   }
+
+  // AI Predictive Analytics methods
+  async getPredictiveModels(): Promise<PredictiveModel[]> {
+    return this.predictiveModels;
+  }
+
+  async getPredictiveModelById(id: number): Promise<PredictiveModel | undefined> {
+    return this.predictiveModels.find(model => model.id === id);
+  }
+
+  async createPredictiveModel(model: Omit<PredictiveModel, 'id'>): Promise<PredictiveModel> {
+    const newId = this.predictiveModels.length > 0 
+      ? Math.max(...this.predictiveModels.map(m => m.id)) + 1 
+      : 1;
+    
+    const newModel: PredictiveModel = {
+      ...model,
+      id: newId
+    };
+    
+    this.predictiveModels.push(newModel);
+    return newModel;
+  }
+
+  async updatePredictiveModel(id: number, model: Partial<PredictiveModel>): Promise<PredictiveModel | undefined> {
+    const index = this.predictiveModels.findIndex(m => m.id === id);
+    if (index === -1) return undefined;
+    
+    this.predictiveModels[index] = {
+      ...this.predictiveModels[index],
+      ...model
+    };
+    
+    return this.predictiveModels[index];
+  }
+
+  async deletePredictiveModel(id: number): Promise<boolean> {
+    const initialLength = this.predictiveModels.length;
+    this.predictiveModels = this.predictiveModels.filter(m => m.id !== id);
+    return initialLength > this.predictiveModels.length;
+  }
+
+  async getModelPredictions(modelId?: number): Promise<ModelPrediction[]> {
+    if (modelId) {
+      return this.modelPredictions.filter(p => p.modelId === modelId);
+    }
+    return this.modelPredictions;
+  }
+
+  async getModelPredictionById(id: number): Promise<ModelPrediction | undefined> {
+    return this.modelPredictions.find(p => p.id === id);
+  }
+
+  async createModelPrediction(prediction: Omit<ModelPrediction, 'id'>): Promise<ModelPrediction> {
+    const newId = this.modelPredictions.length > 0 
+      ? Math.max(...this.modelPredictions.map(p => p.id)) + 1 
+      : 1;
+    
+    const newPrediction: ModelPrediction = {
+      ...prediction,
+      id: newId
+    };
+    
+    this.modelPredictions.push(newPrediction);
+    return newPrediction;
+  }
+
+  async getAnomalyDetections(status?: string): Promise<AnomalyDetection[]> {
+    if (status) {
+      return this.anomalyDetections.filter(a => a.status === status);
+    }
+    return this.anomalyDetections;
+  }
+
+  async resolveAnomaly(id: number, resolution: string): Promise<AnomalyDetection | undefined> {
+    const index = this.anomalyDetections.findIndex(a => a.id === id);
+    if (index === -1) return undefined;
+    
+    this.anomalyDetections[index] = {
+      ...this.anomalyDetections[index],
+      status: "resolved",
+      description: `${this.anomalyDetections[index].description} - Resolution: ${resolution}`
+    };
+    
+    return this.anomalyDetections[index];
+  }
+
+  async getScenarioAnalyses(): Promise<ScenarioAnalysis[]> {
+    return this.scenarioAnalyses;
+  }
+
+  async getScenarioAnalysisById(id: number): Promise<ScenarioAnalysis | undefined> {
+    return this.scenarioAnalyses.find(s => s.id === id);
+  }
+
+  async createScenarioAnalysis(scenario: Omit<ScenarioAnalysis, 'id'>): Promise<ScenarioAnalysis> {
+    const newId = this.scenarioAnalyses.length > 0 
+      ? Math.max(...this.scenarioAnalyses.map(s => s.id)) + 1 
+      : 1;
+    
+    const newScenario: ScenarioAnalysis = {
+      ...scenario,
+      id: newId
+    };
+    
+    this.scenarioAnalyses.push(newScenario);
+    return newScenario;
+  }
+
+  async runPredictiveAnalysis(data: any): Promise<any> {
+    // In a real implementation, this would connect to an AI service
+    // For now, we'll return a simulated prediction based on the input data
+    
+    // Simulate some processing time
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Return a mock prediction result based on the input data type
+    if (data.type === "demand") {
+      return {
+        type: "demand_prediction",
+        confidence: 92.7,
+        prediction: {
+          categories: [
+            { name: "Electronics", change: 8.5, direction: "increase" },
+            { name: "Apparel", change: 12.3, direction: "increase" },
+            { name: "Furniture", change: -3.2, direction: "decrease" }
+          ],
+          factors: [
+            "Seasonal trend upward for electronics and apparel",
+            "Market indicators suggest furniture demand cooling"
+          ],
+          timeframe: "30 days"
+        }
+      };
+    } else if (data.type === "routing") {
+      return {
+        type: "route_optimization",
+        confidence: 89.4,
+        prediction: {
+          optimizedRoutes: [
+            { from: "Chicago", to: "Detroit", timeSaved: "52 minutes", fuelSaved: "12%" },
+            { from: "Los Angeles", to: "San Francisco", timeSaved: "45 minutes", fuelSaved: "9%" }
+          ],
+          weatherImpacts: [
+            { region: "Northeast", severity: "moderate", recommendation: "Delay shipments by 24 hours" }
+          ]
+        }
+      };
+    } else if (data.type === "inventory") {
+      return {
+        type: "inventory_prediction",
+        confidence: 90.8,
+        prediction: {
+          recommendations: [
+            { product: "Electronics", action: "increase", amount: "15%" },
+            { product: "Winter Clothing", action: "decrease", amount: "10%" }
+          ],
+          risks: [
+            { product: "Electronics", risk: "stockout", probability: "high" },
+            { product: "Perishables", risk: "overstocking", probability: "medium" }
+          ]
+        }
+      };
+    } else {
+      return {
+        type: "general_prediction",
+        confidence: 85.3,
+        prediction: {
+          insights: [
+            "Consider increasing warehouse capacity in Chicago region",
+            "Monitor supplier delivery times for potential disruptions",
+            "Weather patterns may impact Northeast delivery schedules"
+          ],
+          timeline: "90 days",
+          reliability: "medium"
+        }
+      };
+    }
+  }
 }
 
 export const storage = new MemStorage();
