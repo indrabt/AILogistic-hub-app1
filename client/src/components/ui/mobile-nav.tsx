@@ -63,7 +63,9 @@ const MobileNav = ({ currentPath }: MobileNavProps) => {
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
-        setUserRole(user.role || "logistics_manager");
+        const role = user.role || "logistics_manager";
+        setUserRole(role);
+        console.log("User role in MobileNav:", role);
       } catch (e) {
         console.error("Failed to parse user data:", e);
       }

@@ -130,7 +130,8 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
-        setUserRole(user.role || "logistics_manager");
+        const role = user.role || "logistics_manager";
+        setUserRole(role);
         setUserName(user.name || user.username || "User");
         
         // Set initials

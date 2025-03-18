@@ -34,6 +34,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     // If authenticated, check if user has permission to access this route
     // Skip this check for the root path since we handle it separately above
     if (user && location !== '/' && !canAccessRoute(location)) {
+      console.log(`Access denied for user role: ${user.role} trying to access ${location}`);
+      
       toast({
         title: 'Access denied',
         description: 'You do not have permission to access this page.',
