@@ -11,6 +11,14 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const [location, setLocation] = useLocation();
   const user = getCurrentUser();
 
+  // Redirect from root path to role-specific dashboard
+  useEffect(() => {
+    if (user && location === '/') {
+      const defaultRoute = getDefaultRoute(user.role);
+      setLocation(defaultRoute);
+    }
+  }, [location, setLocation, user]);
+
   useEffect(() => {
     // Check if user is authenticated (except for login page)
     if (!user && location !== '/login') {
@@ -24,7 +32,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
 
     // If authenticated, check if user has permission to access this route
-    if (user && !canAccessRoute(location)) {
+    // Skip this check for the root path since we handle it separately above
+    if (user && location !== '/' && !canAccessRoute(location)) {
       toast({
         title: 'Access denied',
         description: 'You do not have permission to access this page.',

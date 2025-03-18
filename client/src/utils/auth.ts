@@ -10,16 +10,16 @@ export function getDefaultRoute(role: UserRole): string {
     warehouse_staff: "/warehouse-dashboard",
     logistics_manager: "/dashboard",
     driver: "/driver-dashboard",
-    sales: "/dashboard",
+    sales: "/western-sydney-users",
     business_owner: "/business-dashboard"
   };
-  return routes[role] || "/dashboard";
+  return routes[role] || "/login";
 }
 
 // Define which routes each role can access
 export const routePermissions: Record<string, UserRole[]> = {
-  "/": ["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner"],
-  "/dashboard": ["logistics_manager", "sales"],
+  "/": ["logistics_manager"], // Root path redirects to default dashboard
+  "/dashboard": ["logistics_manager"],
   "/warehouse-dashboard": ["warehouse_staff"],
   "/driver-dashboard": ["driver"],
   "/business-dashboard": ["business_owner", "sales"],

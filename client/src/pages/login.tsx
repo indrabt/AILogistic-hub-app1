@@ -85,8 +85,10 @@ export default function Login() {
         setLocation("/warehouse-dashboard");
       } else if (data.role === "logistics_manager") {
         setLocation("/dashboard");
+      } else if (data.role === "sales") {
+        setLocation("/western-sydney-users");
       } else {
-        setLocation("/dashboard");
+        setLocation("/business-dashboard");
       }
     } catch (error) {
       console.error("Login error:", error);
