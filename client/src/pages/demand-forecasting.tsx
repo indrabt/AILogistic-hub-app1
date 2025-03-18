@@ -5,20 +5,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DownloadIcon, Calendar, TrendingUp, ArrowUpRight, ArrowDownRight, ChevronUp, ChevronDown } from "lucide-react";
 
-const generateForecastData = (periodMonths = 6) => {
+// Generate forecast data for units or revenue
+const generateForecastData = (periodMonths = 6, dataType = 'units') => {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const historicalData = [420, 380, 450, 510, 480, 520, 550, 590, 610, 640, 660, 680];
-  // Adjust forecast data based on period
-  const forecastData = periodMonths === 3 
+  
+  // Base data for units
+  const unitsHistoricalData = [420, 380, 450, 510, 480, 520, 550, 590, 610, 640, 660, 680];
+  const unitsForecastData = periodMonths === 3 
     ? [700, 730, 750] 
     : periodMonths === 6 
       ? [700, 730, 750, 790, 810, 840]
       : [700, 730, 750, 790, 810, 840, 870, 890, 910, 930, 950, 970];
   
+  // Revenue data (units multiplied by average price)
+  const avgUnitPrice = 150; // Average price per unit in dollars
+  const revenueHistoricalData = unitsHistoricalData.map(units => units * avgUnitPrice / 1000); // In thousands
+  const revenueForecastData = dataType === 'units' 
+    ? unitsForecastData 
+    : unitsForecastData.map(units => units * avgUnitPrice / 1000); // In thousands
+  
+  const historicalData = dataType === 'units' ? unitsHistoricalData : revenueHistoricalData;
+  const forecastData = dataType === 'units' ? unitsForecastData : revenueForecastData;
+  
   return {
     labels: [...months, ...months.slice(0, periodMonths).map(m => `${m} (Forecast)`)],
     historicalData,
-    forecastData
+    forecastData,
+    maxValue: dataType === 'units' ? 1000 : 150 // Max value for y-axis scale
   };
 };
 
@@ -161,11 +174,12 @@ const getFilteredItems = (category: string) => {
 export default function DemandForecasting() {
   const [forecastPeriod, setForecastPeriod] = useState("6");
   const [productCategory, setProductCategory] = useState("all");
+  const [dataType, setDataType] = useState<'units' | 'revenue'>('units');
   
-  // Use useMemo to generate forecast data based on the forecast period
-  const { labels, historicalData, forecastData } = useMemo(() => {
-    return generateForecastData(parseInt(forecastPeriod, 10));
-  }, [forecastPeriod]);
+  // Use useMemo to generate forecast data based on the forecast period and data type
+  const { labels, historicalData, forecastData, maxValue } = useMemo(() => {
+    return generateForecastData(parseInt(forecastPeriod, 10), dataType);
+  }, [forecastPeriod, dataType]);
   
   // Get filtered items based on product category
   const filteredCategories = useMemo(() => {
@@ -274,7 +288,7 @@ export default function DemandForecasting() {
         <CardHeader className="border-b border-gray-200">
           <div className="flex justify-between">
             <CardTitle>Demand Forecast Trend</CardTitle>
-            <Tabs defaultValue="units">
+            <Tabs defaultValue="units" onValueChange={(value) => setDataType(value as 'units' | 'revenue')}>
               <TabsList>
                 <TabsTrigger value="units">Units</TabsTrigger>
                 <TabsTrigger value="revenue">Revenue</TabsTrigger>
@@ -293,10 +307,10 @@ export default function DemandForecasting() {
               <line x1="50" y1="80" x2="950" y2="80" stroke="#e5e7eb" strokeWidth="1" strokeDasharray="5,5" />
               
               {/* Y-axis labels */}
-              <text x="45" y="320" textAnchor="end" fill="#6b7280" fontSize="12">0</text>
-              <text x="45" y="240" textAnchor="end" fill="#6b7280" fontSize="12">250</text>
-              <text x="45" y="160" textAnchor="end" fill="#6b7280" fontSize="12">500</text>
-              <text x="45" y="80" textAnchor="end" fill="#6b7280" fontSize="12">750</text>
+              <text x="45" y="320" textAnchor="end" fill="#6b7280" fontSize="12">0{dataType === 'revenue' ? 'k' : ''}</text>
+              <text x="45" y="240" textAnchor="end" fill="#6b7280" fontSize="12">{dataType === 'revenue' ? '50k' : '250'}</text>
+              <text x="45" y="160" textAnchor="end" fill="#6b7280" fontSize="12">{dataType === 'revenue' ? '100k' : '500'}</text>
+              <text x="45" y="80" textAnchor="end" fill="#6b7280" fontSize="12">{dataType === 'revenue' ? '150k' : '750'}</text>
               
               {/* X-axis labels (months) */}
               {labels.map((month, i) => {
@@ -319,7 +333,7 @@ export default function DemandForecasting() {
               <polyline 
                 points={historicalData.map((value, i) => {
                   const x = 50 + (i * 900 / (labels.length - 1));
-                  const y = 320 - (value / 750 * 240);
+                  const y = 320 - (value / maxValue * 240);
                   return `${x},${y}`;
                 }).join(' ')}
                 fill="none"
@@ -331,7 +345,7 @@ export default function DemandForecasting() {
               <polyline 
                 points={forecastData.map((value, i) => {
                   const x = 50 + ((i + historicalData.length) * 900 / (labels.length - 1));
-                  const y = 320 - (value / 750 * 240);
+                  const y = 320 - (value / maxValue * 240);
                   return `${x},${y}`;
                 }).join(' ')}
                 fill="none"
@@ -343,16 +357,16 @@ export default function DemandForecasting() {
               {/* Forecast confidence interval */}
               <path 
                 d={`
-                  M ${50 + (historicalData.length * 900 / (labels.length - 1))},${320 - (forecastData[0] / 750 * 240 - 20)}
+                  M ${50 + (historicalData.length * 900 / (labels.length - 1))},${320 - (forecastData[0] / maxValue * 240 - 20)}
                   ${forecastData.map((value, i) => {
                     const x = 50 + ((i + historicalData.length) * 900 / (labels.length - 1));
-                    const y = 320 - (value / 750 * 240 - 20);
+                    const y = 320 - (value / maxValue * 240 - 20);
                     return `L ${x},${y}`;
                   }).join(' ')}
                   ${forecastData.slice().reverse().map((value, i) => {
                     const idx = forecastData.length - 1 - i;
                     const x = 50 + ((idx + historicalData.length) * 900 / (labels.length - 1));
-                    const y = 320 - (value / 750 * 240 + 20);
+                    const y = 320 - (value / maxValue * 240 + 20);
                     return `L ${x},${y}`;
                   }).join(' ')}
                   Z
@@ -363,14 +377,14 @@ export default function DemandForecasting() {
               {/* Data points for historical data */}
               {historicalData.map((value, i) => {
                 const x = 50 + (i * 900 / (labels.length - 1));
-                const y = 320 - (value / 750 * 240);
+                const y = 320 - (value / maxValue * 240);
                 return <circle key={i} cx={x} cy={y} r="4" fill="#1a237e" />;
               })}
               
               {/* Data points for forecast data */}
               {forecastData.map((value, i) => {
                 const x = 50 + ((i + historicalData.length) * 900 / (labels.length - 1));
-                const y = 320 - (value / 750 * 240);
+                const y = 320 - (value / maxValue * 240);
                 return <circle key={i} cx={x} cy={y} r="4" fill="#1a237e" stroke="#ffffff" strokeWidth="2" />;
               })}
               
