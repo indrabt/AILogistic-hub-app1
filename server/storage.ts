@@ -570,11 +570,11 @@ export class MemStorage implements IStorage {
     };
     
     this.locations = [
-      { id: 1, type: "distribution", lat: 41.8781, lng: -87.6298, name: "Chicago Distribution Center" },
-      { id: 2, type: "distribution", lat: 34.0522, lng: -118.2437, name: "Los Angeles Distribution Center" },
-      { id: 3, type: "transit", lat: 39.7392, lng: -104.9903, name: "Denver Transit Hub" },
-      { id: 4, type: "transit", lat: 32.7767, lng: -96.7970, name: "Dallas Transit Hub" },
-      { id: 5, type: "delay", lat: 40.7128, lng: -74.0060, name: "New York Delivery Center" }
+      { id: 1, type: "distribution", lat: -33.7486, lng: 150.9942, name: "Western Sydney Distribution Center" },
+      { id: 2, type: "distribution", lat: -33.8688, lng: 151.2093, name: "Sydney Distribution Center" },
+      { id: 3, type: "transit", lat: -37.8136, lng: 144.9631, name: "Melbourne Transit Hub" },
+      { id: 4, type: "transit", lat: -27.4698, lng: 153.0251, name: "Brisbane Transit Hub" },
+      { id: 5, type: "delay", lat: -34.9285, lng: 138.6007, name: "Adelaide Delivery Center" }
     ];
     
     this.weatherAlerts = [
@@ -582,19 +582,19 @@ export class MemStorage implements IStorage {
         id: 1,
         severity: "severe",
         title: "Severe Weather Alert",
-        description: "Heavy snowfall expected in the Northeast region affecting 14 active shipments.",
+        description: "Heavy rainfall and flooding expected in the Hawkesbury-Nepean region affecting 14 active shipments.",
         time: "12:30 PM",
         affectedShipments: 14,
-        region: "Northeast"
+        region: "Western Sydney"
       },
       {
         id: 2,
         severity: "advisory",
         title: "Weather Advisory",
-        description: "Fog reducing visibility along West Coast routes. Expected delays of 1-2 hours.",
+        description: "Bushfire smoke reducing visibility along coastal routes. Expected delays of 1-2 hours.",
         time: "09:15 AM",
         affectedShipments: 8,
-        region: "West Coast"
+        region: "NSW Coast"
       }
     ];
     
@@ -616,8 +616,8 @@ export class MemStorage implements IStorage {
     };
     
     this.routeOptimizations = [
-      { id: 1, name: "Chicago to Detroit", description: "Rerouted to avoid construction on I-94", saved: "-45 min" },
-      { id: 2, name: "Dallas to Houston", description: "Traffic-optimized departure time", saved: "-30 min" }
+      { id: 1, name: "Penrith to Sydney CBD", description: "Rerouted to avoid construction on M4 Motorway", saved: "-45 min" },
+      { id: 2, name: "Liverpool to Parramatta", description: "Traffic-optimized departure time", saved: "-30 min" }
     ];
     
     this.routeMetrics = {
@@ -627,32 +627,32 @@ export class MemStorage implements IStorage {
     };
     
     this.activities = [
-      { id: 1, title: "Shipment #A4589 delivered", description: "Package delivered to 1234 Main St, New York", time: "2 hours ago", type: "primary" },
-      { id: 2, title: "Route modification alert", description: "5 routes modified due to weather conditions", time: "4 hours ago", type: "accent" },
-      { id: 3, title: "New shipment created", description: "Shipment #B7813 created from LA to Miami", time: "6 hours ago", type: "secondary" },
-      { id: 4, title: "System update completed", description: "New route optimization algorithm deployed", time: "12 hours ago", type: "default" }
+      { id: 1, title: "Shipment #A4589 delivered", description: "Package delivered to 123 George Street, Sydney CBD", time: "2 hours ago", type: "primary" },
+      { id: 2, title: "Route modification alert", description: "5 routes modified due to flooding in Western Sydney", time: "4 hours ago", type: "accent" },
+      { id: 3, title: "New shipment created", description: "Shipment #B7813 created from Sydney to Melbourne", time: "6 hours ago", type: "secondary" },
+      { id: 4, title: "System update completed", description: "New route optimization algorithm deployed for Western Sydney area", time: "12 hours ago", type: "default" }
     ];
     
     this.routes = [
-      { id: 1, name: "RT-8294", origin: "Chicago, IL", destination: "Detroit, MI", status: "optimized", savings: "45 min", eta: "Today, 4:30 PM", distance: "280 mi" },
-      { id: 2, name: "RT-7512", origin: "Dallas, TX", destination: "Houston, TX", status: "optimized", savings: "30 min", eta: "Today, 5:15 PM", distance: "240 mi" },
-      { id: 3, name: "RT-6351", origin: "Los Angeles, CA", destination: "San Francisco, CA", status: "delayed", savings: "-20 min", eta: "Tomorrow, 11:00 AM", distance: "380 mi" },
-      { id: 4, name: "RT-5437", origin: "New York, NY", destination: "Boston, MA", status: "standard", savings: "0 min", eta: "Today, 7:45 PM", distance: "220 mi" }
+      { id: 1, name: "RT-8294", origin: "Penrith, NSW", destination: "Sydney CBD, NSW", status: "optimized", savings: "45 min", eta: "Today, 4:30 PM", distance: "55 km" },
+      { id: 2, name: "RT-7512", origin: "Liverpool, NSW", destination: "Parramatta, NSW", status: "optimized", savings: "30 min", eta: "Today, 5:15 PM", distance: "25 km" },
+      { id: 3, name: "RT-6351", origin: "Sydney, NSW", destination: "Melbourne, VIC", status: "delayed", savings: "-20 min", eta: "Tomorrow, 11:00 AM", distance: "880 km" },
+      { id: 4, name: "RT-5437", origin: "Sydney, NSW", destination: "Brisbane, QLD", status: "standard", savings: "0 min", eta: "Today, 7:45 PM", distance: "910 km" }
     ];
     
     this.supplyChainNodes = [
-      { id: 1, type: "distribution", name: "Chicago DC", location: "Chicago, IL", lat: 41.8781, lng: -87.6298, inventory: 12500 },
-      { id: 2, type: "distribution", name: "Los Angeles DC", location: "Los Angeles, CA", lat: 34.0522, lng: -118.2437, inventory: 15700 },
-      { id: 3, type: "regional", name: "Denver RC", location: "Denver, CO", lat: 39.7392, lng: -104.9903, inventory: 5200 },
-      { id: 4, type: "regional", name: "Dallas RC", location: "Dallas, TX", lat: 32.7767, lng: -96.7970, inventory: 4800 },
-      { id: 5, type: "local", name: "NYC LC", location: "New York, NY", lat: 40.7128, lng: -74.0060, inventory: 2300 },
-      { id: 6, type: "local", name: "Miami LC", location: "Miami, FL", lat: 25.7617, lng: -80.1918, inventory: 1800 }
+      { id: 1, type: "distribution", name: "Western Sydney DC", location: "Penrith, NSW", lat: -33.7486, lng: 150.6942, inventory: 12500 },
+      { id: 2, type: "distribution", name: "Sydney DC", location: "Sydney, NSW", lat: -33.8688, lng: 151.2093, inventory: 15700 },
+      { id: 3, type: "regional", name: "Melbourne RC", location: "Melbourne, VIC", lat: -37.8136, lng: 144.9631, inventory: 5200 },
+      { id: 4, type: "regional", name: "Brisbane RC", location: "Brisbane, QLD", lat: -27.4698, lng: 153.0251, inventory: 4800 },
+      { id: 5, type: "local", name: "Parramatta LC", location: "Parramatta, NSW", lat: -33.8150, lng: 151.0011, inventory: 2300 },
+      { id: 6, type: "local", name: "Liverpool LC", location: "Liverpool, NSW", lat: -33.9200, lng: 150.9212, inventory: 1800 }
     ];
     
     this.shipments = [
-      { id: 1, shipmentId: "A4589", origin: "Chicago, IL", destination: "Detroit, MI", status: "on-schedule", eta: "Today, 4:30 PM", priority: "high" },
-      { id: 2, shipmentId: "B7813", origin: "Los Angeles, CA", destination: "Miami, FL", status: "delayed", eta: "Tomorrow, 10:15 AM", priority: "medium" },
-      { id: 3, shipmentId: "C3921", origin: "New York, NY", destination: "Boston, MA", status: "on-schedule", eta: "Tomorrow, 2:45 PM", priority: "normal" }
+      { id: 1, shipmentId: "A4589", origin: "Penrith, NSW", destination: "Sydney CBD, NSW", status: "on-schedule", eta: "Today, 4:30 PM", priority: "high" },
+      { id: 2, shipmentId: "B7813", origin: "Sydney, NSW", destination: "Melbourne, VIC", status: "delayed", eta: "Tomorrow, 10:15 AM", priority: "medium" },
+      { id: 3, shipmentId: "C3921", origin: "Brisbane, QLD", destination: "Sydney, NSW", status: "on-schedule", eta: "Tomorrow, 2:45 PM", priority: "normal" }
     ];
     
     this.inventoryAlerts = [
