@@ -323,7 +323,7 @@ export class MemStorage implements IStorage {
         description: "Advanced ML model for predicting product demand across categories",
         type: "demand",
         accuracy: 93.5,
-        lastTrained: "2023-02-10",
+        lastTrained: "2025-02-10",
         status: "active",
         features: ["Historical sales", "Seasonality", "Market trends", "Promotional events"]
       },
@@ -333,7 +333,7 @@ export class MemStorage implements IStorage {
         description: "Neural network for real-time route optimization considering weather and traffic",
         type: "routing",
         accuracy: 89.2,
-        lastTrained: "2023-02-05",
+        lastTrained: "2025-02-05",
         status: "active",
         features: ["Distance", "Weather conditions", "Traffic patterns", "Fuel consumption"]
       },
@@ -343,7 +343,7 @@ export class MemStorage implements IStorage {
         description: "Predictive model for optimal inventory levels and reordering",
         type: "inventory",
         accuracy: 91.7,
-        lastTrained: "2023-01-25",
+        lastTrained: "2025-01-25",
         status: "active",
         features: ["Stock levels", "Supplier lead times", "Seasonal demand", "Storage costs"]
       },
@@ -353,7 +353,7 @@ export class MemStorage implements IStorage {
         description: "AI model that predicts severe weather impacts on logistics operations",
         type: "weather",
         accuracy: 87.4,
-        lastTrained: "2023-02-12",
+        lastTrained: "2025-02-12",
         status: "active",
         features: ["Weather forecasts", "Historical delays", "Route vulnerability", "Shipment priority"]
       },
@@ -363,9 +363,19 @@ export class MemStorage implements IStorage {
         description: "Custom AI model for supply chain risk assessment and mitigation",
         type: "custom",
         accuracy: 85.9,
-        lastTrained: "2023-01-15",
+        lastTrained: "2025-01-15",
         status: "training",
         features: ["Supplier data", "Geopolitical factors", "Commodity prices", "Transportation modes"]
+      },
+      {
+        id: 6,
+        name: "Hawkesbury-Nepean Flood Prediction System",
+        description: "Specialized AI model for predicting flood impacts on Western Sydney logistics corridors",
+        type: "weather",
+        accuracy: 94.2,
+        lastTrained: "2025-03-10",
+        status: "active",
+        features: ["Rainfall data", "River gauges", "Topographical mapping", "Infrastructure vulnerability", "Historical flood patterns", "Warragamba Dam levels"]
       }
     ];
     
@@ -374,7 +384,7 @@ export class MemStorage implements IStorage {
         id: 1,
         modelId: 1,
         modelName: "Demand Forecasting AI",
-        createdAt: "2023-02-15T09:30:00",
+        createdAt: "2025-03-15T09:30:00",
         predictionType: "demand",
         confidence: 92.4,
         insights: [
@@ -414,7 +424,7 @@ export class MemStorage implements IStorage {
         id: 2,
         modelId: 2,
         modelName: "Route Optimization AI",
-        createdAt: "2023-02-14T14:45:00",
+        createdAt: "2025-03-14T14:45:00",
         predictionType: "routing",
         confidence: 88.7,
         insights: [
@@ -439,6 +449,60 @@ export class MemStorage implements IStorage {
             metric: "Fuel usage",
             impact: "negative",
             value: 8.2,
+            unit: "%"
+          }
+        ]
+      },
+      {
+        id: 3,
+        modelId: 6,
+        modelName: "Hawkesbury-Nepean Flood Prediction System",
+        createdAt: "2025-03-18T06:30:00",
+        predictionType: "weather",
+        confidence: 94.2,
+        insights: [
+          {
+            id: 4,
+            title: "Imminent Flood Risk",
+            description: "Potential for localized flooding in Windsor, Richmond, and Penrith areas within 48 hours due to heavy rainfall and rising Warragamba Dam levels",
+            importance: "critical",
+            relatedEntity: "Western Sydney Logistics Network"
+          },
+          {
+            id: 5,
+            title: "M4 Vulnerability",
+            description: "High probability (87%) of M4 motorway partial closures between Penrith and Eastern Creek due to anticipated flood conditions",
+            importance: "high",
+            relatedEntity: "Western Sydney Routes"
+          },
+          {
+            id: 6,
+            title: "Distribution Center Impact",
+            description: "Moderate risk to Western Sydney Distribution Center access roads based on predicted water levels",
+            importance: "medium",
+            relatedEntity: "Western Sydney Distribution Center"
+          }
+        ],
+        impactAreas: [
+          {
+            area: "Logistics",
+            metric: "Delivery routes",
+            impact: "negative",
+            value: 42,
+            unit: "%"
+          },
+          {
+            area: "Operations",
+            metric: "Distribution center access",
+            impact: "negative",
+            value: 25,
+            unit: "%"
+          },
+          {
+            area: "Scheduling",
+            metric: "Delivery timeframes",
+            impact: "negative",
+            value: 68,
             unit: "%"
           }
         ]
