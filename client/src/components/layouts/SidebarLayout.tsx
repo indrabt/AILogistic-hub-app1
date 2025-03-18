@@ -130,8 +130,19 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
-        const role = user.role || "logistics_manager";
-        setUserRole(role);
+        const userRole = user.role || "logistics_manager";
+        
+        // Log user details for debugging
+        console.log("SidebarLayout detected user:", user.username, "with role:", userRole);
+        
+        // Special check for warehouse staff to ensure they don't see driver content
+        if (user.username && user.username.toLowerCase().includes('warehouse')) {
+          console.log("Username contains 'warehouse', enforcing warehouse_staff role");
+          setUserRole('warehouse_staff');
+        } else {
+          setUserRole(userRole);
+        }
+        
         setUserName(user.name || user.username || "User");
         
         // Set initials
