@@ -67,6 +67,12 @@ export default function RealTimeDashboard() {
   const [refreshInterval, setRefreshInterval] = useState(5000); // 5 seconds
   const [insights, setInsights] = useState<AIInsight[]>([]);
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
+  const [localMetrics, setLocalMetrics] = useState<MetricData>({
+    activeShipments: { value: 0, change: "0%", trend: "up" },
+    onTimeDelivery: { value: "0%", change: "0%", trend: "up" },
+    delayAlerts: { value: 0, change: "0%", trend: "up" },
+    avgShippingCost: { value: "$0", change: "0%", trend: "up" },
+  });
 
   // Fetch dashboard metrics
   const { data: metrics, isLoading: metricsLoading } = useQuery({

@@ -6,12 +6,12 @@
  */
 
 import { Server as HttpServer } from 'http';
-import * as WebSocket from 'ws';
+import { WebSocketServer, WebSocket } from 'ws';
 import { log } from './vite';
 import { storage } from './storage';
 
 export class WebSocketManager {
-  private wsServer: WebSocket.Server | null = null;
+  private wsServer: WebSocketServer | null = null;
   private clients: WebSocket[] = [];
   private updateInterval: NodeJS.Timeout | null = null;
 
@@ -21,7 +21,7 @@ export class WebSocketManager {
     }
 
     try {
-      this.wsServer = new WebSocket.Server({ 
+      this.wsServer = new WebSocketServer({ 
         server: httpServer,
         path: '/ws'
       });
@@ -75,7 +75,8 @@ export class WebSocketManager {
   
   private sendMessage(ws: WebSocket, data: any) {
     try {
-      if (ws.readyState === WebSocket.OPEN) {
+      // WebSocket.OPEN has a value of 1
+      if (ws.readyState === 1) {
         ws.send(JSON.stringify(data));
       }
     } catch (error) {
