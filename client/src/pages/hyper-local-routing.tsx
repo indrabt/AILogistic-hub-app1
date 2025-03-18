@@ -48,21 +48,13 @@ export default function HyperLocalRouting() {
   const [activeTab, setActiveTab] = useState("routes");
   
   // Fetch hyper-local routes
-  const { data: routes, isLoading: isLoadingRoutes } = useQuery({
-    queryKey: ["/api/hyper-local/routes"],
-    queryFn: async () => {
-      const response = await apiRequest("/api/hyper-local/routes");
-      return response as HyperLocalRoutingData[];
-    }
+  const { data: routes, isLoading: isLoadingRoutes } = useQuery<HyperLocalRoutingData[]>({
+    queryKey: ["/api/hyper-local/routes"]
   });
   
   // Fetch construction zones
-  const { data: constructionZones, isLoading: isLoadingZones } = useQuery({
-    queryKey: ["/api/hyper-local/construction-zones"],
-    queryFn: async () => {
-      const response = await apiRequest("/api/hyper-local/construction-zones");
-      return response as ConstructionZone[];
-    }
+  const { data: constructionZones, isLoading: isLoadingZones } = useQuery<ConstructionZone[]>({
+    queryKey: ["/api/hyper-local/construction-zones"]
   });
 
   // Route status color mapping
@@ -165,7 +157,7 @@ export default function HyperLocalRouting() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {routes?.map((route) => (
+                        {routes && routes.map((route: HyperLocalRoutingData) => (
                           <TableRow key={route.id} className="cursor-pointer hover:bg-muted/50">
                             <TableCell className="font-medium">{route.name}</TableCell>
                             <TableCell>
@@ -215,7 +207,7 @@ export default function HyperLocalRouting() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {routes?.slice(0, 3).map((route) => (
+                    {routes?.slice(0, 3).map((route: HyperLocalRoutingData) => (
                       <div key={route.id} className="border rounded-lg p-4 space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="font-medium">{route.name}</span>
@@ -294,7 +286,7 @@ export default function HyperLocalRouting() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {constructionZones?.map((zone) => (
+                        {constructionZones && constructionZones.map((zone: ConstructionZone) => (
                           <TableRow key={zone.id} className="cursor-pointer hover:bg-muted/50">
                             <TableCell className="font-medium">{zone.name}</TableCell>
                             <TableCell>
