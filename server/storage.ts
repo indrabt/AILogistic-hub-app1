@@ -1369,10 +1369,14 @@ export class MemStorage implements IStorage {
     // Ensure role is properly typed as UserRole
     const typedRole = insertUser.role as UserRole;
     
+    // Create a new user object matching the User schema
     const user: User = {
-      ...insertUser,
-      role: typedRole,
       id,
+      username: insertUser.username,
+      password: insertUser.password,
+      role: typedRole,
+      name: insertUser.name,
+      email: insertUser.email || null,
       permissions: [],
       lastLogin: new Date().toISOString(),
       preferences: {

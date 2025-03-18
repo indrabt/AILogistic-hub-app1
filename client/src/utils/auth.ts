@@ -1,23 +1,19 @@
-import { UserRole } from "@/shared/types";
+// Define UserRole type matching the one in shared/schema.ts
+export type UserRole = "warehouse_staff" | "logistics_manager" | "driver" | "sales" | "business_owner";
 
 export function checkPermission(userRole: UserRole, requiredRoles: UserRole[]): boolean {
   return requiredRoles.includes(userRole);
 }
 
 export function getDefaultRoute(role: UserRole): string {
-  const routes = {
-    warehouse_staff: "/warehouse",
-    logistics_manager: "/logistics",
-    driver: "/routes",
-    sales: "/clients",
-    business_owner: "/dashboard",
-    warehouse_operator: "/warehouse-operator", // Added route for warehouse operator
-    manufacturer: "/manufacturer",           // Added route for manufacturer
-    courier: "/courier",                     // Added route for courier
-    government_official: "/government"       // Added route for government official
+  const routes: Record<UserRole, string> = {
+    warehouse_staff: "/warehouse-dashboard",
+    logistics_manager: "/dashboard",
+    driver: "/driver-dashboard",
+    sales: "/dashboard",
+    business_owner: "/business-dashboard"
   };
   return routes[role] || "/dashboard";
 }
 
-// Ensure this aligns with the UserRole in shared/schema.ts
-export type UserRole = "warehouse_staff" | "logistics_manager" | "driver" | "sales" | "business_owner";
+// Note: The UserRole type is defined at the top of this file
