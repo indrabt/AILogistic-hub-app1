@@ -12,7 +12,23 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Navigation, Map, AlertTriangle, Clock, PieChart, BarChart3, TrendingUp, Activity, Route } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { 
+  MapPin, 
+  Navigation, 
+  Map, 
+  AlertTriangle, 
+  Clock, 
+  PieChart, 
+  BarChart3, 
+  TrendingUp, 
+  Activity, 
+  Route,
+  Droplets,
+  CloudRain,
+  AlertCircle,
+  ArrowUpRight
+} from "lucide-react";
 import { useState } from "react";
 import { apiRequest } from "../lib/queryClient";
 import { cn } from "../lib/utils";
@@ -361,6 +377,61 @@ export default function HyperLocalRouting() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
+          {/* Hawkesbury-Nepean Flood Prediction Alert */}
+          <Alert className="bg-blue-50 border-blue-300 dark:bg-blue-950 dark:border-blue-800">
+            <Droplets className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <AlertTitle className="text-blue-800 dark:text-blue-300 font-semibold flex items-center gap-2">
+              <span>Hawkesbury-Nepean Flood Prediction System</span>
+              <Badge className="bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400">Active Alert</Badge>
+            </AlertTitle>
+            <AlertDescription className="text-blue-700 dark:text-blue-400">
+              <div className="mt-2 space-y-3">
+                <p>The Hawkesbury-Nepean Flood Prediction AI model has detected increased risk of flooding in the Western Sydney region that may affect routes and delivery schedules.</p>
+                
+                <div className="flex flex-wrap gap-4 mt-3">
+                  <div className="flex items-center gap-2">
+                    <CloudRain className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium">Predicted Rainfall: 150-200mm</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                    <span className="text-sm font-medium">Alert Level: High (82% probability)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-orange-500" />
+                    <span className="text-sm font-medium">Expected Duration: 48-72 hours</span>
+                  </div>
+                </div>
+                
+                <div className="bg-blue-200 dark:bg-blue-900 rounded-full h-2 w-full overflow-hidden">
+                  <div 
+                    className="bg-blue-600 dark:bg-blue-500 h-full transition-all duration-300 ease-in-out"
+                    style={{ width: `82%` }}
+                  />
+                </div>
+                
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex gap-2">
+                    <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-400">
+                      8 Routes Affected
+                    </Badge>
+                    <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-400">
+                      2 Distribution Centers
+                    </Badge>
+                  </div>
+                  <span className="text-xs text-blue-900 dark:text-blue-300 font-medium">
+                    Updated: Today, 06:30 AM
+                  </span>
+                </div>
+
+                <Button size="sm" className="mt-2 bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2">
+                  <span>View Flood Response Plan</span>
+                  <ArrowUpRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
@@ -381,14 +452,23 @@ export default function HyperLocalRouting() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <PieChart className="mr-2 h-5 w-5" />
-                  Traffic Condition Analysis
+                  Traffic & Weather Impact Analysis
                 </CardTitle>
                 <CardDescription>
-                  Analysis of traffic conditions and their impact on routes.
+                  Analysis of traffic and weather conditions affecting routes.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {mockPerformanceChart}
+                <div className="space-y-4">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 dark:bg-yellow-950 dark:border-yellow-900">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                      <span className="font-medium text-yellow-700 dark:text-yellow-300">Weather Impact Alert</span>
+                    </div>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300">Hawkesbury-Nepean region routes are currently being rerouted due to predicted flooding. AI models suggest a 68% increase in delivery times for affected routes.</p>
+                  </div>
+                  {mockPerformanceChart}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -397,10 +477,10 @@ export default function HyperLocalRouting() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Navigation className="mr-2 h-5 w-5" />
-                Overall Route Optimization Impact
+                Western Sydney Route Optimization Impact
               </CardTitle>
               <CardDescription>
-                Analysis of cost savings, time reduction, and environmental impact.
+                Analysis of cost savings, time reduction, and environmental impact with flood prediction integration.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
@@ -417,6 +497,28 @@ export default function HyperLocalRouting() {
                   <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">89%</div>
                   <div className="text-sm text-muted-foreground">Route Optimization Rate</div>
                 </div>
+              </div>
+              
+              <div className="bg-blue-50 border border-blue-200 dark:bg-blue-950 dark:border-blue-900 rounded-lg p-4">
+                <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
+                  <Droplets className="h-4 w-4" />
+                  Hawkesbury-Nepean Flood Prediction Benefits
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                  <div className="bg-white dark:bg-slate-800 p-3 rounded border border-blue-100 dark:border-blue-900">
+                    <div className="text-lg font-bold text-blue-600 dark:text-blue-400">94.2%</div>
+                    <div className="text-xs text-blue-700 dark:text-blue-300">Flood Prediction Accuracy</div>
+                  </div>
+                  <div className="bg-white dark:bg-slate-800 p-3 rounded border border-blue-100 dark:border-blue-900">
+                    <div className="text-lg font-bold text-blue-600 dark:text-blue-400">42%</div>
+                    <div className="text-xs text-blue-700 dark:text-blue-300">Reduced Delay Impact</div>
+                  </div>
+                  <div className="bg-white dark:bg-slate-800 p-3 rounded border border-blue-100 dark:border-blue-900">
+                    <div className="text-lg font-bold text-blue-600 dark:text-blue-400">85%</div>
+                    <div className="text-xs text-blue-700 dark:text-blue-300">Alternative Route Success</div>
+                  </div>
+                </div>
+                <p className="text-sm text-blue-700 dark:text-blue-400">The Hawkesbury-Nepean Flood Prediction System uses real-time data from Warragamba Dam levels, rainfall gauges, and topographical mapping to provide accurate flood predictions specifically tailored to Western Sydney logistics operations.</p>
               </div>
 
               {mockPerformanceChart}
