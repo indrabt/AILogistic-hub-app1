@@ -5,11 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import WarehouseOperatorDashboard from "@/components/dashboard/WarehouseOperatorDashboard";
+import ManufacturerDashboard from "@/components/dashboard/ManufacturerDashboard";
+import CourierDashboard from "@/components/dashboard/CourierDashboard";
+import GovernmentDashboard from "@/components/dashboard/GovernmentDashboard";
+
 
 export default function Routes() {
   const [dateRange, setDateRange] = useState("7");
   const [activeTab, setActiveTab] = useState("active");
-  
+
   return (
     <div>
       <div className="mb-6 flex justify-between items-center">
@@ -85,7 +90,7 @@ export default function Routes() {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="inline-flex items-center bg-white rounded-lg border border-gray-200 px-3 py-1">
             <Select defaultValue="all">
               <SelectTrigger className="text-sm text-gray-600 bg-transparent border-none shadow-none h-auto py-1 w-40">
@@ -100,7 +105,7 @@ export default function Routes() {
             </Select>
           </div>
         </div>
-        
+
         <div className="flex gap-2">
           <Button variant="outline">
             Create New Route
@@ -125,7 +130,7 @@ export default function Routes() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">Optimization Rate</CardTitle>
@@ -138,7 +143,7 @@ export default function Routes() {
             <Progress value={78} className="h-2" />
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">Avg. Savings per Route</CardTitle>
@@ -169,7 +174,7 @@ export default function Routes() {
               <circle cx="500" cy="120" r="8" fill="#2196F3" />
               <circle cx="700" cy="230" r="10" fill="#F44336" />
             </svg>
-            
+
             {/* Map Legend */}
             <div className="absolute bottom-3 right-3 bg-white p-2 rounded shadow-md text-xs">
               <div className="flex items-center mb-1">
