@@ -543,3 +543,15 @@ export interface GrantApplication {
   projectTimeline: string;
   requiredDeliverables: string[];
 }
+export type UserRole = "warehouse_staff" | "logistics_manager" | "driver" | "sales" | "business_owner";
+
+export interface UserProfile extends User {
+  role: UserRole;
+  permissions: string[];
+  lastLogin: string;
+  settings: {
+    notifications: boolean;
+    defaultView: string;
+    theme: "light" | "dark";
+  };
+}

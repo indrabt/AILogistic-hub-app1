@@ -12,9 +12,60 @@ export default function Routes() {
   
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Route Optimization</h2>
-        <p className="text-gray-600">Manage and optimize your delivery routes</p>
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">Route Optimization</h2>
+          <p className="text-gray-600">Real-time route updates and optimization</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setActiveTab("active")}>
+            <MapPin className="h-4 w-4 mr-2" />
+            Active Routes
+          </Button>
+          <Button variant="outline" onClick={() => setActiveTab("upcoming")}>
+            <Calendar className="h-4 w-4 mr-2" />
+            Upcoming
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Route Efficiency</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span>Time Saved</span>
+                <span className="text-green-600 flex items-center">
+                  <TrendingDown className="h-4 w-4 mr-1" />
+                  45 min
+                </span>
+              </div>
+              <Progress value={75} />
+              <p className="text-sm text-muted-foreground">75% more efficient than standard routes</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Delivery Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>12 Completed</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                <span>3 Pending</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters and Export */}
