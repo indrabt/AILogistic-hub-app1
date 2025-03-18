@@ -231,7 +231,7 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.users = new Map();
-    this.currentId = 5; // Start with ID 5 to account for our predefined users
+    this.currentId = 6; // Start with ID 6 to account for our 5 predefined users
     
     // Initialize with predefined users for testing
     this.users.set(1, {
@@ -294,6 +294,22 @@ export class MemStorage implements IStorage {
       preferences: {
         theme: "light",
         dashboardView: "logistics",
+        notifications: true
+      }
+    });
+    
+    this.users.set(5, {
+      id: 5,
+      username: "sales1",
+      password: "password",
+      role: "sales" as UserRole,
+      name: "Emily Sales",
+      email: "sales@example.com",
+      permissions: ["view_customers", "manage_quotes", "view_reports"],
+      lastLogin: new Date().toISOString(),
+      preferences: {
+        theme: "light",
+        dashboardView: "customers",
         notifications: true
       }
     });
@@ -1350,8 +1366,12 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentId++;
+    // Ensure role is properly typed as UserRole
+    const typedRole = insertUser.role as UserRole;
+    
     const user: User = {
       ...insertUser,
+      role: typedRole,
       id,
       permissions: [],
       lastLogin: new Date().toISOString(),

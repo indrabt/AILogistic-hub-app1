@@ -19,4 +19,5 @@ export function getDefaultRoute(role: UserRole): string {
   return routes[role] || "/dashboard";
 }
 
-export type UserRole = "warehouse_staff" | "logistics_manager" | "driver" | "sales" | "business_owner" | "warehouse_operator" | "manufacturer" | "courier" | "government_official";
+// Ensure this aligns with the UserRole in shared/schema.ts
+export type UserRole = "warehouse_staff" | "logistics_manager" | "driver" | "sales" | "business_owner";
