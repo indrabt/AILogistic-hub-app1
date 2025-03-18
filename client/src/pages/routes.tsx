@@ -228,8 +228,8 @@ export default function Routes() {
               <tbody>
                 <tr className="border-b border-gray-200 hover:bg-gray-50">
                   <td className="p-4 text-sm font-medium">RT-8294</td>
-                  <td className="p-4 text-sm">Chicago, IL</td>
-                  <td className="p-4 text-sm">Detroit, MI</td>
+                  <td className="p-4 text-sm">Penrith, NSW</td>
+                  <td className="p-4 text-sm">Sydney CBD, NSW</td>
                   <td className="p-4">
                     <div className="flex items-center">
                       <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
@@ -243,8 +243,8 @@ export default function Routes() {
                 </tr>
                 <tr className="border-b border-gray-200 hover:bg-gray-50">
                   <td className="p-4 text-sm font-medium">RT-7512</td>
-                  <td className="p-4 text-sm">Dallas, TX</td>
-                  <td className="p-4 text-sm">Houston, TX</td>
+                  <td className="p-4 text-sm">Liverpool, NSW</td>
+                  <td className="p-4 text-sm">Parramatta, NSW</td>
                   <td className="p-4">
                     <div className="flex items-center">
                       <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
@@ -258,8 +258,8 @@ export default function Routes() {
                 </tr>
                 <tr className="border-b border-gray-200 hover:bg-gray-50">
                   <td className="p-4 text-sm font-medium">RT-6351</td>
-                  <td className="p-4 text-sm">Los Angeles, CA</td>
-                  <td className="p-4 text-sm">San Francisco, CA</td>
+                  <td className="p-4 text-sm">Sydney, NSW</td>
+                  <td className="p-4 text-sm">Melbourne, VIC</td>
                   <td className="p-4">
                     <div className="flex items-center">
                       <div className="w-2 h-2 rounded-full bg-orange-500 mr-2"></div>
@@ -273,8 +273,8 @@ export default function Routes() {
                 </tr>
                 <tr className="border-b border-gray-200 hover:bg-gray-50">
                   <td className="p-4 text-sm font-medium">RT-5437</td>
-                  <td className="p-4 text-sm">New York, NY</td>
-                  <td className="p-4 text-sm">Boston, MA</td>
+                  <td className="p-4 text-sm">Parramatta, NSW</td>
+                  <td className="p-4 text-sm">Newcastle, NSW</td>
                   <td className="p-4">
                     <div className="flex items-center">
                       <div className="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>

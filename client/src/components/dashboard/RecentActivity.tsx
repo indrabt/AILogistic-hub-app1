@@ -55,7 +55,7 @@ const RecentActivity = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-sm font-medium">Shipment #A4589 delivered</p>
-                  <p className="text-xs text-gray-500">Package delivered to 1234 Main St, New York</p>
+                  <p className="text-xs text-gray-500">Package delivered to 123 George St, Sydney CBD</p>
                 </div>
                 <span className="text-xs text-gray-500">2 hours ago</span>
               </div>
@@ -81,7 +81,7 @@ const RecentActivity = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-sm font-medium">New shipment created</p>
-                  <p className="text-xs text-gray-500">Shipment #B7813 created from LA to Miami</p>
+                  <p className="text-xs text-gray-500">Shipment #B7813 created from Sydney to Melbourne</p>
                 </div>
                 <span className="text-xs text-gray-500">6 hours ago</span>
               </div>
