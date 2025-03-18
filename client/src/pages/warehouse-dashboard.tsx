@@ -10,10 +10,19 @@ import {
   CheckCircle2, 
   Clock,
   Search,
-  RefreshCw
+  RefreshCw,
+  CloudRain,
+  Plane,
+  Waves,
+  PlaneTakeoff,
+  Car,
+  Warehouse as WarehouseIcon,
+  ShieldAlert,
+  PanelTop,
+  Wind
 } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,14 +41,27 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getQueryFn } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
-import { InventoryAlert, Shipment } from "@shared/types";
+import { InventoryAlert, Shipment, WeatherAlert, WeatherEvent } from "@shared/types";
 
 export default function WarehouseDashboard() {
   const [user, setUser] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [_, setLocation] = useLocation();
+  const [selectedTransportMode, setSelectedTransportMode] = useState<string>("truck");
 
   useEffect(() => {
     // Check if user is logged in
@@ -74,6 +96,16 @@ export default function WarehouseDashboard() {
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
+  const { data: weatherAlerts = [] } = useQuery<WeatherAlert[]>({
+    queryKey: ["/api/weather/alerts"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+  });
+
+  const { data: weatherEvents = [] } = useQuery<WeatherEvent[]>({
+    queryKey: ["/api/weather/events"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+  });
+
   // Filter incoming shipments (for demonstration purposes)
   const incomingShipments = (shipments as Shipment[]).filter(s => s.status === "on-schedule").slice(0, 4);
   
@@ -85,6 +117,11 @@ export default function WarehouseDashboard() {
     alert.product.toLowerCase().includes(searchQuery.toLowerCase()) ||
     alert.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  
+  // Critical weather alerts for predictive supply chain resilience
+  const criticalWeatherAlerts = (weatherAlerts as WeatherAlert[])
+    .filter(alert => alert.severity === "severe")
+    .slice(0, 3);
   
   // Handle marking an item as picked
   const handleMarkAsPicked = (shipmentId: string) => {
