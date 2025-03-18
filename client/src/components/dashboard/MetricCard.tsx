@@ -1,50 +1,54 @@
-import { ReactNode } from "react";
-import { ArrowUp, ArrowDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface MetricCardProps {
   title: string;
   value: string;
-  icon: ReactNode;
-  change: {
+  icon: React.ReactNode;
+  change?: {
     value: string;
     trend: "up" | "down";
   };
-  iconBgColor: string;
-  iconColor: string;
+  iconBgColor?: string;
+  iconColor?: string;
 }
 
-const MetricCard = ({
+export default function MetricCard({
   title,
   value,
   icon,
   change,
-  iconBgColor,
-  iconColor,
-}: MetricCardProps) => {
-  const isPositiveTrend = change.trend === "up";
-  const colorClass = isPositiveTrend ? "text-green-500" : "text-red-500";
-
+  iconBgColor = "bg-primary/20",
+  iconColor = "text-primary",
+}: MetricCardProps) {
   return (
-    <div className="bg-white rounded-lg shadow p-6 flex items-center">
-      <div
-        className={cn(
-          "rounded-full h-12 w-12 flex items-center justify-center mr-4",
-          iconBgColor
-        )}
-      >
-        <span className={iconColor}>{icon}</span>
-      </div>
-      <div>
-        <p className="text-sm text-gray-500">{title}</p>
-        <p className="text-2xl font-bold">{value}</p>
-        <div className={cn("flex items-center text-xs", colorClass)}>
-          {isPositiveTrend ? <ArrowUp size={12} className="mr-1" /> : <ArrowDown size={12} className="mr-1" />}
-          <span>{change.value}</span>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <div className={`rounded-full p-2 ${iconBgColor} ${iconColor}`}>
+          {icon}
         </div>
-      </div>
-    </div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        {change && (
+          <p className="text-xs text-muted-foreground flex items-center mt-1">
+            {change.trend === "up" ? (
+              <TrendingUp className="mr-1 h-3 w-3 text-green-500" />
+            ) : (
+              <TrendingDown className="mr-1 h-3 w-3 text-red-500" />
+            )}
+            <span
+              className={
+                change.trend === "up" ? "text-green-500" : "text-red-500"
+              }
+            >
+              {change.value}
+            </span>
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
-};
-
-export default MetricCard;
+}

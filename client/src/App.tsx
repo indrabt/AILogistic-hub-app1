@@ -24,6 +24,7 @@ import WesternSydneyUsers from "@/pages/western-sydney-users";
 import Login from "@/pages/login";
 import DriverDashboard from "@/pages/driver-dashboard";
 import WarehouseDashboard from "@/pages/warehouse-dashboard";
+import RealTimeDashboard from "@/pages/real-time-dashboard";
 
 function Router() {
   const [location] = useLocation();
@@ -62,6 +63,7 @@ function Router() {
           <Route path="/western-sydney-users" component={WesternSydneyUsers} />
           <Route path="/driver-dashboard" component={DriverDashboard} />
           <Route path="/warehouse-dashboard" component={WarehouseDashboard} />
+          <Route path="/real-time-dashboard" component={RealTimeDashboard} />
           <Route path="/reports" component={Reports} />
           <Route path="/settings" component={Settings} />
           <Route component={NotFound} />

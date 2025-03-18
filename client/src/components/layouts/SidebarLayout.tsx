@@ -79,6 +79,7 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
   ],
   logistics_manager: [
     { icon: <LayoutDashboard size={20} />, href: "/dashboard", label: "Overview", id: "logistics-dashboard" },
+    { icon: <Bell size={20} />, href: "/real-time-dashboard", label: "Real-Time Dashboard", id: "logistics-real-time" },
     { icon: <Route size={20} />, href: "/routes", label: "Route Optimization", id: "logistics-routes" },
     { icon: <Navigation size={20} />, href: "/hyper-local-routing", label: "Hyper-Local Routing", id: "logistics-hyper-local" },
     { icon: <Warehouse size={20} />, href: "/supply-chain", label: "Supply Chain", id: "logistics-supply-chain" },
