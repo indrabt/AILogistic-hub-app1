@@ -10,7 +10,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { UserSettings } from "@shared/types";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Save, User, Bell, LayoutDashboard, Palette, Link, Shield, Clock, Database, Cloud } from "lucide-react";
+import { Loader2, Save, User, Bell, LayoutDashboard, Palette, Link, Shield, Clock, Database, Cloud, BarChart3 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -513,7 +513,7 @@ export default function Settings() {
                 <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                   <div className="flex items-center">
                     <div className="w-10 h-10 rounded bg-purple-100 flex items-center justify-center mr-4">
-                      <BarChart3 className="h-5 w-5 text-purple-600" />
+                      <LayoutDashboard className="h-5 w-5 text-purple-600" />
                     </div>
                     <div>
                       <h4 className="font-medium">Analytics Platform</h4>
