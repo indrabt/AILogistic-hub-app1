@@ -22,19 +22,20 @@ export const routePermissions: Record<string, UserRole[]> = {
   "/dashboard": ["logistics_manager"],
   "/warehouse-dashboard": ["warehouse_staff"],
   "/driver-dashboard": ["driver"],
-  "/business-dashboard": ["business_owner", "sales"],
+  "/business-dashboard": ["business_owner"],
+  "/business-metrics": ["business_owner"], // New page for business owner only
   "/routes": ["logistics_manager", "driver"],
   "/hyper-local-routing": ["logistics_manager", "driver"],
   "/supply-chain": ["warehouse_staff", "logistics_manager"],
-  "/demand-forecasting": ["logistics_manager", "sales", "business_owner"],
+  "/demand-forecasting": ["logistics_manager", "business_owner"],
   "/weather-impact": ["warehouse_staff", "logistics_manager", "driver"],
   "/ai-analytics": ["logistics_manager", "business_owner"],
   "/supply-chain-resilience": ["logistics_manager", "business_owner"],
   "/sustainability": ["logistics_manager", "business_owner"],
   "/cybersecurity": ["logistics_manager", "business_owner"],
   "/multi-modal-logistics": ["logistics_manager"],
-  "/western-sydney-users": ["sales", "business_owner"],
-  "/reports": ["logistics_manager", "sales", "business_owner"],
+  "/western-sydney-users": ["sales"], // Only sales can access this page now
+  "/reports": ["logistics_manager", "business_owner"],
   "/settings": ["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner"],
   "/login": ["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner"]
 };

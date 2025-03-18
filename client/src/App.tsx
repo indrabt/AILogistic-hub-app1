@@ -19,6 +19,7 @@ import Sustainability from "@/pages/sustainability";
 import Cybersecurity from "@/pages/cybersecurity";
 import MultiModalLogistics from "@/pages/multi-modal-logistics";
 import BusinessDashboard from "@/pages/business-dashboard";
+import BusinessMetrics from "@/pages/business-metrics"; // New business metrics page
 import WesternSydneyUsers from "@/pages/western-sydney-users";
 import Login from "@/pages/login";
 import DriverDashboard from "@/pages/driver-dashboard";
@@ -47,6 +48,7 @@ function Router() {
         <Route path="/cybersecurity" component={Cybersecurity} />
         <Route path="/multi-modal-logistics" component={MultiModalLogistics} />
         <Route path="/business-dashboard" component={BusinessDashboard} />
+        <Route path="/business-metrics" component={BusinessMetrics} />
         <Route path="/western-sydney-users" component={WesternSydneyUsers} />
         <Route path="/driver-dashboard" component={DriverDashboard} />
         <Route path="/warehouse-dashboard" component={WarehouseDashboard} />

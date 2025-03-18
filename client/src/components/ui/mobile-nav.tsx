@@ -13,7 +13,8 @@ import {
   Truck,
   TrendingUp,
   FileText,
-  Calendar
+  Calendar,
+  BarChart
 } from "lucide-react";
 import { UserRole } from "@/utils/auth";
 

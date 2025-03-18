@@ -106,13 +106,13 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
   ],
   business_owner: [
     { icon: <LayoutDashboard size={20} />, href: "/business-dashboard", label: "Executive Dashboard", id: "owner-dashboard" },
+    { icon: <BarChart size={20} />, href: "/business-metrics", label: "Business Metrics", id: "owner-metrics" },
     { icon: <BrainCircuit size={20} />, href: "/ai-analytics", label: "AI Analytics", id: "owner-ai" },
     { icon: <Shield size={20} />, href: "/supply-chain-resilience", label: "Resilience Planning", id: "owner-resilience" },
     { icon: <Leaf size={20} />, href: "/sustainability", label: "Sustainability", id: "owner-sustainability" },
     { icon: <ShieldAlert size={20} />, href: "/cybersecurity", label: "Cybersecurity", id: "owner-security" },
     { icon: <TrendingUp size={20} />, href: "/demand-forecasting", label: "Market Forecasting", id: "owner-forecasting" },
     { icon: <FileText size={20} />, href: "/reports", label: "Reports & Analytics", id: "owner-reports" },
-    { icon: <Users size={20} />, href: "/western-sydney-users", label: "Western Sydney Market", id: "owner-market" },
   ]
 };
 
