@@ -13,13 +13,35 @@
         window.location.href = "/login";
       } else {
         console.log("User logged in, proceeding to Order Management");
+        console.log("Current user:", storedUser);
         
-        // Set up a redirect to use hash-based URL to avoid router issues
+        // Try multiple different navigation approaches to ensure at least one works
+        
+        // Approach 1: Navigate directly to our standalone component
+        console.log("Attempting navigation to /orders-direct");
+        
+        // Set up a redirect using our new dedicated route
         setTimeout(() => {
-          window.location.href = "/#/order-management";
-        }, 500);
+          console.log("Navigating to new direct route...");
+          window.location.replace("/orders-direct");
+        }, 1000);
       }
     }
+    
+    // Add an additional direct navigation that doesn't depend on onload
+    document.addEventListener("DOMContentLoaded", function() {
+      console.log("DOM loaded for direct order page");
+      
+      // Add a click handler to the button with more aggressive navigation
+      const directButton = document.getElementById('directButton');
+      if (directButton) {
+        directButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          console.log("Direct navigation button clicked");
+          window.location.replace("/orders-direct");
+        });
+      }
+    });
   </script>
   <style>
     body {
@@ -104,9 +126,14 @@
       <p>Loading Order Management system...</p>
     </div>
     <p>You will be redirected automatically in a moment.</p>
-    <a href="/#/order-management" class="button">Access Order Management</a>
+    <a href="/orders-direct" class="button" id="directButton">Access Order Management</a>
     <div class="manual-link">
-      <p>If you're not redirected, <a href="/#/order-management">click here</a> or return to <a href="/">dashboard</a>.</p>
+      <p>If you're not redirected, try one of these options:</p>
+      <div style="margin-top: 10px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <a href="/orders-direct" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Direct Path</a>
+        <a href="/" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Dashboard</a>
+        <a href="/orders-direct-test" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Test Page</a>
+      </div>
     </div>
   </div>
 </body>

@@ -39,6 +39,7 @@ import InventoryTracker from "@/pages/inventory-tracker";
 import OrderManagement from "@/pages/order-management";
 import OrderManagementRouter from "@/components/OrderManagementRouter";
 import OrdersDirectTest from "@/pages/orders-direct-test";
+import OrdersDirect from "@/pages/orders-direct";
 
 function Router() {
   const [location] = useLocation();
@@ -64,7 +65,7 @@ function Router() {
         <Switch>
           {/* More specific routes first */}
           <Route path="/login" component={Login} />
-          <Route path="/orders-direct" component={OrderManagementRouter} />
+          <Route path="/orders-direct" component={OrdersDirect} />
           <Route path="/orders-direct-test" component={OrdersDirectTest} />
           <Route path="/dashboard" component={() => {
             console.log('Dashboard component rendered for logistics manager');
