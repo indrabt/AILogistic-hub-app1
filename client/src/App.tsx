@@ -37,6 +37,7 @@ import LocalSourcing from "@/pages/local-sourcing";
 import IntegrationKit from "@/pages/integration-kit";
 import InventoryTracker from "@/pages/inventory-tracker";
 import OrderManagement from "@/pages/order-management";
+import OrderManagementRouter from "@/components/OrderManagementRouter";
 
 function Router() {
   const [location] = useLocation();
@@ -62,6 +63,7 @@ function Router() {
         <Switch>
           {/* More specific routes first */}
           <Route path="/login" component={Login} />
+          <Route path="/orders-direct" component={OrderManagementRouter} />
           <Route path="/dashboard" component={() => {
             console.log('Dashboard component rendered for logistics manager');
             return <Dashboard />;
