@@ -76,6 +76,7 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
     { icon: <LayoutDashboard size={20} />, href: "/warehouse-dashboard", label: "Dashboard", id: "warehouse-dashboard" },
     { icon: <Package size={20} />, href: "/supply-chain", label: "Inventory", id: "warehouse-inventory" },
     { icon: <ClipboardCheck size={20} />, href: "/supply-chain?view=shipments", label: "Shipments", id: "warehouse-shipments" },
+    { icon: <Package size={20} />, href: "/order-management", label: "Order Management", id: "warehouse-orders" },
     { icon: <Cloud size={20} />, href: "/weather-impact", label: "Weather Alerts", id: "warehouse-weather" },
   ],
   logistics_manager: [
@@ -86,6 +87,7 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
     { icon: <Warehouse size={20} />, href: "/supply-chain", label: "Supply Chain", id: "logistics-supply-chain" },
     { icon: <TrendingUp size={20} />, href: "/demand-forecasting", label: "Demand Forecasting", id: "logistics-demand" },
     { icon: <Cloud size={20} />, href: "/weather-impact", label: "Weather Impact", id: "logistics-weather" },
+    { icon: <ClipboardCheck size={20} />, href: "/order-management", label: "Order Management", id: "logistics-orders" },
     { icon: <BrainCircuit size={20} />, href: "/ai-analytics", label: "AI Analytics", id: "logistics-ai" },
     { icon: <Shield size={20} />, href: "/supply-chain-resilience", label: "Supply Chain Resilience", id: "logistics-resilience" },
     { icon: <ArrowUpDown size={20} />, href: "/multi-modal-logistics", label: "Multi-Modal Logistics", id: "logistics-multi-modal" },

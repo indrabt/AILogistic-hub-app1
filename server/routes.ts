@@ -144,6 +144,315 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Order Management endpoints
+  app.get("/api/orders", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const orders = await storage.getOrders(status);
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  app.get("/api/orders/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const order = await storage.getOrderById(id);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch order" });
+    }
+  });
+
+  app.post("/api/orders", async (req, res) => {
+    try {
+      const orderSchema = z.object({
+        orderNumber: z.string(),
+        customerName: z.string(),
+        customerType: z.enum(["retail", "wholesale", "distributor", "internal"]),
+        customerLocation: z.string(),
+        createdAt: z.string(),
+        status: z.enum(["pending", "processing", "shipped", "delivered", "cancelled", "returned"]),
+        items: z.array(z.any()).optional().default([]),
+        totalValue: z.number(),
+        priority: z.enum(["standard", "express", "urgent"]),
+        notes: z.string().optional(),
+        estimatedDeliveryDate: z.string(),
+        actualDeliveryDate: z.string().optional(),
+        assignedShipmentId: z.string().optional(),
+        paymentStatus: z.enum(["pending", "paid", "partially_paid", "refunded"]),
+        invoiceNumber: z.string().optional()
+      });
+
+      const validatedData = orderSchema.parse(req.body);
+      const newOrder = await storage.createOrder(validatedData);
+      res.status(201).json(newOrder);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid order data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create order" });
+    }
+  });
+
+  app.patch("/api/orders/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const orderPartialSchema = z.object({
+        orderNumber: z.string().optional(),
+        customerName: z.string().optional(),
+        customerType: z.enum(["retail", "wholesale", "distributor", "internal"]).optional(),
+        customerLocation: z.string().optional(),
+        status: z.enum(["pending", "processing", "shipped", "delivered", "cancelled", "returned"]).optional(),
+        totalValue: z.number().optional(),
+        priority: z.enum(["standard", "express", "urgent"]).optional(),
+        notes: z.string().optional(),
+        estimatedDeliveryDate: z.string().optional(),
+        actualDeliveryDate: z.string().optional(),
+        assignedShipmentId: z.string().optional(),
+        paymentStatus: z.enum(["pending", "paid", "partially_paid", "refunded"]).optional(),
+        invoiceNumber: z.string().optional()
+      });
+
+      const validatedData = orderPartialSchema.parse(req.body);
+      const updatedOrder = await storage.updateOrder(id, validatedData);
+      
+      if (!updatedOrder) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      res.json(updatedOrder);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid order data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update order" });
+    }
+  });
+
+  app.delete("/api/orders/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteOrder(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete order" });
+    }
+  });
+
+  app.get("/api/orders/:orderId/items", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const items = await storage.getOrderItems(orderId);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch order items" });
+    }
+  });
+
+  app.post("/api/order-items", async (req, res) => {
+    try {
+      const itemSchema = z.object({
+        productId: z.number(),
+        productName: z.string(),
+        productSKU: z.string(),
+        quantity: z.number(),
+        unitPrice: z.number(),
+        totalPrice: z.number(),
+        warehouseLocation: z.string().optional(),
+        status: z.enum(["pending", "allocated", "picked", "packed", "shipped"])
+      });
+
+      const validatedData = itemSchema.parse(req.body);
+      const newItem = await storage.createOrderItem(validatedData);
+      res.status(201).json(newItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid order item data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create order item" });
+    }
+  });
+
+  app.patch("/api/order-items/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const itemPartialSchema = z.object({
+        productId: z.number().optional(),
+        productName: z.string().optional(),
+        productSKU: z.string().optional(),
+        quantity: z.number().optional(),
+        unitPrice: z.number().optional(),
+        totalPrice: z.number().optional(),
+        warehouseLocation: z.string().optional(),
+        status: z.enum(["pending", "allocated", "picked", "packed", "shipped"]).optional()
+      });
+
+      const validatedData = itemPartialSchema.parse(req.body);
+      const updatedItem = await storage.updateOrderItem(id, validatedData);
+      
+      if (!updatedItem) {
+        return res.status(404).json({ message: "Order item not found" });
+      }
+      
+      res.json(updatedItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid order item data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update order item" });
+    }
+  });
+
+  app.get("/api/return-requests", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const returnRequests = await storage.getReturnRequests(status);
+      res.json(returnRequests);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch return requests" });
+    }
+  });
+
+  app.get("/api/return-requests/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const returnRequest = await storage.getReturnRequestById(id);
+      
+      if (!returnRequest) {
+        return res.status(404).json({ message: "Return request not found" });
+      }
+      
+      res.json(returnRequest);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch return request" });
+    }
+  });
+
+  app.post("/api/return-requests", async (req, res) => {
+    try {
+      const returnRequestSchema = z.object({
+        orderId: z.number(),
+        orderNumber: z.string(),
+        customerName: z.string(),
+        requestDate: z.string(),
+        status: z.enum(["requested", "approved", "received", "inspected", "processed", "rejected"]),
+        reason: z.enum(["damaged", "incorrect_item", "unwanted", "defective", "other"]),
+        items: z.array(z.any()).optional().default([]),
+        returnMethod: z.enum(["pickup", "drop_off", "mail"]),
+        returnShippingLabel: z.string().optional(),
+        resolutionType: z.enum(["refund", "exchange", "store_credit"]).optional(),
+        notes: z.string().optional()
+      });
+
+      const validatedData = returnRequestSchema.parse(req.body);
+      const newReturnRequest = await storage.createReturnRequest(validatedData);
+      res.status(201).json(newReturnRequest);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid return request data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create return request" });
+    }
+  });
+
+  app.patch("/api/return-requests/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const returnRequestPartialSchema = z.object({
+        status: z.enum(["requested", "approved", "received", "inspected", "processed", "rejected"]).optional(),
+        returnShippingLabel: z.string().optional(),
+        resolutionType: z.enum(["refund", "exchange", "store_credit"]).optional(),
+        notes: z.string().optional()
+      });
+
+      const validatedData = returnRequestPartialSchema.parse(req.body);
+      const updatedReturnRequest = await storage.updateReturnRequest(id, validatedData);
+      
+      if (!updatedReturnRequest) {
+        return res.status(404).json({ message: "Return request not found" });
+      }
+      
+      res.json(updatedReturnRequest);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid return request data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update return request" });
+    }
+  });
+
+  app.get("/api/return-requests/:returnId/items", async (req, res) => {
+    try {
+      const returnId = parseInt(req.params.returnId);
+      const items = await storage.getReturnItems(returnId);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch return items" });
+    }
+  });
+
+  app.post("/api/return-items", async (req, res) => {
+    try {
+      const returnItemSchema = z.object({
+        orderItemId: z.number(),
+        productName: z.string(),
+        quantity: z.number(),
+        reason: z.string(),
+        condition: z.enum(["unopened", "opened", "damaged", "defective"]),
+        status: z.enum(["pending", "approved", "received", "rejected"]),
+        resolution: z.string().optional()
+      });
+
+      const validatedData = returnItemSchema.parse(req.body);
+      const newReturnItem = await storage.createReturnItem(validatedData);
+      res.status(201).json(newReturnItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid return item data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create return item" });
+    }
+  });
+
+  app.patch("/api/return-items/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const returnItemPartialSchema = z.object({
+        quantity: z.number().optional(),
+        reason: z.string().optional(),
+        condition: z.enum(["unopened", "opened", "damaged", "defective"]).optional(),
+        status: z.enum(["pending", "approved", "received", "rejected"]).optional(),
+        resolution: z.string().optional()
+      });
+
+      const validatedData = returnItemPartialSchema.parse(req.body);
+      const updatedReturnItem = await storage.updateReturnItem(id, validatedData);
+      
+      if (!updatedReturnItem) {
+        return res.status(404).json({ message: "Return item not found" });
+      }
+      
+      res.json(updatedReturnItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid return item data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update return item" });
+    }
+  });
+
   // Weather impact endpoints
   app.get("/api/weather/events", async (req, res) => {
     try {
