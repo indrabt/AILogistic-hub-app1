@@ -25,13 +25,17 @@ import BusinessMetrics from "@/pages/business-metrics"; // New business metrics 
 import WesternSydneyUsers from "@/pages/western-sydney-users";
 import Login from "@/pages/login";
 import DriverDashboard from "@/pages/driver-dashboard";
+import DriverWeather from "@/pages/driver-weather";
+import DriverSettings from "@/pages/driver-settings";
+import DriverRoutes from "@/pages/driver-routes";
+import DriverNavigation from "@/pages/driver-navigation";
+import DriverSchedule from "@/pages/driver-schedule";
 import WarehouseDashboard from "@/pages/warehouse-dashboard";
 import RealTimeDashboard from "@/pages/real-time-dashboard";
 import RetailDashboard from "@/pages/retail-dashboard";
 import LocalSourcing from "@/pages/local-sourcing";
 import IntegrationKit from "@/pages/integration-kit";
 import InventoryTracker from "@/pages/inventory-tracker";
-import DriverSchedule from "@/pages/driver-schedule";
 
 function Router() {
   const [location] = useLocation();
@@ -74,36 +78,12 @@ function Router() {
           <Route path="/business-dashboard" component={BusinessDashboard} />
           <Route path="/business-metrics" component={BusinessMetrics} />
           <Route path="/western-sydney-users" component={WesternSydneyUsers} />
-          <Route path="/driver-dashboard" component={() => (
-            <DriverSidebarLayout>
-              <DriverDashboard />
-            </DriverSidebarLayout>
-          )} />
-          <Route path="/driver-schedule" component={() => (
-            <DriverSidebarLayout>
-              <DriverSchedule />
-            </DriverSidebarLayout>
-          )} />
-          <Route path="/driver-routes" component={() => (
-            <DriverSidebarLayout>
-              <DriverDashboard />
-            </DriverSidebarLayout>
-          )} />
-          <Route path="/driver-navigation" component={() => (
-            <DriverSidebarLayout>
-              <DriverDashboard />
-            </DriverSidebarLayout>
-          )} />
-          <Route path="/driver-weather" component={() => (
-            <DriverSidebarLayout>
-              <WeatherImpact />
-            </DriverSidebarLayout>
-          )} />
-          <Route path="/driver-settings" component={() => (
-            <DriverSidebarLayout>
-              <Settings />
-            </DriverSidebarLayout>
-          )} />
+          <Route path="/driver-dashboard" component={DriverDashboard} />
+          <Route path="/driver-schedule" component={DriverSchedule} />
+          <Route path="/driver-routes" component={DriverRoutes} />
+          <Route path="/driver-navigation" component={DriverNavigation} />
+          <Route path="/driver-weather" component={DriverWeather} />
+          <Route path="/driver-settings" component={DriverSettings} />
           <Route path="/warehouse-dashboard" component={WarehouseDashboard} />
           <Route path="/real-time-dashboard" component={RealTimeDashboard} />
           <Route path="/retail-dashboard" component={RetailDashboard} />
