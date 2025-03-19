@@ -65,7 +65,14 @@ function Router() {
         <Switch>
           {/* More specific routes first */}
           <Route path="/login" component={Login} />
-          <Route path="/orders-direct" component={OrdersDirect} />
+          <Route path="/orders-direct" component={() => {
+            console.log('Orders Direct Access component being rendered directly');
+            console.log('Current path:', window.location.pathname);
+            console.log('Rendering timestamp:', new Date().toISOString());
+            // Insert a flag in session storage to track successful loads
+            sessionStorage.setItem("ordersDirectAccessed", "true");
+            return <OrdersDirect />;
+          }} />
           <Route path="/orders-direct-test" component={OrdersDirectTest} />
           <Route path="/dashboard" component={() => {
             console.log('Dashboard component rendered for logistics manager');
