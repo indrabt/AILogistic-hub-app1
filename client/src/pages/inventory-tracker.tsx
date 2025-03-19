@@ -251,6 +251,15 @@ export default function InventoryTracker() {
     }
   };
   
+  const deleteItem = (id: number) => {
+    setInventory(inventory.filter(item => item.id !== id));
+    
+    toast({
+      title: "Item Deleted",
+      description: "The inventory item has been removed.",
+    });
+  };
+  
   return (
     <div className="container mx-auto py-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
@@ -782,9 +791,43 @@ export default function InventoryTracker() {
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                             <ShoppingCart className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm" className="h-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm" className="h-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-[160px]">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => toast({ title: "Details", description: `Viewing details for ${item.name}` })}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => toast({ title: "Edit", description: `Editing ${item.name}` })}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Edit Item
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={() => toast({ 
+                                  title: "Order", 
+                                  description: `Added ${item.name} to order list` 
+                                })}
+                                className="text-blue-600"
+                              >
+                                <ShoppingCart className="h-4 w-4 mr-2" />
+                                Add to Order
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={() => deleteItem(item.id)}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                     ))}
