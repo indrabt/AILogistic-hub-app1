@@ -53,6 +53,15 @@ export default function OrdersDirectAccess() {
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(false);
   const [showReturnDialog, setShowReturnDialog] = useState<boolean>(false);
   
+  // Form state for new order
+  const [newOrderData, setNewOrderData] = useState({
+    customerName: "",
+    customerType: "retail" as "retail" | "wholesale" | "distributor" | "internal",
+    customerLocation: "",
+    priority: "standard" as "standard" | "express" | "urgent",
+    notes: ""
+  });
+  
   // Initialize hooks
   const { toast } = useToast();
   const queryClient = useQueryClient();
