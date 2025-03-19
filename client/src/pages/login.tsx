@@ -45,7 +45,7 @@ export default function Login() {
   const form = useForm<LoginFormData>({
     resolver: zodResolver(
       loginUserSchema.extend({
-        role: z.enum(["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner"]),
+        role: z.enum(["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner", "retail_store_owner"]),
       })
     ),
     defaultValues: {
@@ -96,8 +96,10 @@ export default function Login() {
         setLocation("/dashboard");
       } else if (validatedRole === "sales") {
         setLocation("/western-sydney-users");
+      } else if (validatedRole === "retail_store_owner") {
+        setLocation("/retail-dashboard");
       } else {
-        setLocation("/business-dashboard");
+        setLocation("/dashboard");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -181,6 +183,7 @@ export default function Login() {
                         <SelectItem value="logistics_manager">Logistics Manager</SelectItem>
                         <SelectItem value="business_owner">Business Owner</SelectItem>
                         <SelectItem value="sales">Sales</SelectItem>
+                        <SelectItem value="retail_store_owner">Retail Store Owner</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
