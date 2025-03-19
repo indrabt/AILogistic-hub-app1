@@ -50,7 +50,18 @@ export function useWebSocket(
   // Function to create a new WebSocket connection
   const connect = useCallback(() => {
     try {
-      const websocketUrl = url.startsWith('ws') ? url : `ws://${window.location.host}/ws`;
+      // Determine the correct WebSocket URL
+      let websocketUrl;
+      if (url.startsWith('ws')) {
+        websocketUrl = url;
+      } else {
+        // Use the current host but ensure proper protocol (ws or wss)
+        const isSecure = window.location.protocol === 'https:';
+        const protocol = isSecure ? 'wss' : 'ws';
+        websocketUrl = `${protocol}://${window.location.host}/ws`;
+      }
+      
+      console.log('Connecting to WebSocket at:', websocketUrl);
       setStatus('connecting');
       
       const socket = new WebSocket(websocketUrl);

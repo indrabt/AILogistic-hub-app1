@@ -10,9 +10,18 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { log } from './vite';
 import { storage } from './storage';
 
+interface ClientData {
+  socket: WebSocket;
+  userId?: number;
+  username?: string;
+  role?: string;
+  authenticated: boolean;
+  connectedAt: Date;
+}
+
 export class WebSocketManager {
   private wsServer: WebSocketServer | null = null;
-  private clients: WebSocket[] = [];
+  private clients: ClientData[] = [];
   private updateInterval: NodeJS.Timeout | null = null;
 
   initialize(httpServer: HttpServer) {
@@ -29,11 +38,18 @@ export class WebSocketManager {
       this.wsServer.on('connection', (ws: WebSocket) => {
         log('WebSocket connection established', 'websocket');
         
+        // Create a new client data object
+        const clientData: ClientData = {
+          socket: ws,
+          authenticated: false,
+          connectedAt: new Date()
+        };
+        
         // Add to clients list
-        this.clients.push(ws);
+        this.clients.push(clientData);
         
         // Welcome message
-        this.sendMessage(ws, {
+        this.sendMessage(clientData, {
           type: 'SYSTEM_MESSAGE',
           message: 'Connected to Western Sydney AI Logistics Hub',
           timestamp: new Date().toISOString()
@@ -45,7 +61,34 @@ export class WebSocketManager {
             const data = JSON.parse(message.toString());
             log(`WebSocket message received: ${JSON.stringify(data)}`, 'websocket');
             
-            // Handle client messages here
+            // Handle authentication
+            if (data.type === 'AUTHENTICATE') {
+              log(`Authenticating user: ${data.username} with role: ${data.role}`, 'websocket');
+              
+              // Update client data with authentication info
+              clientData.userId = data.userId;
+              clientData.username = data.username;
+              clientData.role = data.role;
+              clientData.authenticated = true;
+              
+              // Send back confirmation
+              this.sendMessage(clientData, {
+                type: 'AUTHENTICATION_SUCCESS',
+                message: `Authenticated as ${data.username}`,
+                timestamp: new Date().toISOString()
+              });
+              
+              // Send current data to this specific client
+              this.sendInitialData(clientData);
+            }
+            
+            // Handle ping messages to keep connection alive
+            if (data.type === 'PING') {
+              this.sendMessage(clientData, {
+                type: 'PONG',
+                timestamp: new Date().toISOString()
+              });
+            }
           } catch (error) {
             log(`Error parsing WebSocket message: ${error}`, 'websocket');
           }
@@ -53,14 +96,14 @@ export class WebSocketManager {
         
         // Handle disconnection
         ws.on('close', () => {
-          this.clients = this.clients.filter(client => client !== ws);
+          this.clients = this.clients.filter(client => client.socket !== ws);
           log(`WebSocket connection closed. Active connections: ${this.clients.length}`, 'websocket');
         });
         
         // Handle errors
         ws.on('error', (error) => {
           log(`WebSocket error: ${error}`, 'websocket');
-          this.clients = this.clients.filter(client => client !== ws);
+          this.clients = this.clients.filter(client => client.socket !== ws);
         });
       });
       
@@ -84,6 +127,30 @@ export class WebSocketManager {
     }
   }
   
+  private async sendInitialData(ws: WebSocket) {
+    try {
+      // Get latest data
+      const dashboardMetrics = await storage.getDashboardMetrics();
+      const weatherAlerts = await storage.getWeatherAlerts();
+      const recentActivities = await storage.getRecentActivities();
+      
+      // Send initial data to this client
+      this.sendMessage(ws, {
+        type: 'DASHBOARD_UPDATE',
+        data: {
+          metrics: dashboardMetrics,
+          alerts: weatherAlerts,
+          activities: recentActivities,
+          timestamp: new Date().toISOString()
+        }
+      });
+      
+      log(`Sent initial data to new client`, 'websocket');
+    } catch (error) {
+      log(`Error sending initial data: ${error}`, 'websocket');
+    }
+  }
+  
   broadcast(data: any) {
     this.clients.forEach(client => {
       this.sendMessage(client, data);
@@ -97,9 +164,10 @@ export class WebSocketManager {
     }, 5000);
   }
   
-  private async broadcastUpdates() {
+  private async broadcastUpdates(specificClients?: WebSocket[]) {
     try {
-      if (this.clients.length === 0) {
+      // If no specific clients provided and no clients connected, return
+      if (!specificClients && this.clients.length === 0) {
         return; // No clients connected
       }
       
@@ -108,8 +176,7 @@ export class WebSocketManager {
       const weatherAlerts = await storage.getWeatherAlerts();
       const recentActivities = await storage.getRecentActivities();
       
-      // Broadcast updates
-      this.broadcast({
+      const updateData = {
         type: 'DASHBOARD_UPDATE',
         data: {
           metrics: dashboardMetrics,
@@ -117,9 +184,19 @@ export class WebSocketManager {
           activities: recentActivities,
           timestamp: new Date().toISOString()
         }
-      });
+      };
       
-      log(`Broadcast updates to ${this.clients.length} clients`, 'websocket');
+      // If specific clients provided, send only to them
+      if (specificClients && specificClients.length > 0) {
+        specificClients.forEach(client => {
+          this.sendMessage(client, updateData);
+        });
+        log(`Sent updates to ${specificClients.length} specific clients`, 'websocket');
+      } else {
+        // Otherwise broadcast to all clients
+        this.broadcast(updateData);
+        log(`Broadcast updates to ${this.clients.length} clients`, 'websocket');
+      }
     } catch (error) {
       log(`Error broadcasting updates: ${error}`, 'websocket');
     }
