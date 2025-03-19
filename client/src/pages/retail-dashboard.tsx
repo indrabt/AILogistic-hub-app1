@@ -897,7 +897,7 @@ export default function RetailDashboard() {
       
       {/* Features Section */}
       <div className="space-y-4">
-        <Tabs defaultValue="demand" onValueChange={setActiveFeature} className="space-y-4">
+        <Tabs defaultValue="sourcing" onValueChange={setActiveFeature} className="space-y-4">
           <TabsList className="grid grid-cols-4 lg:grid-cols-8 h-auto">
             <TabsTrigger value="demand" className="flex flex-col h-auto py-2 px-3">
               <CloudSun className="h-4 w-4 mb-1" />
