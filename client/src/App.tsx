@@ -28,6 +28,7 @@ import WarehouseDashboard from "@/pages/warehouse-dashboard";
 import RealTimeDashboard from "@/pages/real-time-dashboard";
 import RetailDashboard from "@/pages/retail-dashboard";
 import LocalSourcing from "@/pages/local-sourcing";
+import IntegrationKit from "@/pages/integration-kit";
 
 function Router() {
   const [location] = useLocation();
@@ -71,7 +72,7 @@ function Router() {
           <Route path="/inventory-tracker" component={RetailDashboard} />
           <Route path="/loyalty-program" component={RetailDashboard} />
           <Route path="/waste-management" component={RetailDashboard} />
-          <Route path="/integration-kit" component={RetailDashboard} />
+          <Route path="/integration-kit" component={IntegrationKit} />
           <Route path="/staff-training" component={RetailDashboard} />
           <Route path="/reports" component={Reports} />
           <Route path="/settings" component={Settings} />
