@@ -25,21 +25,30 @@ export const routePermissions: Record<string, UserRole[]> = {
   "/driver-dashboard": ["driver"],
   "/business-dashboard": ["business_owner"],
   "/business-metrics": ["business_owner"], // New page for business owner only
-  "/routes": ["logistics_manager", "driver"],
-  "/hyper-local-routing": ["logistics_manager", "driver"],
-  "/supply-chain": ["warehouse_staff", "logistics_manager"],
-  "/demand-forecasting": ["logistics_manager", "business_owner"],
-  "/weather-impact": ["warehouse_staff", "logistics_manager", "driver"],
-  "/real-time-dashboard": ["logistics_manager", "business_owner"],
-  "/ai-analytics": ["logistics_manager", "business_owner"],
-  "/supply-chain-resilience": ["logistics_manager", "business_owner"],
-  "/sustainability": ["logistics_manager", "business_owner"],
+  "/retail-dashboard": ["retail_store_owner"], // New dashboard for retail store owners
+  "/demand-prediction": ["retail_store_owner"], // Feature 1: Simplified Event and Weather Demand Prediction
+  "/local-sourcing": ["retail_store_owner"], // Feature 2: Low-Cost Local Sourcing Connector
+  "/pricing-assistant": ["retail_store_owner"], // Feature 3: Dynamic Pricing Assistant
+  "/inventory-tracker": ["retail_store_owner"], // Feature 4: Perishable Inventory Tracker
+  "/loyalty-program": ["retail_store_owner"], // Feature 5: One-Click Loyalty Program
+  "/waste-management": ["retail_store_owner"], // Feature 6: Waste Management Lite
+  "/integration-kit": ["retail_store_owner"], // Feature 7: Plug-and-Play Integration Kit
+  "/staff-training": ["retail_store_owner"], // Feature 8: Staff Training Tutorials
+  "/routes": ["logistics_manager", "driver", "retail_store_owner"],
+  "/hyper-local-routing": ["logistics_manager", "driver", "retail_store_owner"],
+  "/supply-chain": ["warehouse_staff", "logistics_manager", "retail_store_owner"],
+  "/demand-forecasting": ["logistics_manager", "business_owner", "retail_store_owner"],
+  "/weather-impact": ["warehouse_staff", "logistics_manager", "driver", "retail_store_owner"],
+  "/real-time-dashboard": ["logistics_manager", "business_owner", "retail_store_owner"],
+  "/ai-analytics": ["logistics_manager", "business_owner", "retail_store_owner"],
+  "/supply-chain-resilience": ["logistics_manager", "business_owner", "retail_store_owner"],
+  "/sustainability": ["logistics_manager", "business_owner", "retail_store_owner"],
   "/cybersecurity": ["logistics_manager", "business_owner"],
-  "/multi-modal-logistics": ["logistics_manager"],
+  "/multi-modal-logistics": ["logistics_manager", "retail_store_owner"],
   "/western-sydney-users": ["sales"], // Only sales can access this page now
-  "/reports": ["logistics_manager", "business_owner"],
-  "/settings": ["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner"],
-  "/login": ["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner"]
+  "/reports": ["logistics_manager", "business_owner", "retail_store_owner"],
+  "/settings": ["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner", "retail_store_owner"],
+  "/login": ["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner", "retail_store_owner"]
 };
 
 // Get user from session storage with role validation
@@ -58,6 +67,9 @@ export function determineRoleFromUsername(username: string, currentRole?: UserRo
   } 
   else if (username.toLowerCase().includes('driver')) {
     role = 'driver';
+  }
+  else if (username.toLowerCase().includes('store') || username.toLowerCase().includes('retail')) {
+    role = 'retail_store_owner';
   }
   else if (username.toLowerCase().includes('owner')) {
     role = 'business_owner';

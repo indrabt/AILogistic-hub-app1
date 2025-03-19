@@ -26,6 +26,7 @@ import Login from "@/pages/login";
 import DriverDashboard from "@/pages/driver-dashboard";
 import WarehouseDashboard from "@/pages/warehouse-dashboard";
 import RealTimeDashboard from "@/pages/real-time-dashboard";
+import RetailDashboard from "@/pages/retail-dashboard";
 
 function Router() {
   const [location] = useLocation();
