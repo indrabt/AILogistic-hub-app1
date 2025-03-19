@@ -21,7 +21,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 // Import the order management types
-import { Order, OrderItem, ReturnRequest, ReturnItem } from '@/types/order-types';
+import { Order, OrderItem, ReturnRequest, ReturnItem } from '../types/order-types';
 
 // Status badges for different order states
 const getStatusBadge = (status: string) => {
@@ -83,27 +83,30 @@ export default function OrdersDirectAccess() {
     queryKey: ['/api/orders'],
     retry: 3,
     staleTime: 30000,
-    onError: () => {
-      console.error("Failed to fetch orders");
+    onSuccess: (data: Order[]) => {
+      console.log("Successfully loaded orders:", data.length);
+    },
+    onError: (error: Error) => {
+      console.error("Failed to fetch orders:", error);
       toast({
         title: "Error",
         description: "Failed to load orders. Using cached data if available.",
         variant: "destructive",
       });
     }
-  });
+  } as any);
 
   const { data: orderItems = [] } = useQuery<OrderItem[]>({
     queryKey: ['/api/order-items', selectedOrderId],
     enabled: !!selectedOrderId,
     retry: 2,
     staleTime: 30000,
-  });
+  } as any);
 
   const { data: returnRequests = [] } = useQuery<ReturnRequest[]>({
     queryKey: ['/api/return-requests'],
     staleTime: 30000,
-  });
+  } as any);
 
   // Filter orders based on status and search text
   const filteredOrders = orders.filter((order: Order) => {
