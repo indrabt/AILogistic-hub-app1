@@ -248,6 +248,10 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                       )}
                       onClick={() => {
                         console.log("Direct Order Management navigation triggered");
+                        // Add tracking flag in session storage
+                        sessionStorage.setItem("usingDirectOrdersAccess", "true");
+                        sessionStorage.setItem("lastDirectOrdersAccess", new Date().toISOString());
+                        // Use direct navigation to avoid router issues
                         window.location.href = "/orders-direct";
                       }}
                     >

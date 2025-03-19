@@ -128,6 +128,11 @@ const MobileNav = ({ currentPath }: MobileNavProps) => {
                 )}
                 onClick={() => {
                   console.log("Direct mobile navigation to Order Management");
+                  // Add tracking for mobile navigation
+                  sessionStorage.setItem("usingDirectOrdersAccess", "true");
+                  sessionStorage.setItem("orderAccessMethod", "mobile-navigation");
+                  sessionStorage.setItem("lastDirectOrdersAccess", new Date().toISOString());
+                  // Direct navigation bypassing router
                   window.location.href = "/orders-direct";
                 }}
               >
@@ -188,6 +193,11 @@ const MobileNav = ({ currentPath }: MobileNavProps) => {
                     onClick={() => {
                       console.log("Direct expanded menu navigation to Order Management");
                       setExpanded(false);
+                      // Add tracking for expanded menu navigation
+                      sessionStorage.setItem("usingDirectOrdersAccess", "true");
+                      sessionStorage.setItem("orderAccessMethod", "mobile-expanded-menu");
+                      sessionStorage.setItem("lastDirectOrdersAccess", new Date().toISOString());
+                      // Direct navigation bypassing router
                       window.location.href = "/orders-direct";
                     }}
                   >

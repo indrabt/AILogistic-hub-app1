@@ -24,6 +24,18 @@ export default function DebugNav({ targetRoute = "/orders-direct" }: DebugNavPro
       // Log the current location for debugging
       console.log("Current location before navigation:", window.location.href);
       
+      // Add diagnostic data to session storage
+      sessionStorage.setItem("debugNavTriggered", "true");
+      sessionStorage.setItem("debugNavTimestamp", new Date().toISOString());
+      sessionStorage.setItem("debugNavTarget", targetRoute);
+      sessionStorage.setItem("debugNavOrigin", window.location.href);
+      
+      // For orders-direct route, add specific tracking
+      if (targetRoute === "/orders-direct") {
+        sessionStorage.setItem("usingDirectOrdersAccess", "true");
+        sessionStorage.setItem("orderAccessMethod", "debug-navigation");
+      }
+      
       // The most direct way to navigate, bypassing any router
       window.location.href = targetRoute;
       
@@ -31,6 +43,7 @@ export default function DebugNav({ targetRoute = "/orders-direct" }: DebugNavPro
       setSuccessful(true);
     } catch (error) {
       console.error("Debug navigation error:", error);
+      sessionStorage.setItem("debugNavError", String(error));
       setSuccessful(false);
     }
   };
