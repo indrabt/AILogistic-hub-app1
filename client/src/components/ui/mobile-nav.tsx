@@ -128,7 +128,7 @@ const MobileNav = ({ currentPath }: MobileNavProps) => {
                 )}
                 onClick={() => {
                   console.log("Direct mobile navigation to Order Management");
-                  window.location.href = "/order-management";
+                  window.location.href = "/orders-direct";
                 }}
               >
                 {item.icon}
@@ -188,7 +188,7 @@ const MobileNav = ({ currentPath }: MobileNavProps) => {
                     onClick={() => {
                       console.log("Direct expanded menu navigation to Order Management");
                       setExpanded(false);
-                      window.location.href = "/order-management";
+                      window.location.href = "/orders-direct";
                     }}
                   >
                     {item.icon}
