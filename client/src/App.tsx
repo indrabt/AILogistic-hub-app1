@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { WebSocketProvider } from "@/contexts/WebSocketContext";
 import SidebarLayout from "@/components/layouts/SidebarLayout";
+import DriverSidebarLayout from "@/components/layouts/DriverSidebarLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Dashboard from "@/pages/dashboard";
 import Routes from "@/pages/routes";
@@ -73,12 +74,36 @@ function Router() {
           <Route path="/business-dashboard" component={BusinessDashboard} />
           <Route path="/business-metrics" component={BusinessMetrics} />
           <Route path="/western-sydney-users" component={WesternSydneyUsers} />
-          <Route path="/driver-dashboard" component={DriverDashboard} />
-          <Route path="/driver-schedule" component={DriverSchedule} />
-          <Route path="/driver-routes" component={() => <DriverDashboard />} />
-          <Route path="/driver-navigation" component={() => <DriverDashboard />} />
-          <Route path="/driver-weather" component={() => <WeatherImpact />} />
-          <Route path="/driver-settings" component={() => <Settings />} />
+          <Route path="/driver-dashboard" component={() => (
+            <DriverSidebarLayout>
+              <DriverDashboard />
+            </DriverSidebarLayout>
+          )} />
+          <Route path="/driver-schedule" component={() => (
+            <DriverSidebarLayout>
+              <DriverSchedule />
+            </DriverSidebarLayout>
+          )} />
+          <Route path="/driver-routes" component={() => (
+            <DriverSidebarLayout>
+              <DriverDashboard />
+            </DriverSidebarLayout>
+          )} />
+          <Route path="/driver-navigation" component={() => (
+            <DriverSidebarLayout>
+              <DriverDashboard />
+            </DriverSidebarLayout>
+          )} />
+          <Route path="/driver-weather" component={() => (
+            <DriverSidebarLayout>
+              <WeatherImpact />
+            </DriverSidebarLayout>
+          )} />
+          <Route path="/driver-settings" component={() => (
+            <DriverSidebarLayout>
+              <Settings />
+            </DriverSidebarLayout>
+          )} />
           <Route path="/warehouse-dashboard" component={WarehouseDashboard} />
           <Route path="/real-time-dashboard" component={RealTimeDashboard} />
           <Route path="/retail-dashboard" component={RetailDashboard} />
