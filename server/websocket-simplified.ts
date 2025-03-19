@@ -118,14 +118,15 @@ export class WebSocketManager {
         });
         
         // Handle disconnection
-        ws.on('close', () => {
+        ws.on('close', (code, reason) => {
+          log(`WebSocket connection closed with code ${code}${reason ? ': ' + reason : ''}`, 'websocket');
           this.clients = this.clients.filter(client => client.ws !== ws);
-          log(`WebSocket connection closed. Active connections: ${this.clients.length}`, 'websocket');
+          log(`Active connections remaining: ${this.clients.length}`, 'websocket');
         });
         
         // Handle errors
         ws.on('error', (error) => {
-          log(`WebSocket error: ${error}`, 'websocket');
+          log(`WebSocket error: ${error.message || error}`, 'websocket');
           this.clients = this.clients.filter(client => client.ws !== ws);
         });
       });
