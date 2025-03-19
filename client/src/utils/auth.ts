@@ -23,6 +23,7 @@ export const routePermissions: Record<string, UserRole[]> = {
   "/dashboard": ["logistics_manager"],
   "/warehouse-dashboard": ["warehouse_staff"],
   "/driver-dashboard": ["driver"],
+  "/driver-schedule": ["driver"],
   "/business-dashboard": ["business_owner"],
   "/business-metrics": ["business_owner"], // New page for business owner only
   "/retail-dashboard": ["retail_store_owner"], // New dashboard for retail store owners

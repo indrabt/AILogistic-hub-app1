@@ -28,7 +28,6 @@ export default function DriverDashboard() {
   const [user, setUser] = useState<any>(null);
   const [driverStatus, setDriverStatus] = useState<DriverStatus>("available");
   const [location, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState("dashboard");
 
   useEffect(() => {
     // Check if user is logged in
@@ -122,164 +121,97 @@ export default function DriverDashboard() {
         </div>
       </header>
       
-      {/* Simple tab buttons */}
+      {/* Navigation buttons */}
       <div className="flex space-x-2 mb-4">
         <Button 
-          variant={activeTab === "dashboard" ? "default" : "outline"}
-          onClick={() => setActiveTab("dashboard")}
+          variant="default"
           className="flex-1 sm:flex-initial"
         >
           <Truck className="mr-2 h-4 w-4" /> Dashboard
         </Button>
         <Button 
-          variant={activeTab === "schedule" ? "default" : "outline"}
-          onClick={() => setActiveTab("schedule")}
+          variant="outline"
+          onClick={() => setLocation("/driver-schedule")}
           className="flex-1 sm:flex-initial"
         >
           <CalendarClock className="mr-2 h-4 w-4" /> Schedule
         </Button>
       </div>
       
-      {/* Content based on active tab */}
-      {activeTab === "dashboard" ? (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Delivery card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Truck className="h-5 w-5 text-blue-600" /> Current Delivery
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {currentShipment ? (
-                  <div className="space-y-4">
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="font-semibold">{currentShipment.shipmentId}</p>
-                        <p className="text-sm text-gray-500">
-                          {currentShipment.origin} → {currentShipment.destination}
-                        </p>
-                      </div>
-                      <Badge className={getStatusBadgeClass(currentShipment.status)}>
-                        {currentShipment.status}
-                      </Badge>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Expected arrival</p>
-                      <div className="flex items-center mt-1">
-                        <Clock className="h-4 w-4 mr-1 text-gray-500" />
-                        <span>{currentShipment.eta}</span>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-20 text-gray-500">
-                    No active deliveries
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            {/* Routes card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Assigned Routes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {assignedRoutes.length > 0 ? (
-                  <div className="space-y-4">
-                    {assignedRoutes.map((route) => (
-                      <div key={route.id} className="border rounded-md p-3">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-medium">{route.name}</p>
-                            <div className="flex items-center text-sm text-gray-500 mt-1">
-                              <MapPin className="h-3 w-3 inline mr-1" />
-                              <span>{route.origin} → {route.destination}</span>
-                            </div>
-                          </div>
-                          <Badge className={getStatusBadgeClass(route.status)}>
-                            {route.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-20 text-gray-500">
-                    No routes assigned
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-6">
+      {/* Dashboard content */}
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Delivery card */}
           <Card>
             <CardHeader>
-              <CardTitle>Weekly Schedule</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Truck className="h-5 w-5 text-blue-600" /> Current Delivery
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="border rounded-md overflow-hidden">
-                  <div className="bg-muted p-3 font-medium">Monday, March 20</div>
-                  <div className="divide-y">
-                    {assignedRoutes.map((route) => (
-                      <div key={`mon-${route.id}`} className="p-3">
-                        <div className="flex justify-between">
-                          <div className="font-medium">{route.name}</div>
-                          <Badge className={getStatusBadgeClass(route.status)}>
-                            {route.status}
-                          </Badge>
-                        </div>
-                        <div className="text-sm text-gray-500 mt-1">
-                          {route.origin} → {route.destination}
-                        </div>
-                      </div>
-                    ))}
+              {currentShipment ? (
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <div>
+                      <p className="font-semibold">{currentShipment.shipmentId}</p>
+                      <p className="text-sm text-gray-500">
+                        {currentShipment.origin} → {currentShipment.destination}
+                      </p>
+                    </div>
+                    <Badge className={getStatusBadgeClass(currentShipment.status)}>
+                      {currentShipment.status}
+                    </Badge>
                   </div>
-                </div>
-                
-                <div className="border rounded-md overflow-hidden">
-                  <div className="bg-muted p-3 font-medium">Tuesday, March 21</div>
-                  <div className="divide-y">
-                    <div className="p-3">
-                      <div className="flex justify-between">
-                        <div className="font-medium">North Sydney Route</div>
-                        <Badge className={getStatusBadgeClass("on-schedule")}>
-                          Scheduled
-                        </Badge>
-                      </div>
-                      <div className="text-sm text-gray-500 mt-1">
-                        Warehouse → North Sydney
-                      </div>
+                  <div>
+                    <p className="text-sm font-medium">Expected arrival</p>
+                    <div className="flex items-center mt-1">
+                      <Clock className="h-4 w-4 mr-1 text-gray-500" />
+                      <span>{currentShipment.eta}</span>
                     </div>
                   </div>
                 </div>
-                
-                <div className="border rounded-md overflow-hidden">
-                  <div className="bg-muted p-3 font-medium">Wednesday, March 22</div>
-                  <div className="divide-y">
-                    <div className="p-3">
-                      <div className="flex justify-between">
-                        <div className="font-medium">Parramatta Express</div>
-                        <Badge className={getStatusBadgeClass("on-schedule")}>
-                          Scheduled
+              ) : (
+                <div className="flex items-center justify-center h-20 text-gray-500">
+                  No active deliveries
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          
+          {/* Routes card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Assigned Routes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {assignedRoutes.length > 0 ? (
+                <div className="space-y-4">
+                  {assignedRoutes.map((route) => (
+                    <div key={route.id} className="border rounded-md p-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium">{route.name}</p>
+                          <div className="flex items-center text-sm text-gray-500 mt-1">
+                            <MapPin className="h-3 w-3 inline mr-1" />
+                            <span>{route.origin} → {route.destination}</span>
+                          </div>
+                        </div>
+                        <Badge className={getStatusBadgeClass(route.status)}>
+                          {route.status}
                         </Badge>
                       </div>
-                      <div className="text-sm text-gray-500 mt-1">
-                        Distribution Center → Parramatta
-                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center justify-center h-20 text-gray-500">
+                  No routes assigned
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
-      )}
+      </div>
     </div>
   );
 }

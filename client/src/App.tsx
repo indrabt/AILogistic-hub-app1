@@ -30,6 +30,7 @@ import RetailDashboard from "@/pages/retail-dashboard";
 import LocalSourcing from "@/pages/local-sourcing";
 import IntegrationKit from "@/pages/integration-kit";
 import InventoryTracker from "@/pages/inventory-tracker";
+import DriverSchedule from "@/pages/driver-schedule";
 
 function Router() {
   const [location] = useLocation();
@@ -64,6 +65,7 @@ function Router() {
           <Route path="/business-metrics" component={BusinessMetrics} />
           <Route path="/western-sydney-users" component={WesternSydneyUsers} />
           <Route path="/driver-dashboard" component={DriverDashboard} />
+          <Route path="/driver-schedule" component={DriverSchedule} />
           <Route path="/warehouse-dashboard" component={WarehouseDashboard} />
           <Route path="/real-time-dashboard" component={RealTimeDashboard} />
           <Route path="/retail-dashboard" component={RetailDashboard} />
