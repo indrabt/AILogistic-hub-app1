@@ -48,30 +48,41 @@ export default function OrdersDirectAccess() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [searchText, setSearchText] = useState<string>("");
+  const [isDirectAccessActive, setIsDirectAccessActive] = useState<boolean>(false);
+  const [navigationSource, setNavigationSource] = useState<string>("");
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(false);
   const [showReturnDialog, setShowReturnDialog] = useState<boolean>(false);
   
+  // Initialize hooks
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
+  
+  // Combined component initialization and diagnostic logging
   useEffect(() => {
-    // Add comprehensive diagnostic logging for direct access page
-    console.log("Orders Direct Access page mounted successfully");
-    console.log("Current URL:", window.location.href);
-    console.log("Navigation timestamp:", new Date().toISOString());
+    // Log access details for diagnostics
+    const accessMethod = sessionStorage.getItem("orderAccessMethod") || "unknown";
+    const bypassRouter = sessionStorage.getItem("bypassRouter") === "true";
+    const overrideAccess = sessionStorage.getItem("overrideOrdersAccess") === "true";
+    const debugOrigin = sessionStorage.getItem("debugNavOrigin") || "unknown";
+    const urlParams = new URLSearchParams(window.location.search);
     
     // Record successful page load in session storage with detailed information
     sessionStorage.setItem("orderManagementLoaded", "true");
     sessionStorage.setItem("orderManagementLoadTime", new Date().toISOString());
     sessionStorage.setItem("orderManagementLoadUrl", window.location.href);
     
-    // Check how we got here (from which navigation method)
-    const accessMethod = sessionStorage.getItem("orderAccessMethod") || "direct-url";
-    console.log("Orders page accessed via:", accessMethod);
+    console.log(`Orders Direct Page Access Details:
+      - Accessed at: ${new Date().toISOString()}
+      - Access method: ${accessMethod}
+      - Navigation origin: ${debugOrigin}
+      - URL parameters: ${JSON.stringify(Object.fromEntries(urlParams.entries()))}
+      - Bypass Router flag: ${bypassRouter}
+      - Override Access flag: ${overrideAccess}
+      - Current location: ${window.location.href}
+    `);
     
-    // Record navigation path
-    const navigationOrigin = sessionStorage.getItem("debugNavOrigin") || "unknown";
-    console.log("Navigation origin:", navigationOrigin);
+    setIsDirectAccessActive(true);
+    setNavigationSource(debugOrigin);
     
     // Ensure we reset the filter when the component mounts
     setStatusFilter("all");
@@ -80,7 +91,8 @@ export default function OrdersDirectAccess() {
     // Log navigation success
     toast({
       title: "Order Management Loaded",
-      description: "Direct access successful. Order Management system ready.",
+      description: `Successfully accessed via ${accessMethod} method`,
+      variant: "default",
       duration: 3000,
     });
     

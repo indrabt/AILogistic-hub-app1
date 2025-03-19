@@ -52,6 +52,9 @@ export const routePermissions: Record<string, UserRole[]> = {
   "/multi-modal-logistics": ["logistics_manager", "retail_store_owner"],
   "/western-sydney-users": ["sales"], // Only sales can access this page now
   "/reports": ["logistics_manager", "business_owner", "retail_store_owner"],
+  "/order-management": ["logistics_manager", "business_owner", "warehouse_staff", "retail_store_owner"],
+  "/orders-direct": ["logistics_manager", "business_owner", "warehouse_staff", "retail_store_owner"],
+  "/orders-direct-test": ["logistics_manager", "business_owner", "warehouse_staff", "retail_store_owner"],
   "/settings": ["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner", "retail_store_owner"],
   "/login": ["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner", "retail_store_owner"]
 };

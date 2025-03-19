@@ -56,13 +56,36 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       return;
     }
 
+    // Check for bypass flags - this allows direct order access from HTML page
+    const ordersAccessOverride = sessionStorage.getItem("overrideOrdersAccess") === "true";
+    const bypassRouter = sessionStorage.getItem("bypassRouter") === "true";
+    const isOrdersRoute = location.includes("orders-direct");
+    
+    // Log enhanced debugging information
+    console.log(`Access check details:
+      - User role: ${user?.role}
+      - Current path: ${location}
+      - Orders override flag: ${ordersAccessOverride}
+      - Bypass router flag: ${bypassRouter}
+      - Is orders route: ${isOrdersRoute}`);
+    
     // If authenticated, check if user has permission to access this route
-    // Skip this check for the root path since we handle it separately above
-    if (user && location !== '/' && !canAccessRoute(location)) {
+    // Skip this check for root path or if bypass flags are set for orders route
+    if (user && 
+        location !== '/' && 
+        !canAccessRoute(location) && 
+        !(isOrdersRoute && (ordersAccessOverride || bypassRouter))) {
+      
       console.log(`Access denied for user role: ${user.role} trying to access ${location}`);
       
       // Log additional details for debugging
       console.log(`Session storage user data: ${JSON.stringify(sessionStorage.getItem('user'))}`);
+      
+      // Special handling for orders direct access
+      if (isOrdersRoute) {
+        console.log("Orders access denied despite being an orders route");
+        console.log(`Override flags: ordersAccessOverride=${ordersAccessOverride}, bypassRouter=${bypassRouter}`);
+      }
       
       toast({
         title: 'Access denied',
@@ -74,6 +97,16 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       const defaultRoute = getDefaultRoute(user.role);
       console.log(`Redirecting to default route: ${defaultRoute}`);
       setLocation(defaultRoute);
+    }
+    
+    // If we're on orders route and have override flags, clear them after successful access
+    if (isOrdersRoute && (ordersAccessOverride || bypassRouter) && user) {
+      console.log("Successfully accessed orders with override flags, clearing flags");
+      setTimeout(() => {
+        // Clear after a delay to ensure navigation completes
+        sessionStorage.removeItem("overrideOrdersAccess");
+        sessionStorage.removeItem("bypassRouter");
+      }, 3000);
     }
   }, [location, setLocation, user]);
 

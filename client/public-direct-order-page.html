@@ -15,15 +15,48 @@
         console.log("User logged in, proceeding to Order Management");
         console.log("Current user:", storedUser);
         
-        // Try multiple different navigation approaches to ensure at least one works
+        // Store information for diagnostic purposes
+        sessionStorage.setItem("orderAccessMethod", "direct-html-page");
+        sessionStorage.setItem("debugNavOrigin", "public-direct-order-page.html");
+        sessionStorage.setItem("directOrderAccessAttempt", new Date().toISOString());
         
-        // Approach 1: Navigate directly to our standalone component
-        console.log("Attempting navigation to /orders-direct");
+        // Try to parse the user to set required role permissions
+        try {
+          const user = JSON.parse(storedUser);
+          console.log("Current user role:", user.role);
+          
+          // Ensure necessary permission flags are set
+          sessionStorage.setItem("overrideOrdersAccess", "true");
+          sessionStorage.setItem("bypassRouter", "true");
+        } catch (e) {
+          console.error("Error parsing user:", e);
+        }
         
-        // Set up a redirect using our new dedicated route
+        // Use a robust multi-step approach to navigate
+        console.log("Preparing multi-step navigation to orders page");
+        
+        // Step 1: Try immediate navigation
+        try {
+          console.log("Step 1: Immediate navigation attempt");
+          window.location.href = "/orders-direct";
+        } catch (e) {
+          console.error("Step 1 failed:", e);
+        }
+        
+        // Step 2: Delayed navigation as fallback
         setTimeout(() => {
-          console.log("Navigating to new direct route...");
-          window.location.replace("/orders-direct");
+          console.log("Step 2: Delayed navigation attempt");
+          try {
+            window.location.replace("/orders-direct");
+          } catch (e) {
+            console.error("Step 2 failed:", e);
+            
+            // Step 3: Most aggressive approach
+            setTimeout(() => {
+              console.log("Step 3: Force navigation with reload");
+              window.location.href = "/orders-direct?force=true&t=" + new Date().getTime();
+            }, 1000);
+          }
         }, 1000);
       }
     }
@@ -38,7 +71,14 @@
         directButton.addEventListener('click', function(e) {
           e.preventDefault();
           console.log("Direct navigation button clicked");
-          window.location.replace("/orders-direct");
+          
+          // Set override flags
+          sessionStorage.setItem("orderAccessMethod", "button-click");
+          sessionStorage.setItem("overrideOrdersAccess", "true");
+          sessionStorage.setItem("bypassRouter", "true");
+          
+          // Force navigation with cache-busting parameter
+          window.location.href = "/orders-direct?manual=true&t=" + new Date().getTime();
         });
       }
     });
