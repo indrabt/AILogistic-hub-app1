@@ -40,6 +40,7 @@ import OrderManagement from "@/pages/order-management";
 import OrderManagementRouter from "@/components/OrderManagementRouter";
 import OrdersDirectTest from "@/pages/orders-direct-test";
 import OrdersDirect from "@/pages/orders-direct";
+import OrdersDirectMinimal from "@/pages/orders-direct-minimal";
 
 function Router() {
   const [location] = useLocation();
@@ -74,6 +75,14 @@ function Router() {
             return <OrdersDirect />;
           }} />
           <Route path="/orders-direct-test" component={OrdersDirectTest} />
+          <Route path="/orders-direct-minimal" component={() => {
+            console.log('Orders Direct Minimal component being rendered');
+            console.log('Current path:', window.location.pathname);
+            console.log('Rendering timestamp:', new Date().toISOString());
+            // Insert a flag in session storage to track successful loads
+            sessionStorage.setItem("ordersDirectMinimalAccessed", "true");
+            return <OrdersDirectMinimal />;
+          }} />
           <Route path="/dashboard" component={() => {
             console.log('Dashboard component rendered for logistics manager');
             return <Dashboard />;

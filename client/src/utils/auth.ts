@@ -55,6 +55,7 @@ export const routePermissions: Record<string, UserRole[]> = {
   "/order-management": ["logistics_manager", "business_owner", "warehouse_staff", "retail_store_owner"],
   "/orders-direct": ["logistics_manager", "business_owner", "warehouse_staff", "retail_store_owner"],
   "/orders-direct-test": ["logistics_manager", "business_owner", "warehouse_staff", "retail_store_owner"],
+  "/orders-direct-minimal": ["logistics_manager", "business_owner", "warehouse_staff", "retail_store_owner"],
   "/settings": ["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner", "retail_store_owner"],
   "/login": ["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner", "retail_store_owner"]
 };

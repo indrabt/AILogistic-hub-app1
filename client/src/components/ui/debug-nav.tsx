@@ -81,6 +81,57 @@ export default function DebugNav({ targetRoute = "/orders-direct" }: DebugNavPro
           Navigate to {targetRoute}
         </Button>
         
+        {/* Additional links to other order pages */}
+        <div className="grid grid-cols-2 gap-2 mt-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="text-xs"
+            onClick={() => {
+              sessionStorage.setItem("usingDirectOrdersAccess", "true");
+              window.location.href = "/orders-direct";
+            }}
+          >
+            Orders Direct
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="text-xs"
+            onClick={() => {
+              sessionStorage.setItem("usingMinimalOrdersAccess", "true");
+              window.location.href = "/orders-direct-minimal";
+            }}
+          >
+            Orders Minimal
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="text-xs"
+            onClick={() => {
+              sessionStorage.setItem("usingOrdersTest", "true");
+              window.location.href = "/orders-direct-test";
+            }}
+          >
+            Orders Test
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="text-xs"
+            onClick={() => {
+              sessionStorage.setItem("usingOrderManagement", "true");
+              window.location.href = "/order-management";
+            }}
+          >
+            Order Management
+          </Button>
+        </div>
+        
         {successful === true && (
           <div className="flex items-center text-green-600 text-sm p-2 bg-green-50 rounded">
             <ThumbsUp className="h-4 w-4 mr-2" />
