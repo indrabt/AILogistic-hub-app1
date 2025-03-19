@@ -64,7 +64,6 @@ export default function OrdersDirectAccess() {
   
   // Initialize hooks
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   
   // Combined component initialization and diagnostic logging
   useEffect(() => {
@@ -131,8 +130,8 @@ export default function OrdersDirectAccess() {
   } as any);
   
   // Mutations
-  const createOrderMutation = useMutation({
-    mutationFn: async (orderData: any) => {
+  const createOrderMutation = useMutation<any, Error, Order>({
+    mutationFn: async (orderData) => {
       return await apiRequest('/api/orders', {
         method: 'POST',
         body: JSON.stringify(orderData),
@@ -613,10 +612,12 @@ export default function OrdersDirectAccess() {
                   totalValue: 0,
                   estimatedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
                   paymentStatus: "pending",
+                  // Generate a random order number for new orders
+                  orderNumber: `ORD-${Math.floor(100000 + Math.random() * 900000)}`
                 };
                 
                 // Call the mutation
-                createOrderMutation.mutate(orderData);
+                createOrderMutation.mutate(orderData as any);
               }}
               disabled={createOrderMutation.isPending}
             >
