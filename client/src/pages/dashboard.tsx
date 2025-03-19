@@ -38,10 +38,25 @@ export default function Dashboard() {
           </Select>
         </div>
         
-        <Button variant="secondary" className="bg-green-700 hover:bg-green-800 text-white">
-          <DownloadIcon className="mr-2 h-4 w-4" />
-          Export Data
-        </Button>
+        <div className="flex gap-3">
+          {/* Order Management Direct Access Button */}
+          <Button 
+            variant="default" 
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => {
+              console.log("Direct navigation to Order Management");
+              // Using direct DOM navigation as a workaround for router issues
+              window.location.href = "/order-management";
+            }}
+          >
+            Order Management
+          </Button>
+          
+          <Button variant="secondary" className="bg-green-700 hover:bg-green-800 text-white">
+            <DownloadIcon className="mr-2 h-4 w-4" />
+            Export Data
+          </Button>
+        </div>
       </div>
 
       {/* Key Metrics */}

@@ -235,15 +235,39 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
         
         <nav className="mt-2 flex-1 overflow-y-auto">
           <ul>
-            {roleNavigation.map((item) => (
-              <SidebarItem 
-                key={item.id}
-                icon={item.icon} 
-                href={item.href} 
-                label={item.label} 
-                active={location === item.href || location.startsWith(item.href + "?") || (location.includes(item.href) && item.href !== "/")} 
-              />
-            ))}
+            {roleNavigation.map((item) => {
+              // Add a direct Order Management button
+              if (item.href === "/order-management") {
+                return (
+                  <li className="mb-2" key={item.id}>
+                    <div
+                      className={cn(
+                        "flex items-center py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                        location === item.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                      )}
+                      onClick={() => {
+                        console.log("Direct Order Management navigation triggered");
+                        window.location.href = "/order-management";
+                      }}
+                    >
+                      <span className="mr-3">{item.icon}</span>
+                      {item.label}
+                    </div>
+                  </li>
+                );
+              }
+              
+              // For all other items, use the standard SidebarItem
+              return (
+                <SidebarItem 
+                  key={item.id}
+                  icon={item.icon} 
+                  href={item.href} 
+                  label={item.label} 
+                  active={location === item.href || location.startsWith(item.href + "?") || (location.includes(item.href) && item.href !== "/")} 
+                />
+              );
+            })}
           </ul>
           
           <Separator className="my-4 bg-primary-light/30" />

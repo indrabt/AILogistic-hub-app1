@@ -116,23 +116,46 @@ const MobileNav = ({ currentPath }: MobileNavProps) => {
     <>
       {/* Fixed bottom navigation bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-2 md:hidden z-40">
-        {mainNavItems.map((item) => (
-          <Link key={item.href} href={item.href}>
-            <div 
-              className={cn(
-                "p-2 flex flex-col items-center cursor-pointer",
-                currentPath === item.href || 
-                currentPath.startsWith(item.href + "?") || 
-                (currentPath.includes(item.href) && item.href !== "/") 
-                  ? "text-primary" 
-                  : "text-gray-500"
-              )}
-            >
-              {item.icon}
-              <span className="text-xs mt-1">{item.label}</span>
-            </div>
-          </Link>
-        ))}
+        {mainNavItems.map((item) => {
+          // Special case for Order Management
+          if (item.href === "/order-management") {
+            return (
+              <div 
+                key={item.href}
+                className={cn(
+                  "p-2 flex flex-col items-center cursor-pointer",
+                  currentPath === item.href ? "text-primary" : "text-gray-500"
+                )}
+                onClick={() => {
+                  console.log("Direct mobile navigation to Order Management");
+                  window.location.href = "/order-management";
+                }}
+              >
+                {item.icon}
+                <span className="text-xs mt-1">{item.label}</span>
+              </div>
+            );
+          }
+          
+          // For other links, use standard navigation
+          return (
+            <Link key={item.href} href={item.href}>
+              <div 
+                className={cn(
+                  "p-2 flex flex-col items-center cursor-pointer",
+                  currentPath === item.href || 
+                  currentPath.startsWith(item.href + "?") || 
+                  (currentPath.includes(item.href) && item.href !== "/") 
+                    ? "text-primary" 
+                    : "text-gray-500"
+                )}
+              >
+                {item.icon}
+                <span className="text-xs mt-1">{item.label}</span>
+              </div>
+            </Link>
+          );
+        })}
         
         {/* More button */}
         <div 
@@ -150,23 +173,49 @@ const MobileNav = ({ currentPath }: MobileNavProps) => {
           <div className="w-12 h-1 bg-gray-300 mx-auto mb-4 rounded-full" />
           
           <div className="grid grid-cols-4 gap-4">
-            {extraNavItems.map((item) => (
-              <Link key={item.href} href={item.href} onClick={() => setExpanded(false)}>
-                <div 
-                  className={cn(
-                    "p-3 flex flex-col items-center cursor-pointer rounded-lg",
-                    currentPath === item.href || 
-                    currentPath.startsWith(item.href + "?") || 
-                    (currentPath.includes(item.href) && item.href !== "/") 
-                      ? "text-primary bg-primary/10" 
-                      : "text-gray-500 hover:bg-gray-100"
-                  )}
-                >
-                  {item.icon}
-                  <span className="text-xs mt-2 text-center">{item.label}</span>
-                </div>
-              </Link>
-            ))}
+            {extraNavItems.map((item) => {
+              // Special case for Order Management in expanded menu
+              if (item.href === "/order-management") {
+                return (
+                  <div 
+                    key={item.href}
+                    className={cn(
+                      "p-3 flex flex-col items-center cursor-pointer rounded-lg",
+                      currentPath === item.href 
+                        ? "text-primary bg-primary/10" 
+                        : "text-gray-500 hover:bg-gray-100"
+                    )}
+                    onClick={() => {
+                      console.log("Direct expanded menu navigation to Order Management");
+                      setExpanded(false);
+                      window.location.href = "/order-management";
+                    }}
+                  >
+                    {item.icon}
+                    <span className="text-xs mt-2 text-center">{item.label}</span>
+                  </div>
+                );
+              }
+              
+              // Standard navigation for other items
+              return (
+                <Link key={item.href} href={item.href} onClick={() => setExpanded(false)}>
+                  <div 
+                    className={cn(
+                      "p-3 flex flex-col items-center cursor-pointer rounded-lg",
+                      currentPath === item.href || 
+                      currentPath.startsWith(item.href + "?") || 
+                      (currentPath.includes(item.href) && item.href !== "/") 
+                        ? "text-primary bg-primary/10" 
+                        : "text-gray-500 hover:bg-gray-100"
+                    )}
+                  >
+                    {item.icon}
+                    <span className="text-xs mt-2 text-center">{item.label}</span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
           
           <div className="mt-4 pt-2 border-t border-gray-100 flex justify-center">
