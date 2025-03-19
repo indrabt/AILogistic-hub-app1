@@ -19,7 +19,8 @@ import {
   Tag,
   Zap,
   Settings,
-  Smartphone
+  Smartphone,
+  ClipboardCheck
 } from "lucide-react";
 import { UserRole } from "@/utils/auth";
 
@@ -55,6 +56,7 @@ const mobileNavItems: MobileNavItem[] = [
   { icon: <User size={20} />, label: "Clients", href: "/western-sydney-users", roles: ["sales"] },
   { icon: <BarChart size={20} />, label: "Metrics", href: "/business-metrics", roles: ["business_owner"] },
   { icon: <TrendingUp size={20} />, label: "Forecast", href: "/demand-forecasting", roles: ["sales", "logistics_manager", "business_owner"] },
+  { icon: <ClipboardCheck size={20} />, label: "Orders", href: "/order-management", roles: ["warehouse_staff", "logistics_manager"] },
   
   // Enhanced retail-specific items
   { icon: <TrendingUp size={20} />, label: "Demand", href: "/demand-prediction", roles: ["retail_store_owner"] },
@@ -119,7 +121,9 @@ const MobileNav = ({ currentPath }: MobileNavProps) => {
             <div 
               className={cn(
                 "p-2 flex flex-col items-center cursor-pointer",
-                currentPath === item.href || currentPath.startsWith(item.href + "?") 
+                currentPath === item.href || 
+                currentPath.startsWith(item.href + "?") || 
+                (currentPath.includes(item.href) && item.href !== "/") 
                   ? "text-primary" 
                   : "text-gray-500"
               )}
@@ -151,7 +155,9 @@ const MobileNav = ({ currentPath }: MobileNavProps) => {
                 <div 
                   className={cn(
                     "p-3 flex flex-col items-center cursor-pointer rounded-lg",
-                    currentPath === item.href || currentPath.startsWith(item.href + "?") 
+                    currentPath === item.href || 
+                    currentPath.startsWith(item.href + "?") || 
+                    (currentPath.includes(item.href) && item.href !== "/") 
                       ? "text-primary bg-primary/10" 
                       : "text-gray-500 hover:bg-gray-100"
                   )}

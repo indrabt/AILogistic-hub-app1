@@ -228,7 +228,7 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                 icon={item.icon} 
                 href={item.href} 
                 label={item.label} 
-                active={location === item.href || location.startsWith(item.href + "?")} 
+                active={location === item.href || location.startsWith(item.href + "?") || (location.includes(item.href) && item.href !== "/")} 
               />
             ))}
           </ul>
@@ -241,7 +241,7 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
               icon={<Settings size={20} />} 
               href="/settings" 
               label="Settings" 
-              active={location === "/settings"} 
+              active={location === "/settings" || location.startsWith("/settings?") || location.includes("/settings/")} 
             />
             <li className="mb-2">
               <div
