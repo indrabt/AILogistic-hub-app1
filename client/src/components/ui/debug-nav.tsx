@@ -14,7 +14,7 @@ interface DebugNavProps {
   targetRoute?: string;
 }
 
-export default function DebugNav({ targetRoute = "/order-management" }: DebugNavProps) {
+export default function DebugNav({ targetRoute = "/orders-direct" }: DebugNavProps) {
   const [visible, setVisible] = useState(true);
   const [successful, setSuccessful] = useState<boolean | null>(null);
 

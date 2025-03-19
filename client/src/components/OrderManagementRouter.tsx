@@ -3,6 +3,9 @@
  * 
  * This is a special component that provides direct access to the Order Management page,
  * bypassing any routing issues by acting as a direct entry point.
+ * 
+ * It uses a standalone approach that doesn't rely on React Router or wouter,
+ * and has extra redundancy built in to ensure it always works.
  */
 
 import { useEffect, useState } from "react";
@@ -15,11 +18,16 @@ export default function OrderManagementRouter() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is authenticated
+    // Check if user is authenticated with console logs for better debugging
+    console.log("OrderManagementRouter initializing");
     const storedUser = sessionStorage.getItem('user');
+    
+    console.log("Authentication check - user object:", storedUser ? "exists" : "not found");
     
     if (storedUser) {
       console.log("User authenticated, rendering Order Management");
+      console.log("Current URL: " + window.location.href);
+      console.log("Current path: " + window.location.pathname);
       setIsAuthenticated(true);
     } else {
       console.log("User not authenticated, will redirect to login");
@@ -61,14 +69,23 @@ export default function OrderManagementRouter() {
     <div className="relative">
       <div className="container py-4">
         <div className="flex gap-4 mb-4">
-          <Button variant="outline" size="sm" onClick={() => window.location.href = "/"}>
+          <Button variant="outline" size="sm" onClick={() => {
+            console.log("Navigating back to dashboard");
+            window.location.href = "/";
+          }}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </Button>
-          <Button variant="outline" size="sm" onClick={() => window.location.href = "/dashboard"}>
+          <Button variant="outline" size="sm" onClick={() => {
+            console.log("Navigating to main dashboard");
+            window.location.href = "/dashboard";
+          }}>
             <LayoutDashboard className="w-4 h-4 mr-2" />
             Main Dashboard
           </Button>
+        </div>
+        <div className="bg-green-100 border border-green-300 text-green-700 px-4 py-2 rounded mb-4">
+          <p className="text-sm font-medium">You are using the direct access Order Management page</p>
         </div>
       </div>
       <OrderManagement />

@@ -248,7 +248,7 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                       )}
                       onClick={() => {
                         console.log("Direct Order Management navigation triggered");
-                        window.location.href = "/order-management";
+                        window.location.href = "/orders-direct";
                       }}
                     >
                       <span className="mr-3">{item.icon}</span>
@@ -362,7 +362,7 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
       {isMobile && <MobileNav currentPath={location} />}
 
       {/* Debug Navigation Helper */}
-      <DebugNav targetRoute="/order-management" />
+      <DebugNav targetRoute="/orders-direct" />
     </div>
   );
 };
