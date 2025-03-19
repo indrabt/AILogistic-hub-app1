@@ -4,6 +4,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   BarChart2, 
   Calendar, 
@@ -25,6 +37,21 @@ export default function RetailDashboard() {
   const { toast } = useToast();
   const { status: wsStatus } = useWebSocketContext();
   const [activeFeature, setActiveFeature] = useState('demand');
+  const [pickupDialogOpen, setPickupDialogOpen] = useState(false);
+  const [selectedFarmer, setSelectedFarmer] = useState<number | null>(null);
+  
+  const handleSchedulePickup = () => {
+    setPickupDialogOpen(true);
+  };
+  
+  const schedulePickup = (farmerId: number, date: string, items: string) => {
+    // In a real app, this would make an API call
+    toast({
+      title: "Pickup Scheduled",
+      description: `Your pickup has been scheduled for ${date}`,
+    });
+    setPickupDialogOpen(false);
+  };
 
   // Sample data for widgets
   const weatherForecast = {
@@ -177,9 +204,100 @@ export default function RetailDashboard() {
                   </div>
                 ))}
               </div>
-              <Button className="w-full mt-4">
+              <Button className="w-full mt-4" onClick={handleSchedulePickup}>
                 <Truck className="h-4 w-4 mr-2" /> Schedule Pickup
               </Button>
+              
+              <Dialog open={pickupDialogOpen} onOpenChange={setPickupDialogOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Schedule a Pickup</DialogTitle>
+                    <DialogDescription>
+                      Schedule a pickup from one of your local farmers.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="farmer" className="text-right">
+                        Farmer
+                      </Label>
+                      <Select
+                        onValueChange={(value) => setSelectedFarmer(parseInt(value))}
+                        defaultValue=""
+                      >
+                        <SelectTrigger className="col-span-3">
+                          <SelectValue placeholder="Select a farmer" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {localFarmers.map((farmer) => (
+                            <SelectItem key={farmer.id} value={farmer.id.toString()}>
+                              {farmer.name} ({farmer.distance})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="date" className="text-right">
+                        Date
+                      </Label>
+                      <Input
+                        id="date"
+                        type="date"
+                        className="col-span-3"
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="time" className="text-right">
+                        Time
+                      </Label>
+                      <Input id="time" type="time" className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="items" className="text-right">
+                        Items
+                      </Label>
+                      <Input id="items" placeholder="e.g., 10kg Apples, 5kg Tomatoes" className="col-span-3" />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setPickupDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={() => {
+                      if (selectedFarmer) {
+                        const dateInput = document.getElementById('date') as HTMLInputElement;
+                        const timeInput = document.getElementById('time') as HTMLInputElement;
+                        const itemsInput = document.getElementById('items') as HTMLInputElement;
+                        
+                        const date = dateInput?.value;
+                        const time = timeInput?.value;
+                        const items = itemsInput?.value;
+                        
+                        if (date && time && items) {
+                          const dateTimeStr = `${date} at ${time}`;
+                          schedulePickup(selectedFarmer, dateTimeStr, items);
+                        } else {
+                          toast({
+                            title: "Missing Information",
+                            description: "Please fill in all the fields",
+                            variant: "destructive",
+                          });
+                        }
+                      } else {
+                        toast({
+                          title: "Missing Information",
+                          description: "Please select a farmer",
+                          variant: "destructive",
+                        });
+                      }
+                    }}>
+                      Schedule
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
           
