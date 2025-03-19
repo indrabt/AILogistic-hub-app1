@@ -244,20 +244,20 @@ export default function InventoryTracker() {
   
   return (
     <div className="container mx-auto py-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Inventory Tracker</h1>
-          <p className="text-muted-foreground">Manage your inventory with or without a POS system</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Inventory Tracker</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Manage your inventory with or without a POS system</p>
         </div>
         
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowScanner(true)}>
+        <div className="flex gap-2 w-full md:w-auto justify-end">
+          <Button variant="outline" onClick={() => setShowScanner(true)} className="flex-1 md:flex-none">
             <BarcodeIcon className="h-4 w-4 mr-2" />
-            Scan Items
+            <span className="md:inline">Scan</span>
           </Button>
-          <Button onClick={() => setShowAddItem(true)}>
+          <Button onClick={() => setShowAddItem(true)} className="flex-1 md:flex-none">
             <Plus className="h-4 w-4 mr-2" />
-            Add Item
+            <span className="md:inline">Add Item</span>
           </Button>
         </div>
       </div>
@@ -525,18 +525,27 @@ export default function InventoryTracker() {
       </Dialog>
       
       <Tabs defaultValue={activeTab} className="space-y-4" onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="inventory">Inventory</TabsTrigger>
-          <TabsTrigger value="orders">Orders & Restocking</TabsTrigger>
-          <TabsTrigger value="alerts">Low Stock Alerts ({lowStockItems.length})</TabsTrigger>
+        <TabsList className="w-full grid grid-cols-3 mb-4">
+          <TabsTrigger value="inventory" className="text-xs md:text-sm">Inventory</TabsTrigger>
+          <TabsTrigger value="orders" className="text-xs md:text-sm">
+            <span className="hidden md:inline">Orders & Restocking</span>
+            <span className="inline md:hidden">Orders</span>
+          </TabsTrigger>
+          <TabsTrigger value="alerts" className="text-xs md:text-sm">
+            <span className="hidden md:inline">Low Stock Alerts</span>
+            <span className="inline md:hidden">Alerts</span>
+            <span className="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-muted text-xs">
+              {lowStockItems.length}
+            </span>
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="inventory" className="space-y-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
             <div className="flex items-center space-x-2">
-              <Label htmlFor="category-filter">Filter by:</Label>
+              <Label htmlFor="category-filter" className="whitespace-nowrap text-sm">Filter:</Label>
               <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full md:w-[180px] text-sm">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
@@ -550,17 +559,19 @@ export default function InventoryTracker() {
               </Select>
             </div>
             
-            <div className="flex w-full max-w-sm items-center space-x-2">
+            <div className="flex w-full items-center space-x-2">
               <Input 
-                placeholder="Search by name, supplier, or barcode" 
+                placeholder="Search products..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                className="text-sm"
               />
               {searchTerm && (
                 <Button 
                   variant="ghost" 
                   size="icon" 
                   onClick={() => setSearchTerm('')}
+                  className="h-8 w-8"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -569,7 +580,94 @@ export default function InventoryTracker() {
           </div>
           
           <Card>
-            <CardContent className="p-0">
+            {/* Mobile Card View */}
+            <div className="md:hidden">
+              <CardContent className="p-4">
+                {filteredInventory.length > 0 ? (
+                  <div className="space-y-4">
+                    {filteredInventory.map((item) => (
+                      <div key={item.id} className="border rounded-lg p-3 space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="font-medium">{item.name}</div>
+                            <div className="text-xs text-muted-foreground">Barcode: {item.barcode || 'N/A'}</div>
+                          </div>
+                          <Badge className={item.lowStock ? 'bg-red-100 text-red-800 border-red-300' : 'bg-green-100 text-green-800 border-green-300'}>
+                            {item.lowStock ? 'Low Stock' : 'In Stock'}
+                          </Badge>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <div className="text-muted-foreground">Category</div>
+                            <div>{item.category}</div>
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground">Supplier</div>
+                            <div>{item.supplier}</div>
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground">Price</div>
+                            <div>${item.price.toFixed(2)}</div>
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground">Quantity</div>
+                            <div className={item.lowStock ? 'text-destructive font-medium' : ''}>
+                              {item.quantity} {item.unit}
+                              {item.lowStock && <AlertCircle className="h-3 w-3 text-destructive ml-1 inline" />}
+                            </div>
+                          </div>
+                          {item.expiry && (
+                            <div>
+                              <div className="text-muted-foreground">Expiry</div>
+                              <div>{item.expiry}</div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex justify-end space-x-2 pt-2 border-t">
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <ShoppingCart className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="sm" className="h-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Package className="h-10 w-10 mb-2 text-muted-foreground" />
+                    <p>No items found</p>
+                    <p className="text-sm text-muted-foreground">Try a different search or filter</p>
+                  </div>
+                )}
+              </CardContent>
+              <CardFooter className="py-4 px-4 border-t flex flex-col sm:flex-row gap-3 justify-between">
+                <div className="text-sm text-muted-foreground w-full text-center sm:text-left">
+                  Showing {filteredInventory.length} of {inventory.length} items
+                </div>
+                <div className="flex gap-2 w-full sm:w-auto justify-center sm:justify-end">
+                  <Button variant="outline" size="sm" onClick={handleUploadClick} className="flex-1 sm:flex-none">
+                    <FileUp className="h-4 w-4 mr-2" />
+                    Import
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
+                    Export
+                  </Button>
+                </div>
+              </CardFooter>
+            </div>
+            
+            {/* Desktop Table View */}
+            <CardContent className="p-0 hidden md:block">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -633,7 +731,7 @@ export default function InventoryTracker() {
                 </TableBody>
               </Table>
             </CardContent>
-            <CardFooter className="py-4 px-6 border-t flex justify-between">
+            <CardFooter className="py-4 px-6 border-t hidden md:flex justify-between">
               <div className="text-sm text-muted-foreground">
                 Showing {filteredInventory.length} of {inventory.length} items
               </div>
