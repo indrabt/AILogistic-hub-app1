@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 // Import the order management types
 import { Order, OrderItem, ReturnRequest, ReturnItem } from '../types/order-types';
@@ -125,6 +125,43 @@ export default function OrdersDirectAccess() {
       toast({
         title: "Error",
         description: "Failed to load orders. Using cached data if available.",
+        variant: "destructive",
+      });
+    }
+  } as any);
+  
+  // Mutations
+  const createOrderMutation = useMutation({
+    mutationFn: async (orderData: any) => {
+      return await apiRequest('/api/orders', {
+        method: 'POST',
+        body: JSON.stringify(orderData),
+      });
+    },
+    onSuccess: () => {
+      // Invalidate the orders query to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      
+      setShowCreateDialog(false);
+      toast({
+        title: "Order Created",
+        description: "New order has been created successfully.",
+      });
+      
+      // Reset form data
+      setNewOrderData({
+        customerName: "",
+        customerType: "retail",
+        customerLocation: "",
+        priority: "standard",
+        notes: ""
+      });
+    },
+    onError: (error: any) => {
+      console.error("Failed to create order:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create order. Please try again.",
         variant: "destructive",
       });
     }
@@ -477,12 +514,24 @@ export default function OrdersDirectAccess() {
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="col-span-2">
               <Label htmlFor="customerName">Customer Name</Label>
-              <Input id="customerName" placeholder="Enter customer name" className="mt-1" />
+              <Input 
+                id="customerName" 
+                placeholder="Enter customer name" 
+                className="mt-1"
+                value={newOrderData.customerName}
+                onChange={(e) => setNewOrderData({...newOrderData, customerName: e.target.value})}
+              />
             </div>
             
             <div>
               <Label htmlFor="customerType">Customer Type</Label>
-              <Select defaultValue="retail">
+              <Select 
+                value={newOrderData.customerType}
+                onValueChange={(value) => setNewOrderData({
+                  ...newOrderData, 
+                  customerType: value as "retail" | "wholesale" | "distributor" | "internal"
+                })}
+              >
                 <SelectTrigger id="customerType" className="mt-1">
                   <SelectValue placeholder="Select customer type" />
                 </SelectTrigger>
@@ -497,7 +546,13 @@ export default function OrdersDirectAccess() {
             
             <div>
               <Label htmlFor="priority">Priority</Label>
-              <Select defaultValue="standard">
+              <Select 
+                value={newOrderData.priority}
+                onValueChange={(value) => setNewOrderData({
+                  ...newOrderData, 
+                  priority: value as "standard" | "express" | "urgent"
+                })}
+              >
                 <SelectTrigger id="priority" className="mt-1">
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
@@ -511,12 +566,24 @@ export default function OrdersDirectAccess() {
             
             <div className="col-span-2">
               <Label htmlFor="location">Location</Label>
-              <Input id="location" placeholder="Enter location" className="mt-1" />
+              <Input 
+                id="location" 
+                placeholder="Enter location" 
+                className="mt-1"
+                value={newOrderData.customerLocation}
+                onChange={(e) => setNewOrderData({...newOrderData, customerLocation: e.target.value})}
+              />
             </div>
             
             <div className="col-span-2">
               <Label htmlFor="notes">Notes</Label>
-              <Input id="notes" placeholder="Enter any additional notes" className="mt-1" />
+              <Input 
+                id="notes" 
+                placeholder="Enter any additional notes" 
+                className="mt-1"
+                value={newOrderData.notes}
+                onChange={(e) => setNewOrderData({...newOrderData, notes: e.target.value})}
+              />
             </div>
           </div>
           
@@ -527,14 +594,33 @@ export default function OrdersDirectAccess() {
             <Button 
               type="button"
               onClick={() => {
-                setShowCreateDialog(false);
-                toast({
-                  title: "Order Created",
-                  description: "New order has been created successfully.",
-                });
+                // Validate form data
+                if (!newOrderData.customerName || !newOrderData.customerLocation) {
+                  toast({
+                    title: "Error",
+                    description: "Please fill in all required fields.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+                
+                // Create order data object with default values for other fields
+                const orderData = {
+                  ...newOrderData,
+                  createdAt: new Date().toISOString(),
+                  status: "pending",
+                  items: [],
+                  totalValue: 0,
+                  estimatedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
+                  paymentStatus: "pending",
+                };
+                
+                // Call the mutation
+                createOrderMutation.mutate(orderData);
               }}
+              disabled={createOrderMutation.isPending}
             >
-              Create Order
+              {createOrderMutation.isPending ? "Creating..." : "Create Order"}
             </Button>
           </DialogFooter>
         </DialogContent>
