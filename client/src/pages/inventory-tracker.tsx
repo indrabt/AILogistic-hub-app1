@@ -742,63 +742,86 @@ export default function InventoryTracker() {
                 {filteredInventory.length > 0 ? (
                   <div className="space-y-4">
                     {filteredInventory.map((item) => (
-                      <div key={item.id} className="border rounded-lg p-3 space-y-3">
+                      <div key={item.id} className="border rounded-lg p-3 space-y-3 shadow-sm bg-card">
                         <div className="flex justify-between items-start">
-                          <div>
-                            <div className="font-medium">{item.name}</div>
-                            <div className="text-xs text-muted-foreground">Barcode: {item.barcode || 'N/A'}</div>
+                          <div className="flex-1">
+                            <div className="font-medium text-base">{item.name}</div>
+                            <div className="text-xs text-muted-foreground flex items-center gap-1">
+                              <BarcodeIcon className="h-3 w-3" />
+                              {item.barcode || 'N/A'}
+                            </div>
                           </div>
-                          <Badge className={item.lowStock ? 'bg-red-100 text-red-800 border-red-300' : 'bg-green-100 text-green-800 border-green-300'}>
-                            {item.lowStock ? 'Low Stock' : 'In Stock'}
+                          <Badge className={item.lowStock 
+                            ? 'bg-red-100 text-red-800 border-red-300 flex items-center gap-1' 
+                            : 'bg-green-100 text-green-800 border-green-300 flex items-center gap-1'
+                          }>
+                            {item.lowStock 
+                              ? <><AlertCircle className="h-3 w-3" /> Low Stock</> 
+                              : <><Check className="h-3 w-3" /> In Stock</>
+                            }
                           </Badge>
                         </div>
                         
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <div>
-                            <div className="text-muted-foreground">Category</div>
-                            <div>{item.category}</div>
+                            <div className="text-muted-foreground text-xs">Category</div>
+                            <div className="font-medium">{item.category}</div>
                           </div>
                           <div>
-                            <div className="text-muted-foreground">Supplier</div>
-                            <div>{item.supplier}</div>
+                            <div className="text-muted-foreground text-xs">Supplier</div>
+                            <div className="font-medium truncate">{item.supplier}</div>
                           </div>
                           <div>
-                            <div className="text-muted-foreground">Price</div>
-                            <div>${item.price.toFixed(2)}</div>
+                            <div className="text-muted-foreground text-xs">Price</div>
+                            <div className="font-medium">${item.price.toFixed(2)}</div>
                           </div>
                           <div>
-                            <div className="text-muted-foreground">Quantity</div>
-                            <div className={item.lowStock ? 'text-destructive font-medium' : ''}>
+                            <div className="text-muted-foreground text-xs">Quantity</div>
+                            <div className={`font-medium ${item.lowStock ? 'text-destructive' : ''}`}>
                               {item.quantity} {item.unit}
                               {item.lowStock && <AlertCircle className="h-3 w-3 text-destructive ml-1 inline" />}
                             </div>
                           </div>
                           {item.expiry && (
-                            <div>
-                              <div className="text-muted-foreground">Expiry</div>
-                              <div>{item.expiry}</div>
+                            <div className="col-span-2">
+                              <div className="text-muted-foreground text-xs">Expiry</div>
+                              <div className="font-medium">{new Date(item.expiry).toLocaleDateString()}</div>
                             </div>
                           )}
                         </div>
                         
-                        <div className="flex justify-end space-x-2 pt-2 border-t">
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <ShoppingCart className="h-4 w-4" />
-                          </Button>
+                        <div className="flex justify-between items-center pt-2 border-t mt-2">
+                          <div className="flex gap-1">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="h-8 px-2 py-0 flex items-center gap-1"
+                              onClick={() => toast({ title: "Details", description: `Viewing details for ${item.name}` })}
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                              <span>View</span>
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="h-8 px-2 py-0 flex items-center gap-1"
+                              onClick={() => toast({ 
+                                title: "Cart", 
+                                description: `Added ${item.name} to cart` 
+                              })}
+                            >
+                              <ShoppingCart className="h-3.5 w-3.5" />
+                              <span>Add</span>
+                            </Button>
+                          </div>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="outline" size="sm" className="h-8">
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-[160px]">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuContent align="end" className="w-[180px]">
+                              <DropdownMenuLabel>Item Actions</DropdownMenuLabel>
                               <DropdownMenuItem onClick={() => toast({ title: "Details", description: `Viewing details for ${item.name}` })}>
                                 <Eye className="h-4 w-4 mr-2" />
                                 View Details
@@ -813,7 +836,7 @@ export default function InventoryTracker() {
                                   title: "Order", 
                                   description: `Added ${item.name} to order list` 
                                 })}
-                                className="text-blue-600"
+                                className="text-primary"
                               >
                                 <ShoppingCart className="h-4 w-4 mr-2" />
                                 Add to Order
@@ -824,7 +847,7 @@ export default function InventoryTracker() {
                                 className="text-destructive focus:text-destructive"
                               >
                                 <Trash className="h-4 w-4 mr-2" />
-                                Delete
+                                Delete Item
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
