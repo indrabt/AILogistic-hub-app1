@@ -120,7 +120,7 @@ export default function OrderManagement() {
   // Update Order Status Mutation
   const updateOrderMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
-      return apiRequest<Order>(`/api/orders/${id}`, {
+      return apiRequest(`/api/orders/${id}`, {
         method: 'PATCH',
         body: JSON.stringify({ status }),
         headers: { 'Content-Type': 'application/json' },
@@ -170,7 +170,7 @@ export default function OrderManagement() {
   // Create Return Request Mutation
   const createReturnMutation = useMutation({
     mutationFn: async (newReturn: Omit<ReturnRequest, 'id'>) => {
-      return apiRequest<ReturnRequest>('/api/return-requests', {
+      return apiRequest('/api/return-requests', {
         method: 'POST',
         body: JSON.stringify(newReturn),
         headers: { 'Content-Type': 'application/json' },
@@ -194,7 +194,7 @@ export default function OrderManagement() {
   });
 
   // Filter orders based on search query
-  const filteredOrders = orders.filter(order => {
+  const filteredOrders = orders.filter((order: Order) => {
     if (!searchQuery) return true;
     const searchLower = searchQuery.toLowerCase();
     return (
@@ -205,7 +205,7 @@ export default function OrderManagement() {
   });
 
   // Get the selected order
-  const selectedOrder = selectedOrderId ? orders.find(o => o.id === selectedOrderId) : null;
+  const selectedOrder = selectedOrderId ? orders.find((o: Order) => o.id === selectedOrderId) : null;
 
   // Get status badge style
   const getStatusBadge = (status: string) => {
@@ -345,7 +345,7 @@ export default function OrderManagement() {
                 </div>
               ) : (
                 <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2">
-                  {filteredOrders.map((order) => (
+                  {filteredOrders.map((order: Order) => (
                     <Card 
                       key={order.id} 
                       className={`cursor-pointer ${selectedOrderId === order.id ? 'border-primary' : ''}`}
@@ -610,7 +610,7 @@ export default function OrderManagement() {
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {orderItems.map((item) => (
+                                  {orderItems.map((item: OrderItem) => (
                                     <tr key={item.id} className="border-b hover:bg-muted/50">
                                       <td className="p-3">{item.productName}</td>
                                       <td className="p-3">{item.productSKU}</td>
@@ -629,7 +629,7 @@ export default function OrderManagement() {
                     </TabsContent>
 
                     <TabsContent value="returns">
-                      {returnRequests.filter(r => r.orderId === selectedOrder.id).length === 0 ? (
+                      {returnRequests.filter((r: ReturnRequest) => r.orderId === selectedOrder.id).length === 0 ? (
                         <div className="text-center py-10 text-muted-foreground">
                           <RotateCcw className="h-8 w-8 mx-auto mb-2 opacity-50" />
                           <p>No returns found for this order</p>
@@ -647,8 +647,8 @@ export default function OrderManagement() {
                       ) : (
                         <div className="space-y-4">
                           {returnRequests
-                            .filter(r => r.orderId === selectedOrder.id)
-                            .map((returnRequest) => (
+                            .filter((r: ReturnRequest) => r.orderId === selectedOrder.id)
+                            .map((returnRequest: ReturnRequest) => (
                               <Card key={returnRequest.id}>
                                 <CardHeader className="pb-2">
                                   <div className="flex justify-between items-center">
