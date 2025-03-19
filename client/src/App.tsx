@@ -35,9 +35,18 @@ import DriverSchedule from "@/pages/driver-schedule";
 function Router() {
   const [location] = useLocation();
   
-  // Don't use SidebarLayout for the login page
+  // Don't use SidebarLayout for certain pages
   const noSidebarPaths = ['/login'];
-  const showSidebar = !noSidebarPaths.includes(location);
+  // Don't use main SidebarLayout for driver pages since they have their own sidebar
+  const driverPaths = [
+    '/driver-dashboard', 
+    '/driver-schedule',
+    '/driver-routes',
+    '/driver-navigation',
+    '/driver-weather',
+    '/driver-settings'
+  ];
+  const showSidebar = !noSidebarPaths.includes(location) && !driverPaths.some(path => location.startsWith(path));
   
   const RouterContent = () => {
     console.log('Rendering route component for path:', location);
