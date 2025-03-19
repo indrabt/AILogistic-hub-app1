@@ -29,6 +29,7 @@ import RealTimeDashboard from "@/pages/real-time-dashboard";
 import RetailDashboard from "@/pages/retail-dashboard";
 import LocalSourcing from "@/pages/local-sourcing";
 import IntegrationKit from "@/pages/integration-kit";
+import InventoryTracker from "@/pages/inventory-tracker";
 
 function Router() {
   const [location] = useLocation();
@@ -69,7 +70,7 @@ function Router() {
           <Route path="/demand-prediction" component={RetailDashboard} />
           <Route path="/local-sourcing" component={LocalSourcing} />
           <Route path="/pricing-assistant" component={RetailDashboard} />
-          <Route path="/inventory-tracker" component={RetailDashboard} />
+          <Route path="/inventory-tracker" component={InventoryTracker} />
           <Route path="/loyalty-program" component={RetailDashboard} />
           <Route path="/waste-management" component={RetailDashboard} />
           <Route path="/integration-kit" component={IntegrationKit} />
