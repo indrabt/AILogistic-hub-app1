@@ -1,10 +1,21 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Truck, MapPin, Clock, PackageOpen, ArrowUpDown, Check, AlertTriangle } from "lucide-react";
+import { 
+  Truck, 
+  MapPin, 
+  Clock, 
+  PackageOpen, 
+  ArrowUpDown, 
+  Check, 
+  AlertTriangle, 
+  CalendarClock, 
+  Calendar, 
+  SquarePen
+} from "lucide-react";
 import { useLocation } from "wouter";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -38,7 +49,18 @@ export default function DriverDashboard() {
   const [user, setUser] = useState<any>(null);
   const [driverStatus, setDriverStatus] = useState<DriverStatus>("available");
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
-  const [_, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const [activeView, setActiveView] = useState<string>("dashboard");
+  
+  // Check for URL parameters to determine active view
+  useEffect(() => {
+    // Check if we should show schedule view
+    if (location.includes("?view=schedule")) {
+      setActiveView("schedule");
+    } else {
+      setActiveView("dashboard");
+    }
+  }, [location]);
 
   useEffect(() => {
     // Check if user is logged in
