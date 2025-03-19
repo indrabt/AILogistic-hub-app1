@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { 
-  Truck, 
-  MapPin, 
-  Clock, 
-  CalendarClock
-} from "lucide-react";
+import { Truck, MapPin, Clock } from "lucide-react";
 import { useLocation } from "wouter";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -21,6 +15,7 @@ import {
 import { getQueryFn } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import { Shipment, Route } from "@shared/types";
+import DriverSidebarLayout from "@/components/layouts/DriverSidebarLayout";
 
 type DriverStatus = "available" | "on-delivery" | "break" | "off-duty";
 
@@ -91,7 +86,7 @@ export default function DriverDashboard() {
     }
   };
 
-  return (
+  const content = (
     <div className="container mx-auto p-4 space-y-6">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -99,44 +94,24 @@ export default function DriverDashboard() {
           <p className="text-muted-foreground">Welcome back, {user.name || user.username}</p>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-2 items-center">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Status:</span>
-            <Select
-              value={driverStatus}
-              onValueChange={(value) => handleStatusChange(value as DriverStatus)}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="available">Available</SelectItem>
-                <SelectItem value="on-delivery">On Delivery</SelectItem>
-                <SelectItem value="break">On Break</SelectItem>
-                <SelectItem value="off-duty">Off Duty</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Button variant="outline" onClick={() => setLocation("/login")}>Sign Out</Button>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">Status:</span>
+          <Select
+            value={driverStatus}
+            onValueChange={(value) => handleStatusChange(value as DriverStatus)}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="available">Available</SelectItem>
+              <SelectItem value="on-delivery">On Delivery</SelectItem>
+              <SelectItem value="break">On Break</SelectItem>
+              <SelectItem value="off-duty">Off Duty</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </header>
-      
-      {/* Navigation buttons */}
-      <div className="flex space-x-2 mb-4">
-        <Button 
-          variant="default"
-          className="flex-1 sm:flex-initial"
-        >
-          <Truck className="mr-2 h-4 w-4" /> Dashboard
-        </Button>
-        <Button 
-          variant="outline"
-          onClick={() => setLocation("/driver-schedule")}
-          className="flex-1 sm:flex-initial"
-        >
-          <CalendarClock className="mr-2 h-4 w-4" /> Schedule
-        </Button>
-      </div>
       
       {/* Dashboard content */}
       <div className="space-y-6">
@@ -213,5 +188,11 @@ export default function DriverDashboard() {
         </div>
       </div>
     </div>
+  );
+
+  return (
+    <DriverSidebarLayout>
+      {content}
+    </DriverSidebarLayout>
   );
 }

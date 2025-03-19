@@ -66,6 +66,10 @@ function Router() {
           <Route path="/western-sydney-users" component={WesternSydneyUsers} />
           <Route path="/driver-dashboard" component={DriverDashboard} />
           <Route path="/driver-schedule" component={DriverSchedule} />
+          <Route path="/driver-routes" component={() => <DriverDashboard />} />
+          <Route path="/driver-navigation" component={() => <DriverDashboard />} />
+          <Route path="/driver-weather" component={() => <WeatherImpact />} />
+          <Route path="/driver-settings" component={() => <Settings />} />
           <Route path="/warehouse-dashboard" component={WarehouseDashboard} />
           <Route path="/real-time-dashboard" component={RealTimeDashboard} />
           <Route path="/retail-dashboard" component={RetailDashboard} />
