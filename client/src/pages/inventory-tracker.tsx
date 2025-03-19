@@ -29,7 +29,8 @@ import {
   BarChart2, 
   BarcodeIcon, 
   FilePlus, 
-  FileUp, 
+  FileUp,
+  MoreHorizontal, 
   Package, 
   Plus, 
   Smartphone, 
@@ -264,155 +265,293 @@ export default function InventoryTracker() {
       
       {/* Add Item Dialog */}
       <Dialog open={showAddItem} onOpenChange={setShowAddItem}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] p-4 sm:p-6 h-[90vh] sm:h-auto overflow-auto">
           <DialogHeader>
-            <DialogTitle>Add New Inventory Item</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl">Add New Inventory Item</DialogTitle>
+            <DialogDescription className="text-sm">
               Fill in the details for the new product. Required fields are marked with an asterisk (*).
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name *
-                </Label>
-                <Input
-                  id="name"
-                  value={productName}
-                  onChange={(e) => setProductName(e.target.value)}
-                  className="col-span-3"
-                  placeholder="Product name"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="category" className="text-right">
-                  Category *
-                </Label>
-                <Select
-                  value={productCategory}
-                  onValueChange={setProductCategory}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="supplier" className="text-right">
-                  Supplier *
-                </Label>
-                <Select
-                  value={productSupplier}
-                  onValueChange={setProductSupplier}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select a supplier" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {suppliers.map((supplier) => (
-                      <SelectItem key={supplier} value={supplier}>
-                        {supplier}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="price" className="text-right">
-                  Price ($) *
-                </Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={productPrice}
-                  onChange={(e) => setProductPrice(e.target.value)}
-                  className="col-span-3"
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="quantity" className="text-right">
-                  Quantity *
-                </Label>
-                <div className="col-span-3 grid grid-cols-4 gap-2">
+            <div className="grid gap-4 py-2 sm:py-4">
+              {/* Mobile layout - stacked */}
+              <div className="block sm:hidden space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name-mobile" className="font-medium">
+                    Name <span className="text-destructive">*</span>
+                  </Label>
                   <Input
-                    id="quantity"
-                    type="number"
-                    min="0"
-                    value={productQuantity}
-                    onChange={(e) => setProductQuantity(e.target.value)}
-                    className="col-span-3"
-                    placeholder="0"
+                    id="name-mobile"
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    placeholder="Product name"
                     required
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="category-mobile" className="font-medium">
+                    Category <span className="text-destructive">*</span>
+                  </Label>
                   <Select
-                    value={productUnit}
-                    onValueChange={setProductUnit}
+                    value={productCategory}
+                    onValueChange={setProductCategory}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Unit" />
+                      <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {units.map((unit) => (
-                        <SelectItem key={unit} value={unit}>
-                          {unit}
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="barcode" className="text-right">
-                  Barcode
-                </Label>
-                <div className="col-span-3 flex gap-2">
-                  <Input
-                    id="barcode"
-                    value={productBarcode}
-                    onChange={(e) => setProductBarcode(e.target.value)}
-                    placeholder="Scan or enter barcode"
-                  />
-                  <Button 
-                    type="button" 
-                    variant="outline"
-                    onClick={toggleCamera}
-                    className="shrink-0"
+                <div className="space-y-2">
+                  <Label htmlFor="supplier-mobile" className="font-medium">
+                    Supplier <span className="text-destructive">*</span>
+                  </Label>
+                  <Select
+                    value={productSupplier}
+                    onValueChange={setProductSupplier}
                   >
-                    <BarcodeIcon className="h-4 w-4" />
-                  </Button>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a supplier" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {suppliers.map((supplier) => (
+                        <SelectItem key={supplier} value={supplier}>
+                          {supplier}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="price-mobile" className="font-medium">
+                    Price ($) <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="price-mobile"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={productPrice}
+                    onChange={(e) => setProductPrice(e.target.value)}
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="quantity-mobile" className="font-medium">
+                    Quantity <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Input
+                      id="quantity-mobile"
+                      type="number"
+                      min="0"
+                      value={productQuantity}
+                      onChange={(e) => setProductQuantity(e.target.value)}
+                      className="col-span-2"
+                      placeholder="0"
+                      required
+                    />
+                    <Select
+                      value={productUnit}
+                      onValueChange={setProductUnit}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Unit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {units.map((unit) => (
+                          <SelectItem key={unit} value={unit}>
+                            {unit}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="barcode-mobile" className="font-medium">
+                    Barcode
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="barcode-mobile"
+                      value={productBarcode}
+                      onChange={(e) => setProductBarcode(e.target.value)}
+                      placeholder="Scan or enter barcode"
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      onClick={toggleCamera}
+                      className="shrink-0"
+                    >
+                      <BarcodeIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="expiry-mobile" className="font-medium">
+                    Expiry Date
+                  </Label>
+                  <Input
+                    id="expiry-mobile"
+                    type="date"
+                    value={productExpiry}
+                    onChange={(e) => setProductExpiry(e.target.value)}
+                  />
                 </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="expiry" className="text-right">
-                  Expiry Date
-                </Label>
-                <Input
-                  id="expiry"
-                  type="date"
-                  value={productExpiry}
-                  onChange={(e) => setProductExpiry(e.target.value)}
-                  className="col-span-3"
-                />
+              
+              {/* Desktop layout - grid */}
+              <div className="hidden sm:block">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">
+                    Name <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="name"
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    className="col-span-3"
+                    placeholder="Product name"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4 mt-4">
+                  <Label htmlFor="category" className="text-right">
+                    Category <span className="text-destructive">*</span>
+                  </Label>
+                  <Select
+                    value={productCategory}
+                    onValueChange={setProductCategory}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4 mt-4">
+                  <Label htmlFor="supplier" className="text-right">
+                    Supplier <span className="text-destructive">*</span>
+                  </Label>
+                  <Select
+                    value={productSupplier}
+                    onValueChange={setProductSupplier}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select a supplier" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {suppliers.map((supplier) => (
+                        <SelectItem key={supplier} value={supplier}>
+                          {supplier}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4 mt-4">
+                  <Label htmlFor="price" className="text-right">
+                    Price ($) <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={productPrice}
+                    onChange={(e) => setProductPrice(e.target.value)}
+                    className="col-span-3"
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4 mt-4">
+                  <Label htmlFor="quantity" className="text-right">
+                    Quantity <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="col-span-3 grid grid-cols-4 gap-2">
+                    <Input
+                      id="quantity"
+                      type="number"
+                      min="0"
+                      value={productQuantity}
+                      onChange={(e) => setProductQuantity(e.target.value)}
+                      className="col-span-3"
+                      placeholder="0"
+                      required
+                    />
+                    <Select
+                      value={productUnit}
+                      onValueChange={setProductUnit}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Unit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {units.map((unit) => (
+                          <SelectItem key={unit} value={unit}>
+                            {unit}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4 mt-4">
+                  <Label htmlFor="barcode" className="text-right">
+                    Barcode
+                  </Label>
+                  <div className="col-span-3 flex gap-2">
+                    <Input
+                      id="barcode"
+                      value={productBarcode}
+                      onChange={(e) => setProductBarcode(e.target.value)}
+                      placeholder="Scan or enter barcode"
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      onClick={toggleCamera}
+                      className="shrink-0"
+                    >
+                      <BarcodeIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4 mt-4">
+                  <Label htmlFor="expiry" className="text-right">
+                    Expiry Date
+                  </Label>
+                  <Input
+                    id="expiry"
+                    type="date"
+                    value={productExpiry}
+                    onChange={(e) => setProductExpiry(e.target.value)}
+                    className="col-span-3"
+                  />
+                </div>
               </div>
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowAddItem(false)}>
+            <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 mt-4 sm:mt-0">
+              <Button type="button" variant="outline" onClick={() => setShowAddItem(false)} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button type="submit">Add Item</Button>
+              <Button type="submit" className="w-full sm:w-auto">Add Item</Button>
             </DialogFooter>
           </form>
         </DialogContent>
