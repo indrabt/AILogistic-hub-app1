@@ -21,6 +21,11 @@ import {
   ModelPrediction,
   AnomalyDetection,
   ScenarioAnalysis,
+  // Order Management imports
+  Order,
+  OrderItem,
+  ReturnRequest,
+  ReturnItem,
   // New features imports
   HyperLocalRoutingData,
   ConstructionZone,
@@ -71,6 +76,26 @@ export interface IStorage {
   getSupplyChainNodes(): Promise<SupplyChainNode[]>;
   getShipments(): Promise<Shipment[]>;
   getInventoryAlerts(): Promise<InventoryAlert[]>;
+  
+  // Order Management data
+  getOrders(status?: string): Promise<Order[]>;
+  getOrderById(id: number): Promise<Order | undefined>;
+  createOrder(order: Omit<Order, 'id'>): Promise<Order>;
+  updateOrder(id: number, order: Partial<Order>): Promise<Order | undefined>;
+  deleteOrder(id: number): Promise<boolean>;
+  
+  getOrderItems(orderId: number): Promise<OrderItem[]>;
+  createOrderItem(item: Omit<OrderItem, 'id'>): Promise<OrderItem>;
+  updateOrderItem(id: number, item: Partial<OrderItem>): Promise<OrderItem | undefined>;
+  
+  getReturnRequests(status?: string): Promise<ReturnRequest[]>;
+  getReturnRequestById(id: number): Promise<ReturnRequest | undefined>;
+  createReturnRequest(request: Omit<ReturnRequest, 'id'>): Promise<ReturnRequest>;
+  updateReturnRequest(id: number, request: Partial<ReturnRequest>): Promise<ReturnRequest | undefined>;
+  
+  getReturnItems(returnId: number): Promise<ReturnItem[]>;
+  createReturnItem(item: Omit<ReturnItem, 'id'>): Promise<ReturnItem>;
+  updateReturnItem(id: number, item: Partial<ReturnItem>): Promise<ReturnItem | undefined>;
   
   // Demand forecasting data
   getProductForecasts(category?: string): Promise<ProductForecast[]>;
@@ -163,6 +188,126 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  // Order Management methods
+  async getOrders(status?: string): Promise<Order[]> {
+    if (status) {
+      return this.orders.filter(order => order.status === status);
+    }
+    return this.orders;
+  }
+
+  async getOrderById(id: number): Promise<Order | undefined> {
+    return this.orders.find(order => order.id === id);
+  }
+
+  async createOrder(order: Omit<Order, 'id'>): Promise<Order> {
+    const newOrder: Order = {
+      ...order,
+      id: this.orders.length > 0 ? Math.max(...this.orders.map(o => o.id)) + 1 : 1
+    };
+    this.orders.push(newOrder);
+    return newOrder;
+  }
+
+  async updateOrder(id: number, order: Partial<Order>): Promise<Order | undefined> {
+    const index = this.orders.findIndex(o => o.id === id);
+    if (index === -1) return undefined;
+    
+    this.orders[index] = {
+      ...this.orders[index],
+      ...order
+    };
+    return this.orders[index];
+  }
+
+  async deleteOrder(id: number): Promise<boolean> {
+    const index = this.orders.findIndex(o => o.id === id);
+    if (index === -1) return false;
+    
+    this.orders.splice(index, 1);
+    return true;
+  }
+
+  async getOrderItems(orderId: number): Promise<OrderItem[]> {
+    const order = await this.getOrderById(orderId);
+    return order ? order.items : [];
+  }
+
+  async createOrderItem(item: Omit<OrderItem, 'id'>): Promise<OrderItem> {
+    const newItem: OrderItem = {
+      ...item,
+      id: this.orderItems.length > 0 ? Math.max(...this.orderItems.map(i => i.id)) + 1 : 1
+    };
+    this.orderItems.push(newItem);
+    return newItem;
+  }
+
+  async updateOrderItem(id: number, item: Partial<OrderItem>): Promise<OrderItem | undefined> {
+    const index = this.orderItems.findIndex(i => i.id === id);
+    if (index === -1) return undefined;
+    
+    this.orderItems[index] = {
+      ...this.orderItems[index],
+      ...item
+    };
+    return this.orderItems[index];
+  }
+
+  async getReturnRequests(status?: string): Promise<ReturnRequest[]> {
+    if (status) {
+      return this.returnRequests.filter(request => request.status === status);
+    }
+    return this.returnRequests;
+  }
+
+  async getReturnRequestById(id: number): Promise<ReturnRequest | undefined> {
+    return this.returnRequests.find(request => request.id === id);
+  }
+
+  async createReturnRequest(request: Omit<ReturnRequest, 'id'>): Promise<ReturnRequest> {
+    const newRequest: ReturnRequest = {
+      ...request,
+      id: this.returnRequests.length > 0 ? Math.max(...this.returnRequests.map(r => r.id)) + 1 : 1
+    };
+    this.returnRequests.push(newRequest);
+    return newRequest;
+  }
+
+  async updateReturnRequest(id: number, request: Partial<ReturnRequest>): Promise<ReturnRequest | undefined> {
+    const index = this.returnRequests.findIndex(r => r.id === id);
+    if (index === -1) return undefined;
+    
+    this.returnRequests[index] = {
+      ...this.returnRequests[index],
+      ...request
+    };
+    return this.returnRequests[index];
+  }
+
+  async getReturnItems(returnId: number): Promise<ReturnItem[]> {
+    const returnRequest = await this.getReturnRequestById(returnId);
+    return returnRequest ? returnRequest.items : [];
+  }
+
+  async createReturnItem(item: Omit<ReturnItem, 'id'>): Promise<ReturnItem> {
+    const newItem: ReturnItem = {
+      ...item,
+      id: this.returnItems.length > 0 ? Math.max(...this.returnItems.map(i => i.id)) + 1 : 1
+    };
+    this.returnItems.push(newItem);
+    return newItem;
+  }
+
+  async updateReturnItem(id: number, item: Partial<ReturnItem>): Promise<ReturnItem | undefined> {
+    const index = this.returnItems.findIndex(i => i.id === id);
+    if (index === -1) return undefined;
+    
+    this.returnItems[index] = {
+      ...this.returnItems[index],
+      ...item
+    };
+    return this.returnItems[index];
+  }
   private users: Map<number, User>;
   private metrics: MetricData;
   private locations: MapLocation[];
@@ -181,6 +326,12 @@ export class MemStorage implements IStorage {
   private alternativeRoutes: AlternativeRoute[];
   private reports: Report[];
   private userSettings: UserSettings;
+  
+  // Order Management data
+  private orders: Order[];
+  private orderItems: OrderItem[];
+  private returnRequests: ReturnRequest[];
+  private returnItems: ReturnItem[];
   
   // AI Predictive Analytics data
   private predictiveModels: PredictiveModel[];
@@ -232,6 +383,150 @@ export class MemStorage implements IStorage {
   constructor() {
     this.users = new Map();
     this.currentId = 6; // Start with ID 6 to account for our 5 predefined users
+    
+    // Initialize Order Management arrays with sample data
+    this.orders = [
+      {
+        id: 1,
+        orderNumber: "ORD-2025-0001",
+        customerName: "Sydney Tech Solutions",
+        customerType: "wholesale",
+        customerLocation: "Sydney CBD",
+        createdAt: "2025-03-15T09:30:00",
+        status: "processing",
+        items: [],
+        totalValue: 4250.00,
+        priority: "express",
+        notes: "Requires special handling for electronics",
+        estimatedDeliveryDate: "2025-03-20",
+        paymentStatus: "paid",
+        invoiceNumber: "INV-2025-0001"
+      },
+      {
+        id: 2,
+        orderNumber: "ORD-2025-0002",
+        customerName: "Western Sydney Retail",
+        customerType: "retail",
+        customerLocation: "Penrith",
+        createdAt: "2025-03-16T11:45:00",
+        status: "pending",
+        items: [],
+        totalValue: 1875.50,
+        priority: "standard",
+        estimatedDeliveryDate: "2025-03-22",
+        paymentStatus: "pending",
+      },
+      {
+        id: 3,
+        orderNumber: "ORD-2025-0003",
+        customerName: "Parramatta Medical Supplies",
+        customerType: "distributor",
+        customerLocation: "Parramatta",
+        createdAt: "2025-03-17T08:15:00",
+        status: "shipped",
+        items: [],
+        totalValue: 6430.75,
+        priority: "urgent",
+        estimatedDeliveryDate: "2025-03-19",
+        actualDeliveryDate: null,
+        assignedShipmentId: "SHP-2025-0045",
+        paymentStatus: "paid",
+        invoiceNumber: "INV-2025-0003"
+      }
+    ];
+    
+    this.orderItems = [
+      {
+        id: 1,
+        productId: 101,
+        productName: "Enterprise Server X7",
+        productSKU: "SVR-X7-1TB",
+        quantity: 2,
+        unitPrice: 1250.00,
+        totalPrice: 2500.00,
+        warehouseLocation: "Sydney-W-A12",
+        status: "allocated"
+      },
+      {
+        id: 2,
+        productId: 102,
+        productName: "Network Switch Pro",
+        productSKU: "NSW-P-24PT",
+        quantity: 5,
+        unitPrice: 350.00,
+        totalPrice: 1750.00,
+        warehouseLocation: "Sydney-W-B08",
+        status: "allocated"
+      },
+      {
+        id: 3,
+        productId: 203,
+        productName: "Retail POS Terminal",
+        productSKU: "POS-T3-STD",
+        quantity: 3,
+        unitPrice: 625.50,
+        totalPrice: 1876.50,
+        warehouseLocation: "Penrith-E-C14",
+        status: "pending"
+      },
+      {
+        id: 4,
+        productId: 305,
+        productName: "Medical-Grade Tablet",
+        productSKU: "MED-TAB-12",
+        quantity: 10,
+        unitPrice: 529.95,
+        totalPrice: 5299.50,
+        warehouseLocation: "Sydney-N-D22",
+        status: "picked"
+      },
+      {
+        id: 5,
+        productId: 306,
+        productName: "Sterilization Equipment",
+        productSKU: "MED-STE-A2",
+        quantity: 2,
+        unitPrice: 565.50,
+        totalPrice: 1131.00,
+        warehouseLocation: "Sydney-N-D24",
+        status: "picked"
+      }
+    ];
+    
+    // Link order items to their respective orders
+    this.orders[0].items = [this.orderItems[0], this.orderItems[1]];
+    this.orders[1].items = [this.orderItems[2]];
+    this.orders[2].items = [this.orderItems[3], this.orderItems[4]];
+    
+    this.returnRequests = [
+      {
+        id: 1,
+        orderId: 1,
+        orderNumber: "ORD-2025-0001",
+        customerName: "Sydney Tech Solutions",
+        requestDate: "2025-03-18T14:25:00",
+        status: "requested",
+        reason: "defective",
+        items: [],
+        returnMethod: "drop_off",
+        notes: "Customer reports server overheating issues"
+      }
+    ];
+    
+    this.returnItems = [
+      {
+        id: 1,
+        orderItemId: 1,
+        productName: "Enterprise Server X7",
+        quantity: 1,
+        reason: "Device overheating after 30 minutes of operation",
+        condition: "defective",
+        status: "pending"
+      }
+    ];
+    
+    // Link return items to their respective return requests
+    this.returnRequests[0].items = [this.returnItems[0]];
     
     // Initialize with predefined users for testing
     this.users.set(1, {
