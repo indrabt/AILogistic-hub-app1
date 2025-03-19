@@ -44,7 +44,10 @@ export default function Dashboard() {
             variant="default" 
             className="bg-blue-600 hover:bg-blue-700 text-white"
             onClick={() => {
-              console.log("Direct navigation to Order Management");
+              console.log("Direct navigation to Order Management from Dashboard");
+              console.log("Current location:", window.location.href);
+              console.log("Current pathname:", window.location.pathname);
+              console.log("Navigation timestamp:", new Date().toISOString());
               // Using direct DOM navigation as a workaround for router issues
               window.location.href = "/order-management";
             }}

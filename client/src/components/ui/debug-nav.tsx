@@ -7,7 +7,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, ThumbsUp, X } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, ThumbsUp, X, Info } from "lucide-react";
 
 interface DebugNavProps {
   targetRoute?: string;

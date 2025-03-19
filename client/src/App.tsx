@@ -79,7 +79,13 @@ function Router() {
           <Route path="/business-dashboard" component={BusinessDashboard} />
           <Route path="/business-metrics" component={BusinessMetrics} />
           <Route path="/western-sydney-users" component={WesternSydneyUsers} />
-          <Route path="/order-management" component={OrderManagement} />
+          <Route path="/order-management" component={() => {
+            console.log('Order Management component being rendered');
+            console.log('Current path:', window.location.pathname);
+            console.log('Current URL:', window.location.href);
+            console.log('Rendering timestamp:', new Date().toISOString());
+            return <OrderManagement />;
+          }} />
           <Route path="/driver-dashboard" component={DriverDashboard} />
           <Route path="/driver-schedule" component={DriverSchedule} />
           <Route path="/driver-routes" component={DriverRoutes} />

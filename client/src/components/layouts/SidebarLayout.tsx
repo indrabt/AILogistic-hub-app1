@@ -1,6 +1,7 @@
 import { useState, ReactNode, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
+import DebugNav from "@/components/ui/debug-nav";
 import { 
   LayoutDashboard, 
   Route, 
@@ -359,6 +360,9 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
 
       {/* Mobile Navigation */}
       {isMobile && <MobileNav currentPath={location} />}
+
+      {/* Debug Navigation Helper */}
+      <DebugNav targetRoute="/order-management" />
     </div>
   );
 };
