@@ -35,23 +35,27 @@ const mobileNavItems: MobileNavItem[] = [
   { icon: <LayoutDashboard size={20} />, label: "Dashboard", href: "/dashboard", roles: ["logistics_manager", "sales"] },
   { icon: <LayoutDashboard size={20} />, label: "Dashboard", href: "/driver-dashboard", roles: ["driver"] },
   { icon: <LayoutDashboard size={20} />, label: "Dashboard", href: "/business-dashboard", roles: ["business_owner"] },
+  { icon: <LayoutDashboard size={20} />, label: "Dashboard", href: "/retail-dashboard", roles: ["retail_store_owner"] },
   
   // Common items across roles
-  { icon: <Route size={20} />, label: "Routes", href: "/routes", roles: ["logistics_manager", "driver"] },
-  { icon: <Navigation size={20} />, label: "Local", href: "/hyper-local-routing", roles: ["logistics_manager", "driver"] },
-  { icon: <Warehouse size={20} />, label: "Supply", href: "/supply-chain", roles: ["warehouse_staff", "logistics_manager"] },
-  { icon: <Cloud size={20} />, label: "Weather", href: "/weather-impact", roles: ["warehouse_staff", "logistics_manager", "driver"] },
+  { icon: <Route size={20} />, label: "Routes", href: "/routes", roles: ["logistics_manager", "driver", "retail_store_owner"] },
+  { icon: <Navigation size={20} />, label: "Local", href: "/hyper-local-routing", roles: ["logistics_manager", "driver", "retail_store_owner"] },
+  { icon: <Warehouse size={20} />, label: "Supply", href: "/supply-chain", roles: ["warehouse_staff", "logistics_manager", "retail_store_owner"] },
+  { icon: <Cloud size={20} />, label: "Weather", href: "/weather-impact", roles: ["warehouse_staff", "logistics_manager", "driver", "retail_store_owner"] },
   
   // Role-specific items
   { icon: <Package size={20} />, label: "Inventory", href: "/supply-chain", roles: ["warehouse_staff"] },
+  { icon: <Package size={20} />, label: "Inventory", href: "/inventory-tracker", roles: ["retail_store_owner"] },
   { icon: <Calendar size={20} />, label: "Schedule", href: "/driver-dashboard?view=schedule", roles: ["driver"] },
   { icon: <User size={20} />, label: "Clients", href: "/western-sydney-users", roles: ["sales"] },
   { icon: <BarChart size={20} />, label: "Metrics", href: "/business-metrics", roles: ["business_owner"] },
   { icon: <TrendingUp size={20} />, label: "Forecast", href: "/demand-forecasting", roles: ["sales", "logistics_manager", "business_owner"] },
-  { icon: <FileText size={20} />, label: "Reports", href: "/reports", roles: ["logistics_manager", "sales", "business_owner"] },
+  { icon: <TrendingUp size={20} />, label: "Demand", href: "/demand-prediction", roles: ["retail_store_owner"] },
+  { icon: <Truck size={20} />, label: "Sourcing", href: "/local-sourcing", roles: ["retail_store_owner"] },
+  { icon: <FileText size={20} />, label: "Reports", href: "/reports", roles: ["logistics_manager", "sales", "business_owner", "retail_store_owner"] },
   
   // More options for all roles
-  { icon: <MoreHorizontal size={20} />, label: "More", href: "/settings", roles: ["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner"] },
+  { icon: <MoreHorizontal size={20} />, label: "More", href: "/settings", roles: ["warehouse_staff", "logistics_manager", "driver", "sales", "business_owner", "retail_store_owner"] },
 ];
 
 const MobileNav = ({ currentPath }: MobileNavProps) => {

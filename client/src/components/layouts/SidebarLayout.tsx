@@ -28,7 +28,8 @@ import {
   LogOut,
   Package,
   ClipboardCheck,
-  CalendarClock
+  CalendarClock,
+  Tag
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -96,6 +97,19 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
     { icon: <Navigation size={20} />, href: "/hyper-local-routing", label: "Navigation", id: "driver-navigation" },
     { icon: <Cloud size={20} />, href: "/weather-impact", label: "Weather Alerts", id: "driver-weather" },
     { icon: <CalendarClock size={20} />, href: "/driver-dashboard?view=schedule", label: "Schedule", id: "driver-schedule" },
+  ],
+  retail_store_owner: [
+    { icon: <LayoutDashboard size={20} />, href: "/retail-dashboard", label: "Store Dashboard", id: "retail-dashboard" },
+    { icon: <Cloud size={20} />, href: "/demand-prediction", label: "Demand Prediction", id: "retail-demand" },
+    { icon: <Truck size={20} />, href: "/local-sourcing", label: "Local Sourcing", id: "retail-sourcing" },
+    { icon: <Tag size={20} />, href: "/pricing-assistant", label: "Pricing Assistant", id: "retail-pricing" },
+    { icon: <Package size={20} />, href: "/inventory-tracker", label: "Inventory Tracker", id: "retail-inventory" },
+    { icon: <Users size={20} />, href: "/loyalty-program", label: "Loyalty Program", id: "retail-loyalty" },
+    { icon: <Leaf size={20} />, href: "/waste-management", label: "Waste Management", id: "retail-waste" },
+    { icon: <Settings size={20} />, href: "/integration-kit", label: "Square Integration", id: "retail-integration" },
+    { icon: <FileText size={20} />, href: "/staff-training", label: "Staff Training", id: "retail-training" },
+    { icon: <Route size={20} />, href: "/routes", label: "Delivery Routes", id: "retail-routes" },
+    { icon: <Shield size={20} />, href: "/supply-chain-resilience", label: "Supply Planning", id: "retail-planning" },
   ],
   sales: [
     { icon: <LayoutDashboard size={20} />, href: "/dashboard", label: "Dashboard", id: "sales-dashboard" },
@@ -181,7 +195,8 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
     logistics_manager: "Logistics Command",
     driver: "Driver Portal",
     sales: "Sales Dashboard",
-    business_owner: "Executive Suite"
+    business_owner: "Executive Suite",
+    retail_store_owner: "Retail Store Management"
   };
 
   return (
