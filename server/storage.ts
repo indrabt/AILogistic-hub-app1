@@ -428,7 +428,7 @@ export class MemStorage implements IStorage {
         totalValue: 6430.75,
         priority: "urgent",
         estimatedDeliveryDate: "2025-03-19",
-        actualDeliveryDate: null,
+        actualDeliveryDate: undefined,
         assignedShipmentId: "SHP-2025-0045",
         paymentStatus: "paid",
         invoiceNumber: "INV-2025-0003"
