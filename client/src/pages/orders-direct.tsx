@@ -55,8 +55,23 @@ export default function OrdersDirectAccess() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // Add special logging for direct access page
+    // Add comprehensive diagnostic logging for direct access page
     console.log("Orders Direct Access page mounted successfully");
+    console.log("Current URL:", window.location.href);
+    console.log("Navigation timestamp:", new Date().toISOString());
+    
+    // Record successful page load in session storage with detailed information
+    sessionStorage.setItem("orderManagementLoaded", "true");
+    sessionStorage.setItem("orderManagementLoadTime", new Date().toISOString());
+    sessionStorage.setItem("orderManagementLoadUrl", window.location.href);
+    
+    // Check how we got here (from which navigation method)
+    const accessMethod = sessionStorage.getItem("orderAccessMethod") || "direct-url";
+    console.log("Orders page accessed via:", accessMethod);
+    
+    // Record navigation path
+    const navigationOrigin = sessionStorage.getItem("debugNavOrigin") || "unknown";
+    console.log("Navigation origin:", navigationOrigin);
     
     // Ensure we reset the filter when the component mounts
     setStatusFilter("all");
@@ -69,12 +84,10 @@ export default function OrdersDirectAccess() {
       duration: 3000,
     });
     
-    // Add a flag to session storage to indicate we've successfully loaded the orders page
-    sessionStorage.setItem("orderManagementLoaded", "true");
-    
     // Return cleanup function
     return () => {
       console.log("Orders Direct Access page unmounted");
+      sessionStorage.setItem("orderManagementUnloaded", new Date().toISOString());
     };
   }, [toast]);
 
