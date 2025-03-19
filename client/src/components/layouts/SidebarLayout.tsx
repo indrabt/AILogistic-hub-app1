@@ -47,9 +47,19 @@ interface SidebarItemProps {
 }
 
 const SidebarItem = ({ icon, href, label, active }: SidebarItemProps) => {
+  const handleClick = () => {
+    console.log(`Clicked on sidebar item: ${label} with href: ${href}`);
+    
+    // For the order management link specifically, let's try a direct navigation
+    if (href === "/order-management") {
+      console.log("Attempting direct navigation to Order Management");
+      window.location.href = href;
+    }
+  };
+  
   return (
     <li className="mb-2">
-      <Link href={href}>
+      <Link href={href} onClick={handleClick}>
         <div
           className={cn(
             "flex items-center py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
@@ -140,6 +150,9 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
   const [userRole, setUserRole] = useState<UserRole>("logistics_manager");
   const [userName, setUserName] = useState("User");
   const [userInitials, setUserInitials] = useState("U");
+  
+  // Debugging current location
+  console.log("SidebarLayout: Current location is:", location);
 
   useEffect(() => {
     // Get user info from session storage
