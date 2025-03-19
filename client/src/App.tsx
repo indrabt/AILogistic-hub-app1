@@ -27,6 +27,7 @@ import DriverDashboard from "@/pages/driver-dashboard";
 import WarehouseDashboard from "@/pages/warehouse-dashboard";
 import RealTimeDashboard from "@/pages/real-time-dashboard";
 import RetailDashboard from "@/pages/retail-dashboard";
+import LocalSourcing from "@/pages/local-sourcing";
 
 function Router() {
   const [location] = useLocation();
@@ -65,7 +66,7 @@ function Router() {
           <Route path="/real-time-dashboard" component={RealTimeDashboard} />
           <Route path="/retail-dashboard" component={RetailDashboard} />
           <Route path="/demand-prediction" component={RetailDashboard} />
-          <Route path="/local-sourcing" component={RetailDashboard} />
+          <Route path="/local-sourcing" component={LocalSourcing} />
           <Route path="/pricing-assistant" component={RetailDashboard} />
           <Route path="/inventory-tracker" component={RetailDashboard} />
           <Route path="/loyalty-program" component={RetailDashboard} />
