@@ -17,6 +17,7 @@ interface UseWebSocketOptions {
   reconnectInterval?: number;
   autoReconnect?: boolean;
   skipReconnectWhen?: (reason: CloseEvent | Error) => boolean;
+  pingInterval?: number;
 }
 
 /**
@@ -29,10 +30,11 @@ export function useWebSocket(
     onMessage,
     onClose,
     onError,
-    reconnectAttempts = 5,
-    reconnectInterval = 3000,
+    reconnectAttempts = 10,
+    reconnectInterval = 2000,
     autoReconnect = true,
     skipReconnectWhen,
+    pingInterval = 15000,
   }: UseWebSocketOptions = {}
 ) {
   const [status, setStatus] = useState<WebSocketStatus>('closed');
@@ -41,15 +43,56 @@ export function useWebSocket(
   const reconnectCountRef = useRef(0);
   const isUnmountingRef = useRef(false);
   const autoReconnectRef = useRef(autoReconnect);
+  const pingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const manuallyClosedRef = useRef(false);
 
   // Update autoReconnect ref when the prop changes
   useEffect(() => {
     autoReconnectRef.current = autoReconnect;
   }, [autoReconnect]);
 
+  // Reset ping timeout
+  const resetPingTimeout = useCallback(() => {
+    if (pingTimeoutRef.current) {
+      clearTimeout(pingTimeoutRef.current);
+      pingTimeoutRef.current = null;
+    }
+  }, []);
+
+  // Send ping to server
+  const sendPing = useCallback(() => {
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      socketRef.current.send(JSON.stringify({ type: 'PING', timestamp: new Date().toISOString() }));
+      
+      // Set timeout to check for pong response
+      resetPingTimeout();
+      pingTimeoutRef.current = setTimeout(() => {
+        console.warn('No pong received, connection may be dead. Reconnecting...');
+        if (socketRef.current) {
+          // Force close and reconnect
+          socketRef.current.close();
+          
+          // We need to reconnect manually since this wasn't triggered by the normal close event
+          setTimeout(() => {
+            reconnectCountRef.current = 0; // Reset the counter for a fresh start
+            connect();
+          }, 500);
+        }
+      }, pingInterval);
+    }
+  }, [pingInterval, resetPingTimeout]);
+
   // Function to create a new WebSocket connection
   const connect = useCallback(() => {
+    // Skip if manually closed
+    if (manuallyClosedRef.current) {
+      return;
+    }
+
     try {
+      // Reset ping timeout when starting a new connection
+      resetPingTimeout();
+      
       // Determine the correct WebSocket URL
       let websocketUrl;
       if (url.startsWith('ws')) {
@@ -71,6 +114,11 @@ export function useWebSocket(
         console.log('WebSocket connection established');
         setStatus('open');
         reconnectCountRef.current = 0;
+        manuallyClosedRef.current = false;
+        
+        // Start sending pings immediately after connection
+        sendPing();
+        
         if (onOpen) onOpen(event);
       };
 
@@ -78,6 +126,14 @@ export function useWebSocket(
         try {
           const data: WebSocketMessage = JSON.parse(event.data);
           setLastMessage(data);
+          
+          // If we get a PONG, reset the ping timeout
+          if (data.type === 'PONG') {
+            resetPingTimeout();
+            // Immediately schedule the next ping
+            setTimeout(sendPing, pingInterval);
+          }
+          
           if (onMessage) onMessage(data);
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);
@@ -85,29 +141,41 @@ export function useWebSocket(
       };
 
       socket.onclose = (event) => {
-        console.log(`WebSocket connection closed: ${event.code} ${event.reason}`);
+        console.log(`WebSocket connection closed: ${event.code} ${event.reason || ''}`);
         setStatus('closed');
+        resetPingTimeout();
+        
         if (onClose) onClose(event);
 
-        // Attempt to reconnect unless specifically told not to
-        const shouldSkipReconnect = skipReconnectWhen && skipReconnectWhen(event);
-        if (
-          autoReconnectRef.current &&
-          !isUnmountingRef.current &&
-          !shouldSkipReconnect &&
-          reconnectCountRef.current < reconnectAttempts
-        ) {
-          reconnectCountRef.current += 1;
-          console.log(`Attempting to reconnect (${reconnectCountRef.current}/${reconnectAttempts})...`);
-          setStatus('reconnecting');
-          setTimeout(connect, reconnectInterval);
-        } else if (reconnectCountRef.current >= reconnectAttempts) {
-          console.error('Max reconnection attempts reached');
-          toast({
-            title: 'Connection Lost',
-            description: 'Unable to restore real-time connection. Please refresh the page.',
-            variant: 'destructive',
-          });
+        // Only attempt reconnection if not manually closed
+        if (!manuallyClosedRef.current) {
+          // Attempt to reconnect unless specifically told not to
+          const shouldSkipReconnect = skipReconnectWhen && skipReconnectWhen(event);
+          if (
+            autoReconnectRef.current &&
+            !isUnmountingRef.current &&
+            !shouldSkipReconnect &&
+            reconnectCountRef.current < reconnectAttempts
+          ) {
+            reconnectCountRef.current += 1;
+            console.log(`Attempting to reconnect (${reconnectCountRef.current}/${reconnectAttempts})...`);
+            setStatus('reconnecting');
+            
+            // Use exponential backoff for reconnection attempts
+            const delay = Math.min(
+              reconnectInterval * Math.pow(1.5, reconnectCountRef.current - 1),
+              30000 // Cap at 30 seconds
+            );
+            
+            setTimeout(connect, delay);
+          } else if (reconnectCountRef.current >= reconnectAttempts) {
+            console.error('Max reconnection attempts reached');
+            toast({
+              title: 'Connection Lost',
+              description: 'Unable to restore real-time connection. Please refresh the page.',
+              variant: 'destructive',
+            });
+          }
         }
       };
 
@@ -118,19 +186,24 @@ export function useWebSocket(
     } catch (error) {
       console.error('Error creating WebSocket connection:', error);
       setStatus('closed');
-      const shouldSkipReconnect = skipReconnectWhen && skipReconnectWhen(error as Error);
-      if (
-        autoReconnectRef.current &&
-        !isUnmountingRef.current &&
-        !shouldSkipReconnect &&
-        reconnectCountRef.current < reconnectAttempts
-      ) {
-        reconnectCountRef.current += 1;
-        setStatus('reconnecting');
-        setTimeout(connect, reconnectInterval);
+      resetPingTimeout();
+      
+      // Only attempt reconnection if not manually closed
+      if (!manuallyClosedRef.current) {
+        const shouldSkipReconnect = skipReconnectWhen && skipReconnectWhen(error as Error);
+        if (
+          autoReconnectRef.current &&
+          !isUnmountingRef.current &&
+          !shouldSkipReconnect &&
+          reconnectCountRef.current < reconnectAttempts
+        ) {
+          reconnectCountRef.current += 1;
+          setStatus('reconnecting');
+          setTimeout(connect, reconnectInterval);
+        }
       }
     }
-  }, [url, onOpen, onMessage, onClose, onError, reconnectAttempts, reconnectInterval, skipReconnectWhen]);
+  }, [url, onOpen, onMessage, onClose, onError, reconnectAttempts, reconnectInterval, skipReconnectWhen, sendPing, pingInterval, resetPingTimeout]);
 
   // Connect when the component mounts
   useEffect(() => {
@@ -139,12 +212,13 @@ export function useWebSocket(
     // Cleanup
     return () => {
       isUnmountingRef.current = true;
+      resetPingTimeout();
       if (socketRef.current) {
         socketRef.current.close();
         socketRef.current = null;
       }
     };
-  }, [connect]);
+  }, [connect, resetPingTimeout]);
 
   // Function to manually send a message
   const sendMessage = useCallback((message: any) => {
@@ -157,32 +231,26 @@ export function useWebSocket(
 
   // Function to manually reconnect
   const reconnect = useCallback(() => {
+    manuallyClosedRef.current = false;
     if (socketRef.current) {
       socketRef.current.close();
       socketRef.current = null;
     }
+    resetPingTimeout();
     reconnectCountRef.current = 0;
     connect();
-  }, [connect]);
+  }, [connect, resetPingTimeout]);
 
   // Function to manually disconnect
   const disconnect = useCallback(() => {
+    manuallyClosedRef.current = true;
+    resetPingTimeout();
     if (socketRef.current) {
       socketRef.current.close();
       socketRef.current = null;
     }
-  }, []);
-
-  // Heartbeat ping to keep connection alive
-  useEffect(() => {
-    if (status !== 'open') return;
-
-    const pingInterval = setInterval(() => {
-      sendMessage({ type: 'PING', timestamp: new Date().toISOString() });
-    }, 30000); // Send ping every 30 seconds
-
-    return () => clearInterval(pingInterval);
-  }, [status, sendMessage]);
+    setStatus('closed');
+  }, [resetPingTimeout]);
 
   return {
     status,

@@ -1,8 +1,5 @@
 /**
  * Simplified WebSocket Server for Real-Time Updates
- * 
- * This module provides real-time updates to clients via WebSockets.
- * It ensures delivery status updates with ≤5-second latency.
  */
 
 import { Server as HttpServer } from 'http';
@@ -10,19 +7,24 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { log } from './vite';
 import { storage } from './storage';
 
-interface ClientData {
-  socket: WebSocket;
+// Heartbeat interval and timeout settings (in milliseconds)
+const HEARTBEAT_INTERVAL = 10000; // 10 seconds between pings
+const HEARTBEAT_TIMEOUT = 15000;  // 15 seconds before considering client dead
+
+interface ClientConnection {
+  ws: WebSocket;
+  isAlive: boolean;
   userId?: number;
   username?: string;
   role?: string;
-  authenticated: boolean;
-  connectedAt: Date;
+  lastActivity: Date;
 }
 
 export class WebSocketManager {
   private wsServer: WebSocketServer | null = null;
-  private clients: ClientData[] = [];
+  private clients: ClientConnection[] = [];
   private updateInterval: NodeJS.Timeout | null = null;
+  private heartbeatInterval: NodeJS.Timeout | null = null;
 
   initialize(httpServer: HttpServer) {
     if (this.wsServer) {
@@ -30,26 +32,40 @@ export class WebSocketManager {
     }
 
     try {
+      // Create WebSocket server
       this.wsServer = new WebSocketServer({ 
         server: httpServer,
         path: '/ws'
       });
 
+      // Set up heartbeat interval
+      this.setupHeartbeat();
+
+      // Handle new connections
       this.wsServer.on('connection', (ws: WebSocket) => {
         log('WebSocket connection established', 'websocket');
         
-        // Create a new client data object
-        const clientData: ClientData = {
-          socket: ws,
-          authenticated: false,
-          connectedAt: new Date()
+        // Add to clients list with heartbeat tracking
+        const clientConnection: ClientConnection = {
+          ws,
+          isAlive: true,
+          lastActivity: new Date()
         };
         
-        // Add to clients list
-        this.clients.push(clientData);
+        this.clients.push(clientConnection);
         
-        // Welcome message
-        this.sendMessage(clientData, {
+        // Set up ping handler to keep connection alive
+        ws.on('pong', () => {
+          // Mark the connection as alive when we receive a pong
+          const client = this.clients.find(c => c.ws === ws);
+          if (client) {
+            client.isAlive = true;
+            client.lastActivity = new Date();
+          }
+        });
+        
+        // Send welcome message
+        this.sendMessage(clientConnection, {
           type: 'SYSTEM_MESSAGE',
           message: 'Connected to Western Sydney AI Logistics Hub',
           timestamp: new Date().toISOString()
@@ -61,30 +77,37 @@ export class WebSocketManager {
             const data = JSON.parse(message.toString());
             log(`WebSocket message received: ${JSON.stringify(data)}`, 'websocket');
             
+            // Update activity timestamp
+            const client = this.clients.find(c => c.ws === ws);
+            if (client) {
+              client.lastActivity = new Date();
+            }
+            
             // Handle authentication
             if (data.type === 'AUTHENTICATE') {
               log(`Authenticating user: ${data.username} with role: ${data.role}`, 'websocket');
               
-              // Update client data with authentication info
-              clientData.userId = data.userId;
-              clientData.username = data.username;
-              clientData.role = data.role;
-              clientData.authenticated = true;
+              // Update client data
+              if (client) {
+                client.userId = data.userId;
+                client.username = data.username;
+                client.role = data.role;
+              }
               
               // Send back confirmation
-              this.sendMessage(clientData, {
+              this.sendMessage(client!, {
                 type: 'AUTHENTICATION_SUCCESS',
                 message: `Authenticated as ${data.username}`,
                 timestamp: new Date().toISOString()
               });
               
-              // Send current data to this specific client
-              this.sendInitialData(clientData);
+              // Send immediate data update
+              this.sendDashboardData(client!);
             }
             
-            // Handle ping messages to keep connection alive
+            // Handle ping messages (from client JavaScript)
             if (data.type === 'PING') {
-              this.sendMessage(clientData, {
+              this.sendMessage(client!, {
                 type: 'PONG',
                 timestamp: new Date().toISOString()
               });
@@ -96,14 +119,14 @@ export class WebSocketManager {
         
         // Handle disconnection
         ws.on('close', () => {
-          this.clients = this.clients.filter(client => client.socket !== ws);
+          this.clients = this.clients.filter(client => client.ws !== ws);
           log(`WebSocket connection closed. Active connections: ${this.clients.length}`, 'websocket');
         });
         
         // Handle errors
         ws.on('error', (error) => {
           log(`WebSocket error: ${error}`, 'websocket');
-          this.clients = this.clients.filter(client => client.socket !== ws);
+          this.clients = this.clients.filter(client => client.ws !== ws);
         });
       });
       
@@ -116,10 +139,50 @@ export class WebSocketManager {
     }
   }
   
-  private sendMessage(ws: WebSocket, data: any) {
+  private setupHeartbeat() {
+    // Clear any existing interval
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+    }
+    
+    // Set up new interval for heartbeat
+    this.heartbeatInterval = setInterval(() => {
+      // For each client, check if they're still alive
+      this.clients.forEach(client => {
+        // If client failed to respond to the last ping, terminate the connection
+        if (!client.isAlive) {
+          log('Terminating inactive WebSocket connection', 'websocket');
+          client.ws.terminate();
+          return;
+        }
+        
+        // Mark as not alive, then ping (client will be marked alive again when they respond)
+        client.isAlive = false;
+        
+        // Send ping (low-level WebSocket ping)
+        try {
+          client.ws.ping();
+        } catch (e) {
+          // If ping fails, terminate the connection
+          client.ws.terminate();
+        }
+      });
+      
+      // Clean up terminated connections
+      this.clients = this.clients.filter(client => {
+        return client.ws.readyState !== WebSocket.CLOSED && 
+               client.ws.readyState !== WebSocket.CLOSING;
+      });
+      
+      log(`Heartbeat check complete. Active connections: ${this.clients.length}`, 'websocket');
+    }, HEARTBEAT_INTERVAL);
+  }
+  
+  private sendMessage(client: ClientConnection, data: any) {
     try {
-      // WebSocket.OPEN has a value of 1
-      if (ws.readyState === 1) {
+      const ws = client.ws;
+      // Only send if connection is open (OPEN has a value of 1)
+      if (ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify(data));
       }
     } catch (error) {
@@ -127,15 +190,15 @@ export class WebSocketManager {
     }
   }
   
-  private async sendInitialData(ws: WebSocket) {
+  private async sendDashboardData(client: ClientConnection) {
     try {
       // Get latest data
       const dashboardMetrics = await storage.getDashboardMetrics();
       const weatherAlerts = await storage.getWeatherAlerts();
       const recentActivities = await storage.getRecentActivities();
       
-      // Send initial data to this client
-      this.sendMessage(ws, {
+      // Send data to client
+      this.sendMessage(client, {
         type: 'DASHBOARD_UPDATE',
         data: {
           metrics: dashboardMetrics,
@@ -145,38 +208,37 @@ export class WebSocketManager {
         }
       });
       
-      log(`Sent initial data to new client`, 'websocket');
+      log('Sent dashboard data to client', 'websocket');
     } catch (error) {
-      log(`Error sending initial data: ${error}`, 'websocket');
+      log(`Error sending dashboard data: ${error}`, 'websocket');
     }
   }
   
-  broadcast(data: any) {
-    this.clients.forEach(client => {
-      this.sendMessage(client, data);
-    });
-  }
-  
   private startPeriodicUpdates() {
-    // Send updates every 5 seconds (to meet ≤5-second latency requirement)
+    // Clear any existing interval
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+    }
+    
+    // Send updates every 5 seconds
     this.updateInterval = setInterval(() => {
-      this.broadcastUpdates();
+      this.broadcastDashboardUpdates();
     }, 5000);
   }
   
-  private async broadcastUpdates(specificClients?: WebSocket[]) {
+  private async broadcastDashboardUpdates() {
+    if (this.clients.length === 0) {
+      return; // No clients connected
+    }
+    
     try {
-      // If no specific clients provided and no clients connected, return
-      if (!specificClients && this.clients.length === 0) {
-        return; // No clients connected
-      }
-      
       // Get latest data
       const dashboardMetrics = await storage.getDashboardMetrics();
       const weatherAlerts = await storage.getWeatherAlerts();
       const recentActivities = await storage.getRecentActivities();
       
-      const updateData = {
+      // Create update message
+      const updateMessage = {
         type: 'DASHBOARD_UPDATE',
         data: {
           metrics: dashboardMetrics,
@@ -186,19 +248,14 @@ export class WebSocketManager {
         }
       };
       
-      // If specific clients provided, send only to them
-      if (specificClients && specificClients.length > 0) {
-        specificClients.forEach(client => {
-          this.sendMessage(client, updateData);
-        });
-        log(`Sent updates to ${specificClients.length} specific clients`, 'websocket');
-      } else {
-        // Otherwise broadcast to all clients
-        this.broadcast(updateData);
-        log(`Broadcast updates to ${this.clients.length} clients`, 'websocket');
-      }
+      // Send to all clients
+      this.clients.forEach(client => {
+        this.sendMessage(client, updateMessage);
+      });
+      
+      log(`Broadcast dashboard updates to ${this.clients.length} clients`, 'websocket');
     } catch (error) {
-      log(`Error broadcasting updates: ${error}`, 'websocket');
+      log(`Error broadcasting dashboard updates: ${error}`, 'websocket');
     }
   }
   
@@ -206,6 +263,11 @@ export class WebSocketManager {
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
       this.updateInterval = null;
+    }
+    
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
     }
     
     if (this.wsServer) {
