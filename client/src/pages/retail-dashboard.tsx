@@ -36,11 +36,12 @@ import { useWebSocketContext } from "@/contexts/WebSocketContext";
 export default function RetailDashboard() {
   const { toast } = useToast();
   const { status: wsStatus } = useWebSocketContext();
-  const [activeFeature, setActiveFeature] = useState('demand');
+  const [activeTab, setActiveTab] = useState('sourcing');
   const [pickupDialogOpen, setPickupDialogOpen] = useState(false);
   const [selectedFarmer, setSelectedFarmer] = useState<number | null>(null);
   
   const handleSchedulePickup = () => {
+    console.log("Opening schedule pickup dialog");
     setPickupDialogOpen(true);
   };
   
@@ -204,6 +205,28 @@ export default function RetailDashboard() {
                   </div>
                 ))}
               </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="w-full mt-4">
+                    <Truck className="h-4 w-4 mr-2" /> Schedule Pickup (Dialog Trigger)
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Schedule a Pickup (Dialog Trigger)</DialogTitle>
+                    <DialogDescription>
+                      This dialog is opened with DialogTrigger component
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="py-4">
+                    Try clicking the button below
+                  </div>
+                  <DialogFooter>
+                    <Button>Close</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              
               <Button className="w-full mt-4" onClick={handleSchedulePickup}>
                 <Truck className="h-4 w-4 mr-2" /> Schedule Pickup
               </Button>
@@ -897,7 +920,7 @@ export default function RetailDashboard() {
       
       {/* Features Section */}
       <div className="space-y-4">
-        <Tabs defaultValue="sourcing" onValueChange={setActiveFeature} className="space-y-4">
+        <Tabs defaultValue="sourcing" onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid grid-cols-4 lg:grid-cols-8 h-auto">
             <TabsTrigger value="demand" className="flex flex-col h-auto py-2 px-3">
               <CloudSun className="h-4 w-4 mb-1" />
