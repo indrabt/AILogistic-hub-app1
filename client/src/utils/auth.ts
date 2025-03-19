@@ -1,5 +1,5 @@
 // Define UserRole type matching the one in shared/schema.ts
-export type UserRole = "warehouse_staff" | "logistics_manager" | "driver" | "sales" | "business_owner";
+export type UserRole = "warehouse_staff" | "logistics_manager" | "driver" | "sales" | "business_owner" | "retail_store_owner";
 
 export function checkPermission(userRole: UserRole, requiredRoles: UserRole[]): boolean {
   return requiredRoles.includes(userRole);
@@ -11,7 +11,8 @@ export function getDefaultRoute(role: UserRole): string {
     logistics_manager: "/dashboard",
     driver: "/driver-dashboard",
     sales: "/western-sydney-users",
-    business_owner: "/business-dashboard"
+    business_owner: "/business-dashboard",
+    retail_store_owner: "/retail-dashboard" // New route for retail store owners
   };
   return routes[role] || "/login";
 }
