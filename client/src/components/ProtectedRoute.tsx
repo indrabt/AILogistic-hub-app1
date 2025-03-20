@@ -56,25 +56,43 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       return;
     }
 
-    // Check for bypass flags - this allows direct order access from HTML page
+    // Check for bypass flags - this allows direct access from HTML pages
     const ordersAccessOverride = sessionStorage.getItem("overrideOrdersAccess") === "true";
+    const directWarehouseAccess = sessionStorage.getItem("directWarehouseAccess") === "true";
+    const directWarehouseDashboardAccess = sessionStorage.getItem("directWarehouseDashboardAccess") === "true";
+    const directWarehouseReceivingAccess = sessionStorage.getItem("directWarehouseReceivingAccess") === "true";
     const bypassRouter = sessionStorage.getItem("bypassRouter") === "true";
+    
+    // Check for specific routes
     const isOrdersRoute = location.includes("orders-direct");
+    const isWarehouseDashboardRoute = location === "/warehouse-dashboard";
+    const isWarehouseReceivingRoute = location === "/warehouse-receiving";
     
     // Log enhanced debugging information
     console.log(`Access check details:
       - User role: ${user?.role}
       - Current path: ${location}
       - Orders override flag: ${ordersAccessOverride}
+      - Warehouse override flag: ${directWarehouseAccess}
+      - Warehouse Dashboard flag: ${directWarehouseDashboardAccess}
+      - Warehouse Receiving flag: ${directWarehouseReceivingAccess}
       - Bypass router flag: ${bypassRouter}
-      - Is orders route: ${isOrdersRoute}`);
+      - Is orders route: ${isOrdersRoute}
+      - Is warehouse dashboard: ${isWarehouseDashboardRoute}
+      - Is warehouse receiving: ${isWarehouseReceivingRoute}`);
     
     // If authenticated, check if user has permission to access this route
-    // Skip this check for root path or if bypass flags are set for orders route
+    // Skip this check for root path or if bypass flags are set
+    const hasOrdersOverride = isOrdersRoute && (ordersAccessOverride || bypassRouter);
+    const hasWarehouseDashboardOverride = isWarehouseDashboardRoute && (directWarehouseDashboardAccess || directWarehouseAccess || bypassRouter);
+    const hasWarehouseReceivingOverride = isWarehouseReceivingRoute && (directWarehouseReceivingAccess || directWarehouseAccess || bypassRouter);
+    
     if (user && 
         location !== '/' && 
         !canAccessRoute(location) && 
-        !(isOrdersRoute && (ordersAccessOverride || bypassRouter))) {
+        !hasOrdersOverride &&
+        !hasWarehouseDashboardOverride &&
+        !hasWarehouseReceivingOverride) {
       
       console.log(`Access denied for user role: ${user.role} trying to access ${location}`);
       
@@ -85,6 +103,12 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       if (isOrdersRoute) {
         console.log("Orders access denied despite being an orders route");
         console.log(`Override flags: ordersAccessOverride=${ordersAccessOverride}, bypassRouter=${bypassRouter}`);
+      }
+      
+      // Special handling for warehouse routes
+      if (isWarehouseDashboardRoute || isWarehouseReceivingRoute) {
+        console.log("Warehouse access denied despite being a warehouse route");
+        console.log(`Override flags: directWarehouseAccess=${directWarehouseAccess}, directWarehouseDashboardAccess=${directWarehouseDashboardAccess}, directWarehouseReceivingAccess=${directWarehouseReceivingAccess}, bypassRouter=${bypassRouter}`);
       }
       
       toast({
@@ -100,11 +124,23 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
     
     // If we're on orders route and have override flags, clear them after successful access
-    if (isOrdersRoute && (ordersAccessOverride || bypassRouter) && user) {
+    if (hasOrdersOverride && user) {
       console.log("Successfully accessed orders with override flags, clearing flags");
       setTimeout(() => {
         // Clear after a delay to ensure navigation completes
         sessionStorage.removeItem("overrideOrdersAccess");
+        sessionStorage.removeItem("bypassRouter");
+      }, 3000);
+    }
+    
+    // If we're on warehouse routes and have override flags, clear them after successful access
+    if ((hasWarehouseDashboardOverride || hasWarehouseReceivingOverride) && user) {
+      console.log("Successfully accessed warehouse with override flags, clearing flags");
+      setTimeout(() => {
+        // Clear after a delay to ensure navigation completes
+        sessionStorage.removeItem("directWarehouseAccess");
+        sessionStorage.removeItem("directWarehouseDashboardAccess");
+        sessionStorage.removeItem("directWarehouseReceivingAccess");
         sessionStorage.removeItem("bypassRouter");
       }, 3000);
     }
