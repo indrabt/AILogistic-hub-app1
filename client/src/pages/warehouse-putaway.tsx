@@ -83,7 +83,7 @@ export default function WarehousePutaway() {
     verified: false,
     itemScan: {
       success: true,
-      scanType: "barcode",
+      scanType: "barcode" as ScanType,
       scannedValue: "ELEC-LAPTOP-001",
       timestamp: new Date().toISOString(),
       scannedBy: "manager1",
@@ -741,7 +741,7 @@ export default function WarehousePutaway() {
                           // Simulate item scanning
                           setScanVerification(prev => {
                             // Create the new item scan result
-                            const newItemScan = {
+                            const newItemScan: ScanResult = {
                               success: true,
                               scanType: "barcode" as ScanType,
                               scannedValue: putAwayTasks.find((t: PutAwayTask) => t.id === selectedTaskId)?.sku || "",
@@ -759,7 +759,7 @@ export default function WarehousePutaway() {
                             return {
                               ...prev,
                               itemScan: newItemScan,
-                              verified: isVerified,
+                              verified: isVerified || false, // Ensure verified is always a boolean
                               verificationTimestamp: isVerified ? new Date().toISOString() : prev.verificationTimestamp,
                               verifiedBy: isVerified ? "manager1" : prev.verifiedBy,
                               notes: isVerified ? "Both item and location scans verified successfully." : prev.notes
@@ -810,7 +810,7 @@ export default function WarehousePutaway() {
                           
                           setScanVerification(prev => {
                             // Create the new location scan result
-                            const newLocationScan = {
+                            const newLocationScan: ScanResult = {
                               success: true,
                               scanType: "qrcode" as ScanType,
                               scannedValue: location?.name || "",
@@ -828,7 +828,7 @@ export default function WarehousePutaway() {
                             return {
                               ...prev,
                               locationScan: newLocationScan,
-                              verified: isVerified,
+                              verified: isVerified || false, // Ensure verified is always a boolean
                               verificationTimestamp: isVerified ? new Date().toISOString() : prev.verificationTimestamp,
                               verifiedBy: isVerified ? "manager1" : prev.verifiedBy,
                               notes: isVerified ? "Both item and location scans verified successfully." : prev.notes
