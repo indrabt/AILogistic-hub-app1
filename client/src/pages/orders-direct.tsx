@@ -59,7 +59,11 @@ export default function OrdersDirectAccess() {
     customerType: "retail" as "retail" | "wholesale" | "distributor" | "internal",
     customerLocation: "",
     priority: "standard" as "standard" | "express" | "urgent",
-    notes: ""
+    notes: "",
+    // Adding other required fields with defaults
+    orderNumber: "",
+    estimatedDeliveryDate: "",
+    paymentStatus: "pending" as "pending" | "paid" | "partially_paid" | "refunded"
   });
   
   // Initialize hooks
@@ -155,7 +159,10 @@ export default function OrdersDirectAccess() {
         customerType: "retail",
         customerLocation: "",
         priority: "standard",
-        notes: ""
+        notes: "",
+        orderNumber: "",
+        estimatedDeliveryDate: "",
+        paymentStatus: "pending"
       });
     },
     onError: (error: any) => {
@@ -628,7 +635,11 @@ export default function OrdersDirectAccess() {
                 
                 // Create order data object with default values for other fields
                 const orderData = {
-                  ...newOrderData,
+                  customerName: newOrderData.customerName,
+                  customerType: newOrderData.customerType,
+                  customerLocation: newOrderData.customerLocation,
+                  priority: newOrderData.priority,
+                  notes: newOrderData.notes,
                   createdAt: new Date().toISOString(),
                   status: "pending",
                   items: [],
