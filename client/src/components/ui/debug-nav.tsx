@@ -81,55 +81,115 @@ export default function DebugNav({ targetRoute = "/orders-direct" }: DebugNavPro
           Navigate to {targetRoute}
         </Button>
         
-        {/* Additional links to other order pages */}
+        {/* Additional links to other pages */}
         <div className="grid grid-cols-2 gap-2 mt-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="text-xs"
-            onClick={() => {
-              sessionStorage.setItem("usingDirectOrdersAccess", "true");
-              window.location.href = "/orders-direct";
-            }}
-          >
-            Orders Direct
-          </Button>
+          <div className="col-span-2 bg-slate-100 rounded px-2 py-1 mb-1">
+            <p className="text-xs font-medium text-slate-500 mb-1">Order Pages:</p>
+            <div className="grid grid-cols-2 gap-1">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs"
+                onClick={() => {
+                  sessionStorage.setItem("usingDirectOrdersAccess", "true");
+                  window.location.href = "/orders-direct";
+                }}
+              >
+                Orders Direct
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs"
+                onClick={() => {
+                  sessionStorage.setItem("usingMinimalOrdersAccess", "true");
+                  window.location.href = "/orders-direct-minimal";
+                }}
+              >
+                Orders Minimal
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs"
+                onClick={() => {
+                  sessionStorage.setItem("usingOrdersTest", "true");
+                  window.location.href = "/orders-direct-test";
+                }}
+              >
+                Orders Test
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs"
+                onClick={() => {
+                  sessionStorage.setItem("usingOrderManagement", "true");
+                  window.location.href = "/order-management";
+                }}
+              >
+                Order Management
+              </Button>
+            </div>
+          </div>
           
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="text-xs"
-            onClick={() => {
-              sessionStorage.setItem("usingMinimalOrdersAccess", "true");
-              window.location.href = "/orders-direct-minimal";
-            }}
-          >
-            Orders Minimal
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="text-xs"
-            onClick={() => {
-              sessionStorage.setItem("usingOrdersTest", "true");
-              window.location.href = "/orders-direct-test";
-            }}
-          >
-            Orders Test
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="text-xs"
-            onClick={() => {
-              sessionStorage.setItem("usingOrderManagement", "true");
-              window.location.href = "/order-management";
-            }}
-          >
-            Order Management
-          </Button>
+          <div className="col-span-2 bg-slate-100 rounded px-2 py-1">
+            <p className="text-xs font-medium text-slate-500 mb-1">Warehouse Pages:</p>
+            <div className="grid grid-cols-2 gap-1">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs"
+                onClick={() => {
+                  sessionStorage.setItem("directWarehouseAccess", "true");
+                  sessionStorage.setItem("directWarehouseDashboardAccess", "true");
+                  window.location.href = "/public-direct-warehouse-page.html?target=dashboard";
+                }}
+              >
+                Warehouse Dashboard
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs"
+                onClick={() => {
+                  sessionStorage.setItem("directWarehouseAccess", "true");
+                  sessionStorage.setItem("directWarehouseReceivingAccess", "true");
+                  window.location.href = "/public-direct-warehouse-page.html?target=receiving";
+                }}
+              >
+                Warehouse Receiving
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs"
+                onClick={() => {
+                  sessionStorage.setItem("directWarehouseAccess", "true");
+                  window.location.href = "/warehouse-dashboard";
+                }}
+              >
+                Dashboard Direct
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs"
+                onClick={() => {
+                  sessionStorage.setItem("directWarehouseAccess", "true");
+                  window.location.href = "/warehouse-receiving";
+                }}
+              >
+                Receiving Direct
+              </Button>
+            </div>
+          </div>
         </div>
         
         {successful === true && (

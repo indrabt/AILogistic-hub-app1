@@ -268,7 +268,12 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                       )}
                       onClick={() => {
                         console.log("Direct Warehouse Dashboard navigation triggered");
-                        window.location.href = "/warehouse-dashboard";
+                        // Add tracking flags in session storage
+                        sessionStorage.setItem("usingDirectWarehouseAccess", "true");
+                        sessionStorage.setItem("directWarehouseDashboardAccess", "true");
+                        sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
+                        // Use direct HTML page for navigation to avoid router issues
+                        window.location.href = "/public-direct-warehouse-page.html?target=dashboard";
                       }}
                     >
                       <span className="mr-3">{item.icon}</span>
@@ -286,7 +291,12 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                       )}
                       onClick={() => {
                         console.log("Direct Warehouse Receiving navigation triggered");
-                        window.location.href = "/warehouse-receiving";
+                        // Add tracking flags in session storage
+                        sessionStorage.setItem("usingDirectWarehouseAccess", "true");
+                        sessionStorage.setItem("directWarehouseReceivingAccess", "true");
+                        sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
+                        // Use direct HTML page for navigation to avoid router issues
+                        window.location.href = "/public-direct-warehouse-page.html?target=receiving";
                       }}
                     >
                       <span className="mr-3">{item.icon}</span>

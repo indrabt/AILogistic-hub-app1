@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Management - Direct Access</title>
+  <script>
+    // Ensure user is logged in before proceeding
+    window.onload = function() {
+      const storedUser = sessionStorage.getItem('user');
+      if (!storedUser) {
+        console.log("User not logged in, redirecting to login");
+        window.location.href = "/login";
+      } else {
+        console.log("User logged in, proceeding to Order Management");
+        console.log("Current user:", storedUser);
+        
+        // Store information for diagnostic purposes
+        sessionStorage.setItem("orderAccessMethod", "direct-html-page");
+        sessionStorage.setItem("debugNavOrigin", "orders-direct.html");
+        sessionStorage.setItem("directOrderAccessAttempt", new Date().toISOString());
+        
+        // Try to parse the user to set required role permissions
+        try {
+          const user = JSON.parse(storedUser);
+          console.log("Current user role:", user.role);
+          
+          // Ensure necessary permission flags are set
+          sessionStorage.setItem("overrideOrdersAccess", "true");
+          sessionStorage.setItem("bypassRouter", "true");
+        } catch (e) {
+          console.error("Error parsing user:", e);
+        }
+        
+        // Use a robust multi-step approach to navigate
+        console.log("Preparing multi-step navigation to orders page");
+        
+        // Step 1: Try immediate navigation
+        try {
+          console.log("Step 1: Immediate navigation attempt");
+          window.location.href = "/orders-direct";
+        } catch (e) {
+          console.error("Step 1 failed:", e);
+        }
+        
+        // Step 2: Delayed navigation as fallback
+        setTimeout(() => {
+          console.log("Step 2: Delayed navigation attempt");
+          try {
+            window.location.replace("/orders-direct");
+          } catch (e) {
+            console.error("Step 2 failed:", e);
+            
+            // Step 3: Most aggressive approach
+            setTimeout(() => {
+              console.log("Step 3: Force navigation with reload");
+              window.location.href = "/orders-direct?force=true&t=" + new Date().getTime();
+            }, 1000);
+          }
+        }, 1000);
+      }
+    }
+    
+    // Add an additional direct navigation that doesn't depend on onload
+    document.addEventListener("DOMContentLoaded", function() {
+      console.log("DOM loaded for direct order page");
+      
+      // Add a click handler to the button with more aggressive navigation
+      const directButton = document.getElementById('directButton');
+      if (directButton) {
+        directButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          console.log("Direct navigation button clicked");
+          
+          // Set override flags
+          sessionStorage.setItem("orderAccessMethod", "button-click");
+          sessionStorage.setItem("overrideOrdersAccess", "true");
+          sessionStorage.setItem("bypassRouter", "true");
+          
+          // Force navigation with cache-busting parameter
+          window.location.href = "/orders-direct?manual=true&t=" + new Date().getTime();
+        });
+      }
+    });
+  </script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f9fafb;
+    }
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3b82f6;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin-right: 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .container {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      text-align: center;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .loading-message {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin-top: 0;
+      color: #1f2937;
+    }
+    p {
+      color: #4b5563;
+      margin-bottom: 24px;
+    }
+    .button {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .button:hover {
+      background-color: #2563eb;
+    }
+    .manual-link {
+      margin-top: 20px;
+      color: #6b7280;
+    }
+    .manual-link a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+    .manual-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Order Management</h1>
+    <div class="loading-message">
+      <div class="loader"></div>
+      <p>Loading Order Management system...</p>
+    </div>
+    <p>You will be redirected automatically in a moment.</p>
+    <a href="/orders-direct" class="button" id="directButton">Access Order Management</a>
+    <div class="manual-link">
+      <p>If you're not redirected, try one of these options:</p>
+      <div style="margin-top: 10px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <a href="/orders-direct" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Direct Path</a>
+        <a href="/" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Dashboard</a>
+        <a href="/orders-direct-test" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Test Page</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
