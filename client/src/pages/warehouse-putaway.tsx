@@ -61,7 +61,7 @@ import {
 export default function WarehousePutaway() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string | null>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
@@ -108,7 +108,7 @@ export default function WarehousePutaway() {
   const { data: putAwayTasks = [], isLoading: isLoadingTasks } = useQuery({
     queryKey: ['/api/warehouse/put-away-tasks', statusFilter],
     queryFn: async () => {
-      const url = statusFilter
+      const url = statusFilter && statusFilter !== 'all'
         ? `/api/warehouse/put-away-tasks?status=${statusFilter}`
         : '/api/warehouse/put-away-tasks';
       const response = await apiRequest('GET', url);
@@ -294,12 +294,12 @@ export default function WarehousePutaway() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Select value={statusFilter || ""} onValueChange={(value) => setStatusFilter(value || null)}>
+            <Select value={statusFilter || "all"} onValueChange={(value) => setStatusFilter(value)}>
               <SelectTrigger className="w-full md:w-40">
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All statuses</SelectItem>
+                <SelectItem value="all">All statuses</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
