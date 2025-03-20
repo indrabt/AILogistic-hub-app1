@@ -41,11 +41,6 @@ import MobileNav from "@/components/ui/mobile-nav";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { UserRole } from "@/utils/auth";
 import { Separator } from "@/components/ui/separator";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 
 interface SidebarItemProps {
   icon: ReactNode;
@@ -268,28 +263,29 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
             {roleNavigation.map((item) => {
               // Handle submenu items
               if (item.submenu) {
-                // Use a collapsible menu for items with submenus
+                // Use a simple dropdown menu with useState hook
+                const [isOpen, setIsOpen] = useState(location.startsWith("/warehouse-"));
+                
                 return (
                   <li className="mb-2" key={item.id}>
-                    <Collapsible 
-                      className="w-full" 
-                      defaultOpen={location.startsWith("/warehouse-")}
-                    >
-                      <CollapsibleTrigger className="w-full">
-                        <div
-                          className={cn(
-                            "flex items-center justify-between py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
-                            "hover:bg-primary-light/70 text-white"
-                          )}
-                        >
-                          <div className="flex items-center">
-                            <span className="mr-3">{item.icon}</span>
-                            {item.label}
-                          </div>
-                          <ChevronDown className="h-4 w-4" />
+                    <div className="w-full">
+                      {/* Menu trigger */}
+                      <div
+                        className={cn(
+                          "flex items-center justify-between py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                          "hover:bg-primary-light/70 text-white"
+                        )}
+                        onClick={() => setIsOpen(!isOpen)}
+                      >
+                        <div className="flex items-center">
+                          <span className="mr-3">{item.icon}</span>
+                          {item.label}
                         </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
+                        {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </div>
+                      
+                      {/* Submenu content */}
+                      {isOpen && (
                         <ul className="pl-6 mt-1 space-y-1">
                           {item.submenu.map((subItem) => {
                             if (subItem.href === "/warehouse-receiving") {
@@ -389,8 +385,8 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                             }
                           })}
                         </ul>
-                      </CollapsibleContent>
-                    </Collapsible>
+                      )}
+                    </div>
                   </li>
                 );
               }
