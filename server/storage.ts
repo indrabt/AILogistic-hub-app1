@@ -50,6 +50,13 @@ import {
   Partnership,
   GrantApplication
 } from "@shared/types";
+import type {
+  InboundOrder, InboundOrderItem, ReceivingDiscrepancy, PutAwayTask,
+  InventoryItem, InventoryLocation, StorageLocation, InventoryMovement,
+  PickTask, PickTaskItem, PickBatch, PackingTask, PackingTaskItem,
+  ShipmentPackage, CycleCountTask, CycleCountItem, YardAppointment,
+  DockDoor, CrossDockingTask, CrossDockingItem
+} from "@shared/warehouse-types";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -185,6 +192,72 @@ export interface IStorage {
   getPartnershipById(id: number): Promise<Partnership | undefined>;
   getGrantApplications(status?: string): Promise<GrantApplication[]>;
   createPartnership(partnership: Omit<Partnership, 'id'>): Promise<Partnership>;
+  
+  // Warehouse Management System APIs
+  
+  // 1. Receiving Feature
+  getInboundOrders(status?: string): Promise<InboundOrder[]>;
+  getInboundOrderById(id: number): Promise<InboundOrder | undefined>;
+  createInboundOrder(order: Omit<InboundOrder, 'id'>): Promise<InboundOrder>;
+  updateInboundOrder(id: number, order: Partial<InboundOrder>): Promise<InboundOrder | undefined>;
+  deleteInboundOrder(id: number): Promise<boolean>;
+  
+  getInboundOrderItems(orderId: number): Promise<InboundOrderItem[]>;
+  createInboundOrderItem(item: Omit<InboundOrderItem, 'id'>): Promise<InboundOrderItem>;
+  updateInboundOrderItem(id: number, item: Partial<InboundOrderItem>): Promise<InboundOrderItem | undefined>;
+  
+  getReceivingDiscrepancies(itemId: number): Promise<ReceivingDiscrepancy[]>;
+  createReceivingDiscrepancy(discrepancy: Omit<ReceivingDiscrepancy, 'id'>): Promise<ReceivingDiscrepancy>;
+  updateReceivingDiscrepancy(id: number, discrepancy: Partial<ReceivingDiscrepancy>): Promise<ReceivingDiscrepancy | undefined>;
+  
+  // 2. Put-Away Feature
+  getPutAwayTasks(status?: string): Promise<PutAwayTask[]>;
+  getPutAwayTaskById(id: number): Promise<PutAwayTask | undefined>;
+  createPutAwayTask(task: Omit<PutAwayTask, 'id'>): Promise<PutAwayTask>;
+  updatePutAwayTask(id: number, task: Partial<PutAwayTask>): Promise<PutAwayTask | undefined>;
+  completePutAwayTask(id: number, locationId: number): Promise<PutAwayTask | undefined>;
+  
+  // 3. Inventory Tracking Feature
+  getInventoryItems(category?: string): Promise<InventoryItem[]>;
+  getInventoryItemById(id: number): Promise<InventoryItem | undefined>;
+  getInventoryItemBySku(sku: string): Promise<InventoryItem | undefined>;
+  updateInventoryItem(id: number, item: Partial<InventoryItem>): Promise<InventoryItem | undefined>;
+  
+  getInventoryLocations(itemId: number): Promise<InventoryLocation[]>;
+  getInventoryItemsByLocation(locationId: number): Promise<InventoryLocation[]>;
+  
+  getStorageLocations(status?: string): Promise<StorageLocation[]>;
+  getStorageLocationById(id: number): Promise<StorageLocation | undefined>;
+  updateStorageLocation(id: number, location: Partial<StorageLocation>): Promise<StorageLocation | undefined>;
+  
+  getInventoryMovements(itemId?: number, type?: string): Promise<InventoryMovement[]>;
+  createInventoryMovement(movement: Omit<InventoryMovement, 'id'>): Promise<InventoryMovement>;
+  
+  // 4. Picking Feature
+  getPickTasks(status?: string): Promise<PickTask[]>;
+  getPickTaskById(id: number): Promise<PickTask | undefined>;
+  createPickTask(task: Omit<PickTask, 'id'>): Promise<PickTask>;
+  updatePickTask(id: number, task: Partial<PickTask>): Promise<PickTask | undefined>;
+  
+  getPickTaskItems(taskId: number): Promise<PickTaskItem[]>;
+  updatePickTaskItem(id: number, item: Partial<PickTaskItem>): Promise<PickTaskItem | undefined>;
+  completePickTaskItem(id: number, pickedQuantity: number, locationId: number): Promise<PickTaskItem | undefined>;
+  
+  getPickBatches(status?: string): Promise<PickBatch[]>;
+  createPickBatch(batch: Omit<PickBatch, 'id'>): Promise<PickBatch>;
+  
+  // 5. Packing Feature
+  getPackingTasks(status?: string): Promise<PackingTask[]>;
+  getPackingTaskById(id: number): Promise<PackingTask | undefined>;
+  createPackingTask(task: Omit<PackingTask, 'id'>): Promise<PackingTask>;
+  updatePackingTask(id: number, task: Partial<PackingTask>): Promise<PackingTask | undefined>;
+  
+  getPackingTaskItems(taskId: number): Promise<PackingTaskItem[]>;
+  updatePackingTaskItem(id: number, item: Partial<PackingTaskItem>): Promise<PackingTaskItem | undefined>;
+  
+  getShipmentPackages(packingTaskId: number): Promise<ShipmentPackage[]>;
+  createShipmentPackage(pkg: Omit<ShipmentPackage, 'id'>): Promise<ShipmentPackage>;
+  updateShipmentPackage(id: number, pkg: Partial<ShipmentPackage>): Promise<ShipmentPackage | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -346,6 +419,22 @@ export class MemStorage implements IStorage {
   // 2. Predictive Supply Chain Resilience
   private resilienceForecasts: ResilienceForecast[];
   private inventoryRecommendations: InventoryRecommendation[];
+  
+  // Warehouse Management System data
+  private inboundOrders: InboundOrder[];
+  private inboundOrderItems: InboundOrderItem[];
+  private receivingDiscrepancies: ReceivingDiscrepancy[];
+  private putAwayTasks: PutAwayTask[];
+  private inventoryItems: InventoryItem[];
+  private inventoryLocations: InventoryLocation[];
+  private storageLocations: StorageLocation[];
+  private inventoryMovements: InventoryMovement[];
+  private pickTasks: PickTask[];
+  private pickTaskItems: PickTaskItem[];
+  private pickBatches: PickBatch[];
+  private packingTasks: PackingTask[];
+  private packingTaskItems: PackingTaskItem[];
+  private shipmentPackages: ShipmentPackage[];
   
   // 3. Sustainable AI-Driven Operations
   private sustainabilityMetrics: SustainabilityMetrics;
