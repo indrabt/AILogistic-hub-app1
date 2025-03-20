@@ -6,6 +6,10 @@ import { WebSocketProvider } from "@/contexts/WebSocketContext";
 import SidebarLayout from "@/components/layouts/SidebarLayout";
 import DriverSidebarLayout from "@/components/layouts/DriverSidebarLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { lazy, Suspense } from 'react';
+
+// Lazy load components for code splitting
+const NavigationTest = lazy(() => import('./pages/navigation-test'));
 import Dashboard from "@/pages/dashboard";
 import Routes from "@/pages/routes";
 import SupplyChain from "@/pages/supply-chain";
@@ -136,13 +140,11 @@ function Router() {
           <Route path="/staff-training" component={RetailDashboard} />
           <Route path="/reports" component={Reports} />
           <Route path="/settings" component={Settings} />
-          <Route path="/navigation-test" component={() => {
-            console.log('Navigation Test page loaded for testing link functionality');
-            return import('./pages/navigation-test').then(module => {
-              const NavigationTest = module.default;
-              return <NavigationTest />;
-            });
-          }} />
+          <Route path="/navigation-test" component={() => (
+            <Suspense fallback={<div className="p-8">Loading Navigation Test...</div>}>
+              <NavigationTest />
+            </Suspense>
+          )} />
           {/* Root path */}
           <Route path="/" component={() => {
             console.log('Root path component rendered - explicit placement at end');

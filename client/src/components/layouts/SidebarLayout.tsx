@@ -524,7 +524,7 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                 return (
                   <li className="mb-2" key={item.id}>
                     <a
-                      href="/warehouse-packing"
+                      href="/warehouse-direct-link.html?target=packing"
                       className={cn(
                         "flex items-center py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
                         location === item.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
