@@ -340,7 +340,12 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                                     )}
                                     onClick={() => {
                                       console.log("Direct Warehouse Picking navigation triggered from submenu");
-                                      window.location.href = "/warehouse-picking";
+                                      // Add tracking flags in session storage for analytics
+                                      sessionStorage.setItem("usingDirectWarehouseAccess", "true");
+                                      sessionStorage.setItem("directWarehousePickingAccess", "true");
+                                      sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
+                                      // Use setLocation from wouter instead of direct DOM manipulation
+                                      setLocation("/warehouse-picking");
                                     }}
                                   >
                                     <span className="mr-3">{subItem.icon}</span>
@@ -358,7 +363,12 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                                     )}
                                     onClick={() => {
                                       console.log("Direct Warehouse Packing navigation triggered from submenu");
-                                      window.location.href = "/warehouse-packing";
+                                      // Add tracking flags in session storage for analytics
+                                      sessionStorage.setItem("usingDirectWarehouseAccess", "true");
+                                      sessionStorage.setItem("directWarehousePackingAccess", "true");
+                                      sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
+                                      // Use setLocation from wouter instead of direct DOM manipulation
+                                      setLocation("/warehouse-packing");
                                     }}
                                   >
                                     <span className="mr-3">{subItem.icon}</span>
