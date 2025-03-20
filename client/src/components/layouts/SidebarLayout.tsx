@@ -48,17 +48,10 @@ interface SidebarItemProps {
 }
 
 const SidebarItem = ({ icon, href, label, active }: SidebarItemProps) => {
+  // We'll make sure SidebarItem is never used for those special routes
+  // that are now handled with direct navigation
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     console.log(`Clicked on sidebar item: ${label} with href: ${href}`);
-    
-    // For certain pages that need direct navigation
-    if (href === "/order-management" || 
-        href === "/warehouse-dashboard" || 
-        href === "/warehouse-receiving") {
-      e.preventDefault(); // Prevent default Link behavior
-      console.log(`Attempting direct navigation to ${label}`);
-      window.location.href = href;
-    }
   };
   
   return (
@@ -242,7 +235,7 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
         <nav className="mt-2 flex-1 overflow-y-auto">
           <ul>
             {roleNavigation.map((item) => {
-              // Add a direct Order Management button
+              // Special cases with direct navigation
               if (item.href === "/order-management") {
                 return (
                   <li className="mb-2" key={item.id}>
@@ -258,6 +251,42 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                         sessionStorage.setItem("lastDirectOrdersAccess", new Date().toISOString());
                         // Use direct navigation to avoid router issues
                         window.location.href = "/orders-direct";
+                      }}
+                    >
+                      <span className="mr-3">{item.icon}</span>
+                      {item.label}
+                    </div>
+                  </li>
+                );
+              } else if (item.href === "/warehouse-dashboard") {
+                return (
+                  <li className="mb-2" key={item.id}>
+                    <div
+                      className={cn(
+                        "flex items-center py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                        location === item.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                      )}
+                      onClick={() => {
+                        console.log("Direct Warehouse Dashboard navigation triggered");
+                        window.location.href = "/warehouse-dashboard";
+                      }}
+                    >
+                      <span className="mr-3">{item.icon}</span>
+                      {item.label}
+                    </div>
+                  </li>
+                );
+              } else if (item.href === "/warehouse-receiving") {
+                return (
+                  <li className="mb-2" key={item.id}>
+                    <div
+                      className={cn(
+                        "flex items-center py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                        location === item.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                      )}
+                      onClick={() => {
+                        console.log("Direct Warehouse Receiving navigation triggered");
+                        window.location.href = "/warehouse-receiving";
                       }}
                     >
                       <span className="mr-3">{item.icon}</span>
