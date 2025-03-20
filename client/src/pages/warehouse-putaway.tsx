@@ -67,7 +67,7 @@ export default function WarehousePutaway() {
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
   const [selectedLocationId, setSelectedLocationId] = useState<number | null>(null);
   const [showDebug, setShowDebug] = useState(false);
-  const [navigationFlags, setNavigationFlags] = useState<{[key: string]: boolean}>({});
+  const [navigationFlags, setNavigationFlags] = useState<{[key: string]: boolean | string}>({});
   
   // Debug check for navigation flags on component mount
   useEffect(() => {
@@ -227,7 +227,8 @@ export default function WarehousePutaway() {
             {Object.entries(navigationFlags).map(([key, value]) => (
               <div key={key} className="flex items-center gap-2 border-b border-blue-100 pb-1">
                 <span className="font-semibold">{key}:</span>
-                <span className={value ? "text-green-600" : "text-red-600"}>
+                <span className={typeof value === 'boolean' && value ? "text-green-600" : 
+                                 typeof value === 'string' && value !== "unknown" ? "text-blue-600" : "text-red-600"}>
                   {typeof value === 'boolean' ? value.toString() : value}
                 </span>
               </div>
@@ -238,6 +239,39 @@ export default function WarehousePutaway() {
                   "✅ Navigation flags set correctly" : 
                   "⚠️ Missing required navigation flags"}
               </p>
+            </div>
+            <div className="col-span-full mt-2 flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  // Test direct navigation via warehouse-direct.html
+                  window.location.href = "/warehouse-direct.html?target=putaway&test=true&t=" + new Date().getTime();
+                }}
+              >
+                Test Direct Page Navigation
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  // Test manual flag setting
+                  sessionStorage.removeItem("directWarehouseDashboardAccess");
+                  sessionStorage.removeItem("directWarehouseReceivingAccess");
+                  sessionStorage.removeItem("directWarehousePutawayAccess");
+                  
+                  // Set navigation flags for put-away access
+                  sessionStorage.setItem("directWarehousePutawayAccess", "true");
+                  sessionStorage.setItem("directWarehouseAccess", "true");
+                  sessionStorage.setItem("bypassRouter", "true");
+                  sessionStorage.setItem("warehouseAccessMethod", "debug-test");
+                  
+                  // Refresh the page to test navigation
+                  window.location.reload();
+                }}
+              >
+                Test Flag Setting
+              </Button>
             </div>
           </div>
         </div>
