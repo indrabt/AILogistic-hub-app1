@@ -1,0 +1,188 @@
+[
+  {
+    "id": 1001,
+    "orderNumber": "INB-2025-1001",
+    "supplierName": "Sydney Electronics Supply",
+    "supplierReference": "SES-78452",
+    "expectedDeliveryDate": "2025-03-21T10:30:00Z",
+    "actualDeliveryDate": "2025-03-21T09:45:00Z",
+    "status": "received",
+    "createdAt": "2025-03-18T15:20:00Z",
+    "createdBy": "warehouse_admin",
+    "notes": "Priority delivery for Western Sydney Distribution Center",
+    "items": [
+      {
+        "id": 10011,
+        "inboundOrderId": 1001,
+        "sku": "ELC-5578-POW",
+        "productName": "Power Adapter 240V",
+        "expectedQuantity": 150,
+        "receivedQuantity": 150,
+        "batchNumber": "SES-B789",
+        "lotNumber": "LOT-2025-0321",
+        "expiryDate": "2027-03-21T00:00:00Z",
+        "status": "received",
+        "storageLocation": "ZONE-A-R01-S03",
+        "discrepancies": []
+      },
+      {
+        "id": 10012,
+        "inboundOrderId": 1001,
+        "sku": "ELC-5593-CBL",
+        "productName": "USB-C Cable 2m",
+        "expectedQuantity": 300,
+        "receivedQuantity": 290,
+        "batchNumber": "SES-B790",
+        "lotNumber": "LOT-2025-0321",
+        "expiryDate": "2030-03-21T00:00:00Z",
+        "status": "partial",
+        "storageLocation": "ZONE-A-R01-S04",
+        "discrepancies": [
+          {
+            "id": 5001,
+            "inboundOrderItemId": 10012,
+            "type": "quantity_mismatch",
+            "description": "Package contained 10 fewer items than expected",
+            "quantity": 10,
+            "reportedBy": "warehouse_staff1",
+            "reportedAt": "2025-03-21T09:55:00Z",
+            "status": "open",
+            "resolutionNotes": ""
+          }
+        ]
+      },
+      {
+        "id": 10013,
+        "inboundOrderId": 1001,
+        "sku": "ELC-6721-CHG",
+        "productName": "Wireless Charging Pad",
+        "expectedQuantity": 75,
+        "receivedQuantity": 75,
+        "batchNumber": "SES-B791",
+        "lotNumber": "LOT-2025-0321",
+        "expiryDate": "2030-03-21T00:00:00Z",
+        "status": "received",
+        "storageLocation": "ZONE-A-R02-S01",
+        "discrepancies": []
+      }
+    ]
+  },
+  {
+    "id": 1002,
+    "orderNumber": "INB-2025-1002",
+    "supplierName": "Parramatta Food Distributors",
+    "supplierReference": "PFD-45699",
+    "expectedDeliveryDate": "2025-03-22T08:00:00Z",
+    "actualDeliveryDate": null,
+    "status": "pending",
+    "createdAt": "2025-03-19T14:30:00Z",
+    "createdBy": "logistics_manager",
+    "notes": "Perishable goods - handle with care",
+    "items": [
+      {
+        "id": 10021,
+        "inboundOrderId": 1002,
+        "sku": "FD-0124-PRO",
+        "productName": "Protein Bars (Box of 24)",
+        "expectedQuantity": 100,
+        "receivedQuantity": 0,
+        "status": "pending",
+        "discrepancies": []
+      },
+      {
+        "id": 10022,
+        "inboundOrderId": 1002,
+        "sku": "FD-0210-NUT",
+        "productName": "Mixed Nuts (1kg)",
+        "expectedQuantity": 50,
+        "receivedQuantity": 0,
+        "expiryDate": "2025-09-15T00:00:00Z",
+        "status": "pending",
+        "discrepancies": []
+      },
+      {
+        "id": 10023,
+        "inboundOrderId": 1002,
+        "sku": "FD-0315-VIT",
+        "productName": "Vitamin Water (Pack of 12)",
+        "expectedQuantity": 120,
+        "receivedQuantity": 0,
+        "expiryDate": "2025-12-31T00:00:00Z",
+        "status": "pending",
+        "discrepancies": []
+      }
+    ]
+  },
+  {
+    "id": 1003,
+    "orderNumber": "INB-2025-1003",
+    "supplierName": "Western Sydney Office Supplies",
+    "supplierReference": "WSOS-12345",
+    "expectedDeliveryDate": "2025-03-20T14:00:00Z",
+    "actualDeliveryDate": "2025-03-20T14:20:00Z",
+    "status": "partial",
+    "createdAt": "2025-03-17T10:15:00Z",
+    "createdBy": "warehouse_admin",
+    "notes": "Standard office supplies restock",
+    "items": [
+      {
+        "id": 10031,
+        "inboundOrderId": 1003,
+        "sku": "OFF-1001-PEN",
+        "productName": "Ballpoint Pens (Box of 50)",
+        "expectedQuantity": 30,
+        "receivedQuantity": 30,
+        "batchNumber": "WSOS-P123",
+        "status": "received",
+        "storageLocation": "ZONE-C-R03-S02",
+        "discrepancies": []
+      },
+      {
+        "id": 10032,
+        "inboundOrderId": 1003,
+        "sku": "OFF-1002-NOT",
+        "productName": "Notebooks A4 (Pack of 5)",
+        "expectedQuantity": 60,
+        "receivedQuantity": 60,
+        "batchNumber": "WSOS-N456",
+        "status": "received",
+        "storageLocation": "ZONE-C-R03-S03",
+        "discrepancies": []
+      },
+      {
+        "id": 10033,
+        "inboundOrderId": 1003,
+        "sku": "OFF-1010-STA",
+        "productName": "Stapler with Staples",
+        "expectedQuantity": 25,
+        "receivedQuantity": 0,
+        "status": "pending",
+        "discrepancies": []
+      },
+      {
+        "id": 10034,
+        "inboundOrderId": 1003,
+        "sku": "OFF-1025-PAP",
+        "productName": "Printer Paper (500 sheets)",
+        "expectedQuantity": 40,
+        "receivedQuantity": 38,
+        "batchNumber": "WSOS-PA789",
+        "status": "partial",
+        "storageLocation": "ZONE-C-R04-S01",
+        "discrepancies": [
+          {
+            "id": 5002,
+            "inboundOrderItemId": 10034,
+            "type": "quantity_mismatch",
+            "description": "2 reams of paper damaged during transport",
+            "quantity": 2,
+            "reportedBy": "warehouse_staff2",
+            "reportedAt": "2025-03-20T14:35:00Z",
+            "status": "resolved",
+            "resolutionNotes": "Credit note issued by supplier"
+          }
+        ]
+      }
+    ]
+  }
+]

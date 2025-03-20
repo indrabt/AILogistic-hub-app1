@@ -1,0 +1,498 @@
+[
+  {
+    "id": 1,
+    "sku": "ELC-5578-POW",
+    "productName": "Power Adapter 240V",
+    "category": "electronics",
+    "totalQuantity": 143,
+    "allocatedQuantity": 7,
+    "availableQuantity": 136,
+    "minimumStockLevel": 50,
+    "maximumStockLevel": 200,
+    "reorderPoint": 75,
+    "reorderQuantity": 100,
+    "locations": [
+      {
+        "id": 1001,
+        "inventoryItemId": 1,
+        "locationId": 101,
+        "quantity": 143,
+        "status": "stored",
+        "batchNumber": "SES-B789",
+        "lotNumber": "LOT-2025-0321",
+        "expiryDate": "2027-03-21T00:00:00Z",
+        "lastUpdatedAt": "2025-03-21T10:25:00Z"
+      }
+    ],
+    "attributes": [
+      {
+        "id": 10001,
+        "inventoryItemId": 1,
+        "name": "color",
+        "value": "black"
+      },
+      {
+        "id": 10002,
+        "inventoryItemId": 1,
+        "name": "voltage",
+        "value": "240V"
+      },
+      {
+        "id": 10003,
+        "inventoryItemId": 1,
+        "name": "amperage",
+        "value": "2.5A"
+      }
+    ],
+    "lastUpdatedAt": "2025-03-21T10:25:00Z",
+    "productCharacteristics": {
+      "category": "electronics",
+      "size": "small",
+      "weight": "light",
+      "temperatureRequirements": "ambient",
+      "velocityCategory": "fast",
+      "hazardous": false,
+      "fragile": false,
+      "stackable": true,
+      "specialHandling": []
+    }
+  },
+  {
+    "id": 2,
+    "sku": "ELC-5593-CBL",
+    "productName": "USB-C Cable 2m",
+    "category": "electronics",
+    "totalQuantity": 265,
+    "allocatedQuantity": 25,
+    "availableQuantity": 240,
+    "minimumStockLevel": 100,
+    "maximumStockLevel": 500,
+    "reorderPoint": 150,
+    "reorderQuantity": 200,
+    "locations": [
+      {
+        "id": 1002,
+        "inventoryItemId": 2,
+        "locationId": 102,
+        "quantity": 265,
+        "status": "stored",
+        "batchNumber": "SES-B790",
+        "lotNumber": "LOT-2025-0321",
+        "expiryDate": "2030-03-21T00:00:00Z",
+        "lastUpdatedAt": "2025-03-21T10:45:00Z"
+      }
+    ],
+    "attributes": [
+      {
+        "id": 10004,
+        "inventoryItemId": 2,
+        "name": "color",
+        "value": "black"
+      },
+      {
+        "id": 10005,
+        "inventoryItemId": 2,
+        "name": "length",
+        "value": "2m"
+      },
+      {
+        "id": 10006,
+        "inventoryItemId": 2,
+        "name": "connector",
+        "value": "USB-C to USB-C"
+      }
+    ],
+    "lastUpdatedAt": "2025-03-21T10:45:00Z",
+    "productCharacteristics": {
+      "category": "electronics",
+      "size": "small",
+      "weight": "light",
+      "temperatureRequirements": "ambient",
+      "velocityCategory": "fast",
+      "hazardous": false,
+      "fragile": false,
+      "stackable": true,
+      "specialHandling": []
+    }
+  },
+  {
+    "id": 3,
+    "sku": "ELC-6721-CHG",
+    "productName": "Wireless Charging Pad",
+    "category": "electronics",
+    "totalQuantity": 70,
+    "allocatedQuantity": 8,
+    "availableQuantity": 62,
+    "minimumStockLevel": 25,
+    "maximumStockLevel": 100,
+    "reorderPoint": 40,
+    "reorderQuantity": 50,
+    "locations": [
+      {
+        "id": 1003,
+        "inventoryItemId": 3,
+        "locationId": 103,
+        "quantity": 70,
+        "status": "stored",
+        "batchNumber": "SES-B791",
+        "lotNumber": "LOT-2025-0321",
+        "expiryDate": "2030-03-21T00:00:00Z",
+        "lastUpdatedAt": "2025-03-21T11:15:00Z"
+      }
+    ],
+    "attributes": [
+      {
+        "id": 10007,
+        "inventoryItemId": 3,
+        "name": "color",
+        "value": "white"
+      },
+      {
+        "id": 10008,
+        "inventoryItemId": 3,
+        "name": "power",
+        "value": "15W"
+      },
+      {
+        "id": 10009,
+        "inventoryItemId": 3,
+        "name": "compatibility",
+        "value": "universal"
+      }
+    ],
+    "lastUpdatedAt": "2025-03-21T11:15:00Z",
+    "productCharacteristics": {
+      "category": "electronics",
+      "size": "small",
+      "weight": "medium",
+      "temperatureRequirements": "ambient",
+      "velocityCategory": "medium",
+      "hazardous": false,
+      "fragile": true,
+      "stackable": false,
+      "specialHandling": ["Do not stack more than 3 high"]
+    }
+  },
+  {
+    "id": 4,
+    "sku": "OFF-1001-PEN",
+    "productName": "Ballpoint Pens (Box of 50)",
+    "category": "office",
+    "totalQuantity": 28,
+    "allocatedQuantity": 8,
+    "availableQuantity": 20,
+    "minimumStockLevel": 15,
+    "maximumStockLevel": 100,
+    "reorderPoint": 25,
+    "reorderQuantity": 30,
+    "locations": [
+      {
+        "id": 1004,
+        "inventoryItemId": 4,
+        "locationId": 301,
+        "quantity": 28,
+        "status": "stored",
+        "batchNumber": "WSOS-P123",
+        "lastUpdatedAt": "2025-03-20T15:10:00Z"
+      }
+    ],
+    "attributes": [
+      {
+        "id": 10010,
+        "inventoryItemId": 4,
+        "name": "color",
+        "value": "blue"
+      },
+      {
+        "id": 10011,
+        "inventoryItemId": 4,
+        "name": "point",
+        "value": "medium"
+      }
+    ],
+    "lastUpdatedAt": "2025-03-20T15:10:00Z",
+    "productCharacteristics": {
+      "category": "office",
+      "size": "small",
+      "weight": "light",
+      "temperatureRequirements": "ambient",
+      "velocityCategory": "medium",
+      "hazardous": false,
+      "fragile": false,
+      "stackable": true,
+      "specialHandling": []
+    }
+  },
+  {
+    "id": 5,
+    "sku": "OFF-1002-NOT",
+    "productName": "Notebooks A4 (Pack of 5)",
+    "category": "office",
+    "totalQuantity": 56,
+    "allocatedQuantity": 7,
+    "availableQuantity": 49,
+    "minimumStockLevel": 20,
+    "maximumStockLevel": 150,
+    "reorderPoint": 30,
+    "reorderQuantity": 50,
+    "locations": [
+      {
+        "id": 1005,
+        "inventoryItemId": 5,
+        "locationId": 302,
+        "quantity": 56,
+        "status": "stored",
+        "batchNumber": "WSOS-N456",
+        "lastUpdatedAt": "2025-03-20T15:30:00Z"
+      }
+    ],
+    "attributes": [
+      {
+        "id": 10012,
+        "inventoryItemId": 5,
+        "name": "paper",
+        "value": "lined"
+      },
+      {
+        "id": 10013,
+        "inventoryItemId": 5,
+        "name": "cover",
+        "value": "hardcover"
+      },
+      {
+        "id": 10014,
+        "inventoryItemId": 5,
+        "name": "size",
+        "value": "A4"
+      }
+    ],
+    "lastUpdatedAt": "2025-03-20T15:30:00Z",
+    "productCharacteristics": {
+      "category": "office",
+      "size": "medium",
+      "weight": "medium",
+      "temperatureRequirements": "ambient",
+      "velocityCategory": "medium",
+      "hazardous": false,
+      "fragile": false,
+      "stackable": true,
+      "specialHandling": []
+    }
+  },
+  {
+    "id": 6,
+    "sku": "OFF-1025-PAP",
+    "productName": "Printer Paper (500 sheets)",
+    "category": "office",
+    "totalQuantity": 36,
+    "allocatedQuantity": 14,
+    "availableQuantity": 22,
+    "minimumStockLevel": 20,
+    "maximumStockLevel": 100,
+    "reorderPoint": 30,
+    "reorderQuantity": 40,
+    "locations": [
+      {
+        "id": 1006,
+        "inventoryItemId": 6,
+        "locationId": 304,
+        "quantity": 36,
+        "status": "stored",
+        "batchNumber": "WSOS-PA789",
+        "lastUpdatedAt": "2025-03-20T16:15:00Z"
+      }
+    ],
+    "attributes": [
+      {
+        "id": 10015,
+        "inventoryItemId": 6,
+        "name": "weight",
+        "value": "80gsm"
+      },
+      {
+        "id": 10016,
+        "inventoryItemId": 6,
+        "name": "color",
+        "value": "white"
+      },
+      {
+        "id": 10017,
+        "inventoryItemId": 6,
+        "name": "size",
+        "value": "A4"
+      }
+    ],
+    "lastUpdatedAt": "2025-03-20T16:15:00Z",
+    "productCharacteristics": {
+      "category": "office",
+      "size": "medium",
+      "weight": "heavy",
+      "temperatureRequirements": "ambient",
+      "velocityCategory": "fast",
+      "hazardous": false,
+      "fragile": false,
+      "stackable": true,
+      "specialHandling": ["Use dolly for transport", "Stack maximum 5 high"]
+    }
+  },
+  {
+    "id": 7,
+    "sku": "FD-0124-PRO",
+    "productName": "Protein Bars (Box of 24)",
+    "category": "food",
+    "totalQuantity": 0,
+    "allocatedQuantity": 0,
+    "availableQuantity": 0,
+    "minimumStockLevel": 10,
+    "maximumStockLevel": 150,
+    "reorderPoint": 20,
+    "reorderQuantity": 100,
+    "locations": [],
+    "attributes": [
+      {
+        "id": 10018,
+        "inventoryItemId": 7,
+        "name": "flavor",
+        "value": "chocolate"
+      },
+      {
+        "id": 10019,
+        "inventoryItemId": 7,
+        "name": "dietary",
+        "value": "gluten-free"
+      }
+    ],
+    "lastUpdatedAt": "2025-03-19T14:30:00Z",
+    "productCharacteristics": {
+      "category": "food",
+      "size": "medium",
+      "weight": "medium",
+      "temperatureRequirements": "ambient",
+      "velocityCategory": "fast",
+      "hazardous": false,
+      "fragile": false,
+      "stackable": true,
+      "specialHandling": []
+    }
+  },
+  {
+    "id": 8,
+    "sku": "FD-0210-NUT",
+    "productName": "Mixed Nuts (1kg)",
+    "category": "food",
+    "totalQuantity": 0,
+    "allocatedQuantity": 0,
+    "availableQuantity": 0,
+    "minimumStockLevel": 5,
+    "maximumStockLevel": 100,
+    "reorderPoint": 15,
+    "reorderQuantity": 50,
+    "locations": [],
+    "attributes": [
+      {
+        "id": 10020,
+        "inventoryItemId": 8,
+        "name": "allergens",
+        "value": "contains tree nuts"
+      },
+      {
+        "id": 10021,
+        "inventoryItemId": 8,
+        "name": "organic",
+        "value": "yes"
+      }
+    ],
+    "lastUpdatedAt": "2025-03-19T14:30:00Z",
+    "productCharacteristics": {
+      "category": "food",
+      "size": "medium",
+      "weight": "medium",
+      "temperatureRequirements": "ambient",
+      "velocityCategory": "medium",
+      "hazardous": false,
+      "fragile": false,
+      "stackable": true,
+      "specialHandling": ["Allergen separation required"]
+    }
+  },
+  {
+    "id": 9,
+    "sku": "FD-0315-VIT",
+    "productName": "Vitamin Water (Pack of 12)",
+    "category": "beverages",
+    "totalQuantity": 0,
+    "allocatedQuantity": 0,
+    "availableQuantity": 0,
+    "minimumStockLevel": 20,
+    "maximumStockLevel": 200,
+    "reorderPoint": 40,
+    "reorderQuantity": 120,
+    "locations": [],
+    "attributes": [
+      {
+        "id": 10022,
+        "inventoryItemId": 9,
+        "name": "flavor",
+        "value": "mixed berry"
+      },
+      {
+        "id": 10023,
+        "inventoryItemId": 9,
+        "name": "size",
+        "value": "500ml"
+      }
+    ],
+    "lastUpdatedAt": "2025-03-19T14:30:00Z",
+    "productCharacteristics": {
+      "category": "beverages",
+      "size": "medium",
+      "weight": "heavy",
+      "temperatureRequirements": "chilled",
+      "velocityCategory": "fast",
+      "hazardous": false,
+      "fragile": false,
+      "stackable": true,
+      "specialHandling": ["Keep refrigerated", "Do not freeze"]
+    }
+  },
+  {
+    "id": 10,
+    "sku": "OFF-1010-STA",
+    "productName": "Stapler with Staples",
+    "category": "office",
+    "totalQuantity": 0,
+    "allocatedQuantity": 0,
+    "availableQuantity": 0,
+    "minimumStockLevel": 10,
+    "maximumStockLevel": 50,
+    "reorderPoint": 15,
+    "reorderQuantity": 25,
+    "locations": [],
+    "attributes": [
+      {
+        "id": 10024,
+        "inventoryItemId": 10,
+        "name": "color",
+        "value": "black"
+      },
+      {
+        "id": 10025,
+        "inventoryItemId": 10,
+        "name": "capacity",
+        "value": "20 sheets"
+      }
+    ],
+    "lastUpdatedAt": "2025-03-17T10:15:00Z",
+    "productCharacteristics": {
+      "category": "office",
+      "size": "small",
+      "weight": "light",
+      "temperatureRequirements": "ambient",
+      "velocityCategory": "slow",
+      "hazardous": false,
+      "fragile": false,
+      "stackable": true,
+      "specialHandling": []
+    }
+  }
+]

@@ -1,0 +1,263 @@
+[
+  {
+    "id": 3001,
+    "customerOrderId": 5001,
+    "batchId": 101,
+    "status": "completed",
+    "assignedTo": "warehouse_staff1",
+    "priority": "high",
+    "dueDate": "2025-03-21T15:00:00Z",
+    "startedAt": "2025-03-21T13:30:00Z",
+    "completedAt": "2025-03-21T14:15:00Z",
+    "items": [
+      {
+        "id": 30011,
+        "pickTaskId": 3001,
+        "orderItemId": 50011,
+        "sku": "ELC-5578-POW",
+        "productName": "Power Adapter 240V",
+        "quantity": 5,
+        "locationId": 101,
+        "locationName": "ZONE-A-R01-S03",
+        "status": "picked",
+        "pickedQuantity": 5,
+        "pickedLocationId": 101,
+        "batchNumber": "SES-B789",
+        "lotNumber": "LOT-2025-0321",
+        "pickedAt": "2025-03-21T13:40:00Z"
+      },
+      {
+        "id": 30012,
+        "pickTaskId": 3001,
+        "orderItemId": 50012,
+        "sku": "ELC-5593-CBL",
+        "productName": "USB-C Cable 2m",
+        "quantity": 10,
+        "locationId": 102,
+        "locationName": "ZONE-A-R01-S04",
+        "status": "picked",
+        "pickedQuantity": 10,
+        "pickedLocationId": 102,
+        "batchNumber": "SES-B790",
+        "lotNumber": "LOT-2025-0321",
+        "pickedAt": "2025-03-21T13:55:00Z"
+      },
+      {
+        "id": 30013,
+        "pickTaskId": 3001,
+        "orderItemId": 50013,
+        "sku": "ELC-6721-CHG",
+        "productName": "Wireless Charging Pad",
+        "quantity": 3,
+        "locationId": 103,
+        "locationName": "ZONE-A-R02-S01",
+        "status": "picked",
+        "pickedQuantity": 3,
+        "pickedLocationId": 103,
+        "batchNumber": "SES-B791",
+        "lotNumber": "LOT-2025-0321",
+        "pickedAt": "2025-03-21T14:10:00Z"
+      }
+    ]
+  },
+  {
+    "id": 3002,
+    "customerOrderId": 5002,
+    "batchId": null,
+    "status": "in_progress",
+    "assignedTo": "warehouse_staff2",
+    "priority": "urgent",
+    "dueDate": "2025-03-22T12:00:00Z",
+    "startedAt": "2025-03-22T09:30:00Z",
+    "completedAt": null,
+    "items": [
+      {
+        "id": 30021,
+        "pickTaskId": 3002,
+        "orderItemId": 50021,
+        "sku": "ELC-5578-POW",
+        "productName": "Power Adapter 240V",
+        "quantity": 2,
+        "locationId": 101,
+        "locationName": "ZONE-A-R01-S03",
+        "status": "picked",
+        "pickedQuantity": 2,
+        "pickedLocationId": 101,
+        "batchNumber": "SES-B789",
+        "lotNumber": "LOT-2025-0321",
+        "pickedAt": "2025-03-22T09:40:00Z"
+      },
+      {
+        "id": 30022,
+        "pickTaskId": 3002,
+        "orderItemId": 50022,
+        "sku": "OFF-1001-PEN",
+        "productName": "Ballpoint Pens (Box of 50)",
+        "quantity": 1,
+        "locationId": 301,
+        "locationName": "ZONE-C-R03-S02",
+        "status": "picked",
+        "pickedQuantity": 1,
+        "pickedLocationId": 301,
+        "batchNumber": "WSOS-P123",
+        "pickedAt": "2025-03-22T09:50:00Z"
+      },
+      {
+        "id": 30023,
+        "pickTaskId": 3002,
+        "orderItemId": 50023,
+        "sku": "OFF-1025-PAP",
+        "productName": "Printer Paper (500 sheets)",
+        "quantity": 3,
+        "locationId": 304,
+        "locationName": "ZONE-C-R04-S01",
+        "status": "pending",
+        "pickedQuantity": 0
+      }
+    ]
+  },
+  {
+    "id": 3003,
+    "customerOrderId": 5003,
+    "batchId": 102,
+    "status": "pending",
+    "assignedTo": null,
+    "priority": "medium",
+    "dueDate": "2025-03-23T15:00:00Z",
+    "startedAt": null,
+    "completedAt": null,
+    "items": [
+      {
+        "id": 30031,
+        "pickTaskId": 3003,
+        "orderItemId": 50031,
+        "sku": "ELC-6721-CHG",
+        "productName": "Wireless Charging Pad",
+        "quantity": 5,
+        "locationId": 103,
+        "locationName": "ZONE-A-R02-S01",
+        "status": "pending",
+        "pickedQuantity": 0
+      },
+      {
+        "id": 30032,
+        "pickTaskId": 3003,
+        "orderItemId": 50032,
+        "sku": "OFF-1002-NOT",
+        "productName": "Notebooks A4 (Pack of 5)",
+        "quantity": 4,
+        "locationId": 302,
+        "locationName": "ZONE-C-R03-S03",
+        "status": "pending",
+        "pickedQuantity": 0
+      }
+    ]
+  },
+  {
+    "id": 3004,
+    "customerOrderId": 5004,
+    "batchId": 102,
+    "status": "pending",
+    "assignedTo": null,
+    "priority": "low",
+    "dueDate": "2025-03-25T15:00:00Z",
+    "startedAt": null,
+    "completedAt": null,
+    "items": [
+      {
+        "id": 30041,
+        "pickTaskId": 3004,
+        "orderItemId": 50041,
+        "sku": "ELC-5593-CBL",
+        "productName": "USB-C Cable 2m",
+        "quantity": 15,
+        "locationId": 102,
+        "locationName": "ZONE-A-R01-S04",
+        "status": "pending",
+        "pickedQuantity": 0
+      },
+      {
+        "id": 30042,
+        "pickTaskId": 3004,
+        "orderItemId": 50042,
+        "sku": "OFF-1001-PEN",
+        "productName": "Ballpoint Pens (Box of 50)",
+        "quantity": 5,
+        "locationId": 301,
+        "locationName": "ZONE-C-R03-S02",
+        "status": "pending",
+        "pickedQuantity": 0
+      },
+      {
+        "id": 30043,
+        "pickTaskId": 3004,
+        "orderItemId": 50043,
+        "sku": "OFF-1025-PAP",
+        "productName": "Printer Paper (500 sheets)",
+        "quantity": 10,
+        "locationId": 304,
+        "locationName": "ZONE-C-R04-S01",
+        "status": "pending",
+        "pickedQuantity": 0
+      }
+    ]
+  },
+  {
+    "id": 3005,
+    "customerOrderId": 5005,
+    "batchId": null,
+    "status": "completed",
+    "assignedTo": "warehouse_staff3",
+    "priority": "high",
+    "dueDate": "2025-03-20T16:00:00Z",
+    "startedAt": "2025-03-20T14:00:00Z",
+    "completedAt": "2025-03-20T14:45:00Z",
+    "items": [
+      {
+        "id": 30051,
+        "pickTaskId": 3005,
+        "orderItemId": 50051,
+        "sku": "OFF-1001-PEN",
+        "productName": "Ballpoint Pens (Box of 50)",
+        "quantity": 2,
+        "locationId": 301,
+        "locationName": "ZONE-C-R03-S02",
+        "status": "picked",
+        "pickedQuantity": 2,
+        "pickedLocationId": 301,
+        "batchNumber": "WSOS-P123",
+        "pickedAt": "2025-03-20T14:10:00Z"
+      },
+      {
+        "id": 30052,
+        "pickTaskId": 3005,
+        "orderItemId": 50052,
+        "sku": "OFF-1002-NOT",
+        "productName": "Notebooks A4 (Pack of 5)",
+        "quantity": 3,
+        "locationId": 302,
+        "locationName": "ZONE-C-R03-S03",
+        "status": "picked",
+        "pickedQuantity": 3,
+        "pickedLocationId": 302,
+        "batchNumber": "WSOS-N456",
+        "pickedAt": "2025-03-20T14:20:00Z"
+      },
+      {
+        "id": 30053,
+        "pickTaskId": 3005,
+        "orderItemId": 50053,
+        "sku": "OFF-1025-PAP",
+        "productName": "Printer Paper (500 sheets)",
+        "quantity": 1,
+        "locationId": 304,
+        "locationName": "ZONE-C-R04-S01",
+        "status": "picked",
+        "pickedQuantity": 1,
+        "pickedLocationId": 304,
+        "batchNumber": "WSOS-PA789",
+        "pickedAt": "2025-03-20T14:30:00Z"
+      }
+    ]
+  }
+]

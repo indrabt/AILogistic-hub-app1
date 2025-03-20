@@ -1,0 +1,266 @@
+[
+  {
+    "id": 4001,
+    "customerOrderId": 5001,
+    "status": "completed",
+    "assignedTo": "warehouse_staff1",
+    "startedAt": "2025-03-21T14:30:00Z",
+    "completedAt": "2025-03-21T15:00:00Z",
+    "items": [
+      {
+        "id": 40011,
+        "packingTaskId": 4001,
+        "pickTaskItemId": 30011,
+        "sku": "ELC-5578-POW",
+        "productName": "Power Adapter 240V",
+        "quantity": 5,
+        "packedQuantity": 5,
+        "packageId": 6001,
+        "status": "packed",
+        "packedAt": "2025-03-21T14:40:00Z"
+      },
+      {
+        "id": 40012,
+        "packingTaskId": 4001,
+        "pickTaskItemId": 30012,
+        "sku": "ELC-5593-CBL",
+        "productName": "USB-C Cable 2m",
+        "quantity": 10,
+        "packedQuantity": 10,
+        "packageId": 6001,
+        "status": "packed",
+        "packedAt": "2025-03-21T14:45:00Z"
+      },
+      {
+        "id": 40013,
+        "packingTaskId": 4001,
+        "pickTaskItemId": 30013,
+        "sku": "ELC-6721-CHG",
+        "productName": "Wireless Charging Pad",
+        "quantity": 3,
+        "packedQuantity": 3,
+        "packageId": 6001,
+        "status": "packed",
+        "packedAt": "2025-03-21T14:50:00Z"
+      }
+    ],
+    "packages": [
+      {
+        "id": 6001,
+        "packingTaskId": 4001,
+        "packageType": "medium_box",
+        "length": 30,
+        "width": 25,
+        "height": 15,
+        "dimensionUnit": "cm",
+        "weight": 2.5,
+        "weightUnit": "kg",
+        "trackingNumber": "AUS-TR-123456789",
+        "carrier": "Australia Post",
+        "service": "Express Post",
+        "status": "shipped",
+        "createdAt": "2025-03-21T14:35:00Z",
+        "shippedAt": "2025-03-21T15:05:00Z",
+        "notes": "Fragile items inside - handle with care"
+      }
+    ]
+  },
+  {
+    "id": 4002,
+    "customerOrderId": 5005,
+    "status": "completed",
+    "assignedTo": "warehouse_staff3",
+    "startedAt": "2025-03-20T15:00:00Z",
+    "completedAt": "2025-03-20T15:30:00Z",
+    "items": [
+      {
+        "id": 40021,
+        "packingTaskId": 4002,
+        "pickTaskItemId": 30051,
+        "sku": "OFF-1001-PEN",
+        "productName": "Ballpoint Pens (Box of 50)",
+        "quantity": 2,
+        "packedQuantity": 2,
+        "packageId": 6002,
+        "status": "packed",
+        "packedAt": "2025-03-20T15:10:00Z"
+      },
+      {
+        "id": 40022,
+        "packingTaskId": 4002,
+        "pickTaskItemId": 30052,
+        "sku": "OFF-1002-NOT",
+        "productName": "Notebooks A4 (Pack of 5)",
+        "quantity": 3,
+        "packedQuantity": 3,
+        "packageId": 6002,
+        "status": "packed",
+        "packedAt": "2025-03-20T15:15:00Z"
+      },
+      {
+        "id": 40023,
+        "packingTaskId": 4002,
+        "pickTaskItemId": 30053,
+        "sku": "OFF-1025-PAP",
+        "productName": "Printer Paper (500 sheets)",
+        "quantity": 1,
+        "packedQuantity": 1,
+        "packageId": 6002,
+        "status": "packed",
+        "packedAt": "2025-03-20T15:20:00Z"
+      }
+    ],
+    "packages": [
+      {
+        "id": 6002,
+        "packingTaskId": 4002,
+        "packageType": "large_box",
+        "length": 40,
+        "width": 30,
+        "height": 25,
+        "dimensionUnit": "cm",
+        "weight": 8.2,
+        "weightUnit": "kg",
+        "trackingNumber": "AUS-TR-987654321",
+        "carrier": "Australia Post",
+        "service": "Standard Post",
+        "status": "shipped",
+        "createdAt": "2025-03-20T15:05:00Z",
+        "shippedAt": "2025-03-20T16:00:00Z"
+      }
+    ]
+  },
+  {
+    "id": 4003,
+    "customerOrderId": 5002,
+    "status": "in_progress",
+    "assignedTo": "warehouse_staff2",
+    "startedAt": "2025-03-22T10:00:00Z",
+    "completedAt": null,
+    "items": [
+      {
+        "id": 40031,
+        "packingTaskId": 4003,
+        "pickTaskItemId": 30021,
+        "sku": "ELC-5578-POW",
+        "productName": "Power Adapter 240V",
+        "quantity": 2,
+        "packedQuantity": 2,
+        "packageId": 6003,
+        "status": "packed",
+        "packedAt": "2025-03-22T10:10:00Z"
+      },
+      {
+        "id": 40032,
+        "packingTaskId": 4003,
+        "pickTaskItemId": 30022,
+        "sku": "OFF-1001-PEN",
+        "productName": "Ballpoint Pens (Box of 50)",
+        "quantity": 1,
+        "packedQuantity": 1,
+        "packageId": 6003,
+        "status": "packed",
+        "packedAt": "2025-03-22T10:15:00Z"
+      },
+      {
+        "id": 40033,
+        "packingTaskId": 4003,
+        "pickTaskItemId": 30023,
+        "sku": "OFF-1025-PAP",
+        "productName": "Printer Paper (500 sheets)",
+        "quantity": 3,
+        "packedQuantity": 0,
+        "status": "pending"
+      }
+    ],
+    "packages": [
+      {
+        "id": 6003,
+        "packingTaskId": 4003,
+        "packageType": "small_box",
+        "length": 20,
+        "width": 15,
+        "height": 10,
+        "dimensionUnit": "cm",
+        "weight": 0.8,
+        "weightUnit": "kg",
+        "carrier": "Australia Post",
+        "service": "Express Post",
+        "status": "packed",
+        "createdAt": "2025-03-22T10:05:00Z"
+      }
+    ]
+  },
+  {
+    "id": 4004,
+    "customerOrderId": 5003,
+    "status": "pending",
+    "assignedTo": null,
+    "startedAt": null,
+    "completedAt": null,
+    "items": [
+      {
+        "id": 40041,
+        "packingTaskId": 4004,
+        "pickTaskItemId": 30031,
+        "sku": "ELC-6721-CHG",
+        "productName": "Wireless Charging Pad",
+        "quantity": 5,
+        "packedQuantity": 0,
+        "status": "pending"
+      },
+      {
+        "id": 40042,
+        "packingTaskId": 4004,
+        "pickTaskItemId": 30032,
+        "sku": "OFF-1002-NOT",
+        "productName": "Notebooks A4 (Pack of 5)",
+        "quantity": 4,
+        "packedQuantity": 0,
+        "status": "pending"
+      }
+    ],
+    "packages": []
+  },
+  {
+    "id": 4005,
+    "customerOrderId": 5004,
+    "status": "pending",
+    "assignedTo": null,
+    "startedAt": null,
+    "completedAt": null,
+    "items": [
+      {
+        "id": 40051,
+        "packingTaskId": 4005,
+        "pickTaskItemId": 30041,
+        "sku": "ELC-5593-CBL",
+        "productName": "USB-C Cable 2m",
+        "quantity": 15,
+        "packedQuantity": 0,
+        "status": "pending"
+      },
+      {
+        "id": 40052,
+        "packingTaskId": 4005,
+        "pickTaskItemId": 30042,
+        "sku": "OFF-1001-PEN",
+        "productName": "Ballpoint Pens (Box of 50)",
+        "quantity": 5,
+        "packedQuantity": 0,
+        "status": "pending"
+      },
+      {
+        "id": 40053,
+        "packingTaskId": 4005,
+        "pickTaskItemId": 30043,
+        "sku": "OFF-1025-PAP",
+        "productName": "Printer Paper (500 sheets)",
+        "quantity": 10,
+        "packedQuantity": 0,
+        "status": "pending"
+      }
+    ],
+    "packages": []
+  }
+]
