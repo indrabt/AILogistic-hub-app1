@@ -381,6 +381,507 @@ export class MemStorage implements IStorage {
     };
     return this.returnItems[index];
   }
+
+  // Warehouse Management System Methods - Receiving Feature
+  
+  async getInboundOrders(status?: string): Promise<InboundOrder[]> {
+    if (status) {
+      return this.inboundOrders.filter(order => order.status === status);
+    }
+    return this.inboundOrders;
+  }
+
+  async getInboundOrderById(id: number): Promise<InboundOrder | undefined> {
+    return this.inboundOrders.find(order => order.id === id);
+  }
+
+  async createInboundOrder(order: Omit<InboundOrder, 'id'>): Promise<InboundOrder> {
+    const newOrder: InboundOrder = {
+      ...order,
+      id: this.inboundOrders.length > 0 ? Math.max(...this.inboundOrders.map(o => o.id)) + 1 : 1,
+      items: order.items || []
+    };
+    this.inboundOrders.push(newOrder);
+    return newOrder;
+  }
+
+  async updateInboundOrder(id: number, order: Partial<InboundOrder>): Promise<InboundOrder | undefined> {
+    const index = this.inboundOrders.findIndex(o => o.id === id);
+    if (index === -1) return undefined;
+    
+    this.inboundOrders[index] = {
+      ...this.inboundOrders[index],
+      ...order
+    };
+    return this.inboundOrders[index];
+  }
+
+  async deleteInboundOrder(id: number): Promise<boolean> {
+    const index = this.inboundOrders.findIndex(o => o.id === id);
+    if (index === -1) return false;
+    
+    this.inboundOrders.splice(index, 1);
+    // Also delete associated items
+    this.inboundOrderItems = this.inboundOrderItems.filter(item => item.inboundOrderId !== id);
+    return true;
+  }
+
+  async getInboundOrderItems(orderId: number): Promise<InboundOrderItem[]> {
+    return this.inboundOrderItems.filter(item => item.inboundOrderId === orderId);
+  }
+
+  async createInboundOrderItem(item: Omit<InboundOrderItem, 'id'>): Promise<InboundOrderItem> {
+    const newItem: InboundOrderItem = {
+      ...item,
+      id: this.inboundOrderItems.length > 0 ? Math.max(...this.inboundOrderItems.map(i => i.id)) + 1 : 1,
+      discrepancies: item.discrepancies || []
+    };
+    this.inboundOrderItems.push(newItem);
+    
+    // Update the inbound order's items array
+    const order = this.inboundOrders.find(o => o.id === item.inboundOrderId);
+    if (order) {
+      order.items.push(newItem);
+    }
+    
+    return newItem;
+  }
+
+  async updateInboundOrderItem(id: number, item: Partial<InboundOrderItem>): Promise<InboundOrderItem | undefined> {
+    const index = this.inboundOrderItems.findIndex(i => i.id === id);
+    if (index === -1) return undefined;
+    
+    this.inboundOrderItems[index] = {
+      ...this.inboundOrderItems[index],
+      ...item
+    };
+    
+    // Update the item in the inbound order's items array
+    const order = this.inboundOrders.find(o => o.id === this.inboundOrderItems[index].inboundOrderId);
+    if (order) {
+      const orderItemIndex = order.items.findIndex(i => i.id === id);
+      if (orderItemIndex !== -1) {
+        order.items[orderItemIndex] = this.inboundOrderItems[index];
+      }
+    }
+    
+    return this.inboundOrderItems[index];
+  }
+
+  async getReceivingDiscrepancies(itemId: number): Promise<ReceivingDiscrepancy[]> {
+    return this.receivingDiscrepancies.filter(d => d.inboundOrderItemId === itemId);
+  }
+
+  async createReceivingDiscrepancy(discrepancy: Omit<ReceivingDiscrepancy, 'id'>): Promise<ReceivingDiscrepancy> {
+    const newDiscrepancy: ReceivingDiscrepancy = {
+      ...discrepancy,
+      id: this.receivingDiscrepancies.length > 0 ? Math.max(...this.receivingDiscrepancies.map(d => d.id)) + 1 : 1
+    };
+    this.receivingDiscrepancies.push(newDiscrepancy);
+    
+    // Update the inbound order item's discrepancies array
+    const item = this.inboundOrderItems.find(i => i.id === discrepancy.inboundOrderItemId);
+    if (item) {
+      item.discrepancies.push(newDiscrepancy);
+    }
+    
+    return newDiscrepancy;
+  }
+
+  async updateReceivingDiscrepancy(id: number, discrepancy: Partial<ReceivingDiscrepancy>): Promise<ReceivingDiscrepancy | undefined> {
+    const index = this.receivingDiscrepancies.findIndex(d => d.id === id);
+    if (index === -1) return undefined;
+    
+    this.receivingDiscrepancies[index] = {
+      ...this.receivingDiscrepancies[index],
+      ...discrepancy
+    };
+    
+    // Update the discrepancy in the inbound order item's discrepancies array
+    const item = this.inboundOrderItems.find(i => i.id === this.receivingDiscrepancies[index].inboundOrderItemId);
+    if (item) {
+      const discrepancyIndex = item.discrepancies.findIndex(d => d.id === id);
+      if (discrepancyIndex !== -1) {
+        item.discrepancies[discrepancyIndex] = this.receivingDiscrepancies[index];
+      }
+    }
+    
+    return this.receivingDiscrepancies[index];
+  }
+  
+  // Warehouse Management System Methods - Put-Away Feature
+  
+  async getPutAwayTasks(status?: string): Promise<PutAwayTask[]> {
+    if (status) {
+      return this.putAwayTasks.filter(task => task.status === status);
+    }
+    return this.putAwayTasks;
+  }
+
+  async getPutAwayTaskById(id: number): Promise<PutAwayTask | undefined> {
+    return this.putAwayTasks.find(task => task.id === id);
+  }
+
+  async createPutAwayTask(task: Omit<PutAwayTask, 'id'>): Promise<PutAwayTask> {
+    const newTask: PutAwayTask = {
+      ...task,
+      id: this.putAwayTasks.length > 0 ? Math.max(...this.putAwayTasks.map(t => t.id)) + 1 : 1
+    };
+    this.putAwayTasks.push(newTask);
+    return newTask;
+  }
+
+  async updatePutAwayTask(id: number, task: Partial<PutAwayTask>): Promise<PutAwayTask | undefined> {
+    const index = this.putAwayTasks.findIndex(t => t.id === id);
+    if (index === -1) return undefined;
+    
+    this.putAwayTasks[index] = {
+      ...this.putAwayTasks[index],
+      ...task
+    };
+    return this.putAwayTasks[index];
+  }
+
+  async completePutAwayTask(id: number, locationId: number): Promise<PutAwayTask | undefined> {
+    const task = await this.getPutAwayTaskById(id);
+    if (!task) return undefined;
+    
+    const location = await this.getStorageLocationById(locationId);
+    if (!location) return undefined;
+    
+    // Update task status
+    task.status = "completed";
+    task.actualLocation = location;
+    task.completedAt = new Date().toISOString();
+    
+    // Create inventory movement record
+    await this.createInventoryMovement({
+      inventoryItemId: 0, // This would need to be the actual inventory item ID
+      fromLocationId: 4, // Assuming Receiving Area has ID 4
+      toLocationId: locationId,
+      quantity: task.quantity,
+      type: "put_away",
+      referenceNumber: `PUTAWAY-${id}`,
+      referenceType: "put_away_task",
+      performedBy: task.assignedTo || "system",
+      performedAt: task.completedAt,
+      notes: `Put-away task ${id} completed`
+    });
+    
+    return task;
+  }
+  
+  // Warehouse Management System Methods - Inventory Tracking Feature
+  
+  async getInventoryItems(category?: string): Promise<InventoryItem[]> {
+    if (category) {
+      return this.inventoryItems.filter(item => item.category === category);
+    }
+    return this.inventoryItems;
+  }
+
+  async getInventoryItemById(id: number): Promise<InventoryItem | undefined> {
+    return this.inventoryItems.find(item => item.id === id);
+  }
+
+  async getInventoryItemBySku(sku: string): Promise<InventoryItem | undefined> {
+    return this.inventoryItems.find(item => item.sku === sku);
+  }
+
+  async updateInventoryItem(id: number, item: Partial<InventoryItem>): Promise<InventoryItem | undefined> {
+    const index = this.inventoryItems.findIndex(i => i.id === id);
+    if (index === -1) return undefined;
+    
+    this.inventoryItems[index] = {
+      ...this.inventoryItems[index],
+      ...item
+    };
+    return this.inventoryItems[index];
+  }
+
+  async getInventoryLocations(itemId: number): Promise<InventoryLocation[]> {
+    return this.inventoryLocations.filter(loc => loc.inventoryItemId === itemId);
+  }
+
+  async getInventoryItemsByLocation(locationId: number): Promise<InventoryLocation[]> {
+    return this.inventoryLocations.filter(loc => loc.locationId === locationId);
+  }
+
+  async getStorageLocations(status?: string): Promise<StorageLocation[]> {
+    if (status) {
+      return this.storageLocations.filter(loc => loc.status === status);
+    }
+    return this.storageLocations;
+  }
+
+  async getStorageLocationById(id: number): Promise<StorageLocation | undefined> {
+    return this.storageLocations.find(loc => loc.id === id);
+  }
+
+  async updateStorageLocation(id: number, location: Partial<StorageLocation>): Promise<StorageLocation | undefined> {
+    const index = this.storageLocations.findIndex(l => l.id === id);
+    if (index === -1) return undefined;
+    
+    this.storageLocations[index] = {
+      ...this.storageLocations[index],
+      ...location
+    };
+    return this.storageLocations[index];
+  }
+
+  async getInventoryMovements(itemId?: number, type?: string): Promise<InventoryMovement[]> {
+    let movements = this.inventoryMovements;
+    
+    if (itemId) {
+      movements = movements.filter(m => m.inventoryItemId === itemId);
+    }
+    
+    if (type) {
+      movements = movements.filter(m => m.type === type);
+    }
+    
+    return movements;
+  }
+
+  async createInventoryMovement(movement: Omit<InventoryMovement, 'id'>): Promise<InventoryMovement> {
+    const newMovement: InventoryMovement = {
+      ...movement,
+      id: this.inventoryMovements.length > 0 ? Math.max(...this.inventoryMovements.map(m => m.id)) + 1 : 1
+    };
+    this.inventoryMovements.push(newMovement);
+    return newMovement;
+  }
+  
+  // Warehouse Management System Methods - Picking Feature
+  
+  async getPickTasks(status?: string): Promise<PickTask[]> {
+    if (status) {
+      return this.pickTasks.filter(task => task.status === status);
+    }
+    return this.pickTasks;
+  }
+
+  async getPickTaskById(id: number): Promise<PickTask | undefined> {
+    return this.pickTasks.find(task => task.id === id);
+  }
+
+  async createPickTask(task: Omit<PickTask, 'id'>): Promise<PickTask> {
+    const newTask: PickTask = {
+      ...task,
+      id: this.pickTasks.length > 0 ? Math.max(...this.pickTasks.map(t => t.id)) + 1 : 1,
+      items: task.items || []
+    };
+    this.pickTasks.push(newTask);
+    return newTask;
+  }
+
+  async updatePickTask(id: number, task: Partial<PickTask>): Promise<PickTask | undefined> {
+    const index = this.pickTasks.findIndex(t => t.id === id);
+    if (index === -1) return undefined;
+    
+    this.pickTasks[index] = {
+      ...this.pickTasks[index],
+      ...task
+    };
+    return this.pickTasks[index];
+  }
+
+  async getPickTaskItems(taskId: number): Promise<PickTaskItem[]> {
+    const task = await this.getPickTaskById(taskId);
+    return task ? task.items : [];
+  }
+
+  async updatePickTaskItem(id: number, item: Partial<PickTaskItem>): Promise<PickTaskItem | undefined> {
+    // First, find which pick task contains this item
+    let targetTask: PickTask | undefined;
+    let itemIndex = -1;
+    
+    for (const task of this.pickTasks) {
+      itemIndex = task.items.findIndex(i => i.id === id);
+      if (itemIndex !== -1) {
+        targetTask = task;
+        break;
+      }
+    }
+    
+    if (!targetTask || itemIndex === -1) return undefined;
+    
+    // Update the item
+    targetTask.items[itemIndex] = {
+      ...targetTask.items[itemIndex],
+      ...item
+    };
+    
+    return targetTask.items[itemIndex];
+  }
+
+  async completePickTaskItem(id: number, pickedQuantity: number, locationId: number): Promise<PickTaskItem | undefined> {
+    // First, find which pick task contains this item
+    let targetTask: PickTask | undefined;
+    let itemIndex = -1;
+    
+    for (const task of this.pickTasks) {
+      itemIndex = task.items.findIndex(i => i.id === id);
+      if (itemIndex !== -1) {
+        targetTask = task;
+        break;
+      }
+    }
+    
+    if (!targetTask || itemIndex === -1) return undefined;
+    
+    // Update the item status
+    targetTask.items[itemIndex].status = pickedQuantity >= targetTask.items[itemIndex].quantity ? "picked" : "partial";
+    targetTask.items[itemIndex].pickedQuantity = pickedQuantity;
+    targetTask.items[itemIndex].pickedLocationId = locationId;
+    targetTask.items[itemIndex].pickedAt = new Date().toISOString();
+    
+    // Create inventory movement record
+    await this.createInventoryMovement({
+      inventoryItemId: 0, // This would need to be the actual inventory item ID
+      fromLocationId: locationId,
+      toLocationId: undefined, // To be determined at packing stage
+      quantity: pickedQuantity,
+      type: "picking",
+      referenceNumber: `PICK-${targetTask.id}-${id}`,
+      referenceType: "pick_task",
+      performedBy: targetTask.assignedTo || "system",
+      performedAt: targetTask.items[itemIndex].pickedAt!,
+      notes: `Pick task item ${id} completed with quantity ${pickedQuantity}`
+    });
+    
+    // Check if all items in the task are picked
+    const allItemsCompleted = targetTask.items.every(i => i.status === "picked" || i.status === "unavailable");
+    if (allItemsCompleted) {
+      targetTask.status = "completed";
+      targetTask.completedAt = new Date().toISOString();
+    }
+    
+    return targetTask.items[itemIndex];
+  }
+
+  async getPickBatches(status?: string): Promise<PickBatch[]> {
+    if (status) {
+      return this.pickBatches.filter(batch => batch.status === status);
+    }
+    return this.pickBatches;
+  }
+
+  async createPickBatch(batch: Omit<PickBatch, 'id'>): Promise<PickBatch> {
+    const newBatch: PickBatch = {
+      ...batch,
+      id: this.pickBatches.length > 0 ? Math.max(...this.pickBatches.map(b => b.id)) + 1 : 1,
+      tasks: batch.tasks || []
+    };
+    this.pickBatches.push(newBatch);
+    return newBatch;
+  }
+  
+  // Warehouse Management System Methods - Packing Feature
+  
+  async getPackingTasks(status?: string): Promise<PackingTask[]> {
+    if (status) {
+      return this.packingTasks.filter(task => task.status === status);
+    }
+    return this.packingTasks;
+  }
+
+  async getPackingTaskById(id: number): Promise<PackingTask | undefined> {
+    return this.packingTasks.find(task => task.id === id);
+  }
+
+  async createPackingTask(task: Omit<PackingTask, 'id'>): Promise<PackingTask> {
+    const newTask: PackingTask = {
+      ...task,
+      id: this.packingTasks.length > 0 ? Math.max(...this.packingTasks.map(t => t.id)) + 1 : 1,
+      items: task.items || [],
+      packages: task.packages || []
+    };
+    this.packingTasks.push(newTask);
+    return newTask;
+  }
+
+  async updatePackingTask(id: number, task: Partial<PackingTask>): Promise<PackingTask | undefined> {
+    const index = this.packingTasks.findIndex(t => t.id === id);
+    if (index === -1) return undefined;
+    
+    this.packingTasks[index] = {
+      ...this.packingTasks[index],
+      ...task
+    };
+    return this.packingTasks[index];
+  }
+
+  async getPackingTaskItems(taskId: number): Promise<PackingTaskItem[]> {
+    const task = await this.getPackingTaskById(taskId);
+    return task ? task.items : [];
+  }
+
+  async updatePackingTaskItem(id: number, item: Partial<PackingTaskItem>): Promise<PackingTaskItem | undefined> {
+    // First, find which packing task contains this item
+    let targetTask: PackingTask | undefined;
+    let itemIndex = -1;
+    
+    for (const task of this.packingTasks) {
+      itemIndex = task.items.findIndex(i => i.id === id);
+      if (itemIndex !== -1) {
+        targetTask = task;
+        break;
+      }
+    }
+    
+    if (!targetTask || itemIndex === -1) return undefined;
+    
+    // Update the item
+    targetTask.items[itemIndex] = {
+      ...targetTask.items[itemIndex],
+      ...item
+    };
+    
+    return targetTask.items[itemIndex];
+  }
+
+  async getShipmentPackages(packingTaskId: number): Promise<ShipmentPackage[]> {
+    const task = await this.getPackingTaskById(packingTaskId);
+    return task ? task.packages : [];
+  }
+
+  async createShipmentPackage(pkg: Omit<ShipmentPackage, 'id'>): Promise<ShipmentPackage> {
+    const newPackage: ShipmentPackage = {
+      ...pkg,
+      id: this.shipmentPackages.length > 0 ? Math.max(...this.shipmentPackages.map(p => p.id)) + 1 : 1
+    };
+    this.shipmentPackages.push(newPackage);
+    
+    // Add package to the packing task
+    const task = this.packingTasks.find(t => t.id === pkg.packingTaskId);
+    if (task) {
+      task.packages.push(newPackage);
+    }
+    
+    return newPackage;
+  }
+
+  async updateShipmentPackage(id: number, pkg: Partial<ShipmentPackage>): Promise<ShipmentPackage | undefined> {
+    const index = this.shipmentPackages.findIndex(p => p.id === id);
+    if (index === -1) return undefined;
+    
+    this.shipmentPackages[index] = {
+      ...this.shipmentPackages[index],
+      ...pkg
+    };
+    
+    // Update the package in the packing task's packages array
+    const task = this.packingTasks.find(t => t.id === this.shipmentPackages[index].packingTaskId);
+    if (task) {
+      const packageIndex = task.packages.findIndex(p => p.id === id);
+      if (packageIndex !== -1) {
+        task.packages[packageIndex] = this.shipmentPackages[index];
+      }
+    }
+    
+    return this.shipmentPackages[index];
+  }
   private users: Map<number, User>;
   private metrics: MetricData;
   private locations: MapLocation[];
@@ -472,6 +973,132 @@ export class MemStorage implements IStorage {
   constructor() {
     this.users = new Map();
     this.currentId = 6; // Start with ID 6 to account for our 5 predefined users
+    
+    // Initialize Warehouse Management System arrays with sample data
+    
+    // Initialize storage locations
+    this.storageLocations = [
+      {
+        id: 1,
+        name: "Aisle A - Rack 1",
+        type: "rack",
+        aisle: "A",
+        rack: "1",
+        capacity: 1000,
+        capacityUnit: "kg",
+        currentUtilization: 600,
+        status: "available"
+      },
+      {
+        id: 2,
+        name: "Aisle A - Rack 2",
+        type: "rack",
+        aisle: "A",
+        rack: "2",
+        capacity: 1000,
+        capacityUnit: "kg",
+        currentUtilization: 800,
+        status: "available"
+      },
+      {
+        id: 3,
+        name: "Aisle B - Rack 1",
+        type: "rack",
+        aisle: "B",
+        rack: "1",
+        capacity: 1000,
+        capacityUnit: "kg",
+        currentUtilization: 300,
+        status: "available"
+      },
+      {
+        id: 4,
+        name: "Receiving Area",
+        type: "staging",
+        capacity: 5000,
+        capacityUnit: "kg",
+        currentUtilization: 1000,
+        status: "available"
+      }
+    ];
+    
+    // Initialize inbound orders
+    this.inboundOrders = [
+      {
+        id: 1,
+        orderNumber: "INB-2025-0001",
+        supplierName: "Tech Components Ltd",
+        supplierReference: "PO-2025-56789",
+        expectedDeliveryDate: "2025-03-21",
+        status: "pending",
+        createdAt: new Date().toISOString(),
+        createdBy: "warehouse1",
+        notes: "Priority electronics delivery",
+        items: []
+      },
+      {
+        id: 2,
+        orderNumber: "INB-2025-0002",
+        supplierName: "Office Supplies Co",
+        supplierReference: "PO-2025-12345",
+        expectedDeliveryDate: "2025-03-22",
+        status: "pending",
+        createdAt: new Date().toISOString(),
+        createdBy: "warehouse1",
+        items: []
+      }
+    ];
+    
+    // Initialize inbound order items
+    this.inboundOrderItems = [
+      {
+        id: 1,
+        inboundOrderId: 1,
+        sku: "TECH-MON-24",
+        productName: "24-inch Monitor",
+        expectedQuantity: 20,
+        receivedQuantity: 0,
+        status: "pending",
+        discrepancies: []
+      },
+      {
+        id: 2,
+        inboundOrderId: 1,
+        sku: "TECH-KB-01",
+        productName: "Wireless Keyboard",
+        expectedQuantity: 30,
+        receivedQuantity: 0,
+        status: "pending",
+        discrepancies: []
+      },
+      {
+        id: 3,
+        inboundOrderId: 2,
+        sku: "OFF-PAPER-A4",
+        productName: "A4 Paper (Reams)",
+        expectedQuantity: 50,
+        receivedQuantity: 0,
+        status: "pending",
+        discrepancies: []
+      }
+    ];
+    
+    // Link inbound order items to their orders
+    this.inboundOrders[0].items = [this.inboundOrderItems[0], this.inboundOrderItems[1]];
+    this.inboundOrders[1].items = [this.inboundOrderItems[2]];
+    
+    // Initialize empty arrays for other warehouse data
+    this.receivingDiscrepancies = [];
+    this.putAwayTasks = [];
+    this.inventoryItems = [];
+    this.inventoryLocations = [];
+    this.inventoryMovements = [];
+    this.pickTasks = [];
+    this.pickTaskItems = [];
+    this.pickBatches = [];
+    this.packingTasks = [];
+    this.packingTaskItems = [];
+    this.shipmentPackages = [];
     
     // Initialize Order Management arrays with sample data
     this.orders = [
