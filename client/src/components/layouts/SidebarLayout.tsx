@@ -516,7 +516,7 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                         sessionStorage.setItem("directWarehousePickingAccess", "true");
                         sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
                         // Use direct navigation
-                        window.location.href = "/warehouse-picking";
+                        setLocation("/warehouse-picking");
                       }}
                     >
                       <span className="mr-3">{item.icon}</span>
@@ -539,7 +539,7 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                         sessionStorage.setItem("directWarehousePackingAccess", "true");
                         sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
                         // Use direct navigation
-                        window.location.href = "/warehouse-packing";
+                        setLocation("/warehouse-packing");
                       }}
                     >
                       <span className="mr-3">{item.icon}</span>
