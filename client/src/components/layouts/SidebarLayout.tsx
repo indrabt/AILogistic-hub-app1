@@ -30,7 +30,9 @@ import {
   Package,
   ClipboardCheck,
   CalendarClock,
-  Tag
+  Tag,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -39,6 +41,11 @@ import MobileNav from "@/components/ui/mobile-nav";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { UserRole } from "@/utils/auth";
 import { Separator } from "@/components/ui/separator";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface SidebarItemProps {
   icon: ReactNode;
@@ -77,15 +84,26 @@ interface SidebarLayoutProps {
   children: ReactNode;
 }
 
+// Warehouse operations submenu items
+const warehouseOperations = [
+  { icon: <Truck size={20} />, href: "/warehouse-receiving", label: "Receiving", id: "warehouse-receiving" },
+  { icon: <ArrowUpDown size={20} />, href: "/warehouse-putaway", label: "Put-Away", id: "warehouse-putaway" },
+  { icon: <Package size={20} />, href: "/warehouse-picking", label: "Picking", id: "warehouse-picking" },
+  { icon: <Package size={20} />, href: "/warehouse-packing", label: "Packing", id: "warehouse-packing" },
+];
+
 // Define navigation items for each role
-const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label: string; id: string }[]> = {
+const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label: string; id: string; submenu?: { icon: ReactNode; href: string; label: string; id: string }[] }[]> = {
   warehouse_staff: [
     { icon: <LayoutDashboard size={20} />, href: "/warehouse-dashboard", label: "Dashboard", id: "warehouse-dashboard" },
     { icon: <Package size={20} />, href: "/supply-chain", label: "Inventory", id: "warehouse-inventory" },
-    { icon: <Truck size={20} />, href: "/warehouse-receiving", label: "Receiving", id: "warehouse-receiving" },
-    { icon: <ArrowUpDown size={20} />, href: "/warehouse-putaway", label: "Put-Away", id: "warehouse-putaway" },
-    { icon: <Package size={20} />, href: "/warehouse-picking", label: "Picking", id: "warehouse-picking" },
-    { icon: <Package size={20} />, href: "/warehouse-packing", label: "Packing", id: "warehouse-packing" },
+    { 
+      icon: <Warehouse size={20} />, 
+      href: "#", 
+      label: "Warehouse Operations", 
+      id: "warehouse-operations",
+      submenu: warehouseOperations
+    },
     { icon: <ClipboardCheck size={20} />, href: "/supply-chain?view=shipments", label: "Shipments", id: "warehouse-shipments" },
     { icon: <Package size={20} />, href: "/order-management", label: "Order Management", id: "warehouse-orders" },
     { icon: <Cloud size={20} />, href: "/weather-impact", label: "Weather Alerts", id: "warehouse-weather" },
@@ -96,10 +114,17 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
     { icon: <Route size={20} />, href: "/routes", label: "Route Optimization", id: "logistics-routes" },
     { icon: <Navigation size={20} />, href: "/hyper-local-routing", label: "Hyper-Local Routing", id: "logistics-hyper-local" },
     { icon: <Warehouse size={20} />, href: "/supply-chain", label: "Supply Chain", id: "logistics-supply-chain" },
-    { icon: <Truck size={20} />, href: "/warehouse-receiving", label: "Warehouse Receiving", id: "logistics-receiving" },
-    { icon: <ArrowUpDown size={20} />, href: "/warehouse-putaway", label: "Warehouse Put-Away", id: "logistics-putaway" },
-    { icon: <Package size={20} />, href: "/warehouse-picking", label: "Warehouse Picking", id: "logistics-picking" },
-    { icon: <Package size={20} />, href: "/warehouse-packing", label: "Warehouse Packing", id: "logistics-packing" },
+    { 
+      icon: <Warehouse size={20} />, 
+      href: "#", 
+      label: "Warehouse Operations", 
+      id: "logistics-warehouse-operations",
+      submenu: warehouseOperations.map(item => ({ 
+        ...item, 
+        id: `logistics-${item.id}`,
+        label: item.label  // Keep the original labels instead of prefixing with "Warehouse "
+      }))
+    },
     { icon: <TrendingUp size={20} />, href: "/demand-forecasting", label: "Demand Forecasting", id: "logistics-demand" },
     { icon: <Cloud size={20} />, href: "/weather-impact", label: "Weather Impact", id: "logistics-weather" },
     { icon: <ClipboardCheck size={20} />, href: "/order-management", label: "Order Management", id: "logistics-orders" },
@@ -241,6 +266,135 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
         <nav className="mt-2 flex-1 overflow-y-auto">
           <ul>
             {roleNavigation.map((item) => {
+              // Handle submenu items
+              if (item.submenu) {
+                // Use a collapsible menu for items with submenus
+                return (
+                  <li className="mb-2" key={item.id}>
+                    <Collapsible 
+                      className="w-full" 
+                      defaultOpen={location.startsWith("/warehouse-")}
+                    >
+                      <CollapsibleTrigger className="w-full">
+                        <div
+                          className={cn(
+                            "flex items-center justify-between py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                            "hover:bg-primary-light/70 text-white"
+                          )}
+                        >
+                          <div className="flex items-center">
+                            <span className="mr-3">{item.icon}</span>
+                            {item.label}
+                          </div>
+                          <ChevronDown className="h-4 w-4" />
+                        </div>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <ul className="pl-6 mt-1 space-y-1">
+                          {item.submenu.map((subItem) => {
+                            if (subItem.href === "/warehouse-receiving") {
+                              return (
+                                <li key={subItem.id}>
+                                  <div
+                                    className={cn(
+                                      "flex items-center py-2 px-3 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                                      location === subItem.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                                    )}
+                                    onClick={() => {
+                                      console.log("Direct Warehouse Receiving navigation triggered from submenu");
+                                      sessionStorage.setItem("usingDirectWarehouseAccess", "true");
+                                      sessionStorage.setItem("directWarehouseReceivingAccess", "true");
+                                      sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
+                                      window.location.href = "/warehouse-direct.html?target=receiving";
+                                    }}
+                                  >
+                                    <span className="mr-3">{subItem.icon}</span>
+                                    {subItem.label}
+                                  </div>
+                                </li>
+                              );
+                            } else if (subItem.href === "/warehouse-putaway") {
+                              return (
+                                <li key={subItem.id}>
+                                  <div
+                                    className={cn(
+                                      "flex items-center py-2 px-3 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                                      location === subItem.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                                    )}
+                                    onClick={() => {
+                                      console.log("Direct Warehouse Put-Away navigation triggered from submenu");
+                                      sessionStorage.setItem("usingDirectWarehouseAccess", "true");
+                                      sessionStorage.setItem("directWarehousePutawayAccess", "true");
+                                      sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
+                                      window.location.href = "/warehouse-direct.html?target=putaway&t=" + new Date().getTime();
+                                    }}
+                                  >
+                                    <span className="mr-3">{subItem.icon}</span>
+                                    {subItem.label}
+                                  </div>
+                                </li>
+                              );
+                            } else if (subItem.href === "/warehouse-picking") {
+                              return (
+                                <li key={subItem.id}>
+                                  <div
+                                    className={cn(
+                                      "flex items-center py-2 px-3 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                                      location === subItem.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                                    )}
+                                    onClick={() => {
+                                      console.log("Direct Warehouse Picking navigation triggered from submenu");
+                                      window.location.href = "/warehouse-picking";
+                                    }}
+                                  >
+                                    <span className="mr-3">{subItem.icon}</span>
+                                    {subItem.label}
+                                  </div>
+                                </li>
+                              );
+                            } else if (subItem.href === "/warehouse-packing") {
+                              return (
+                                <li key={subItem.id}>
+                                  <div
+                                    className={cn(
+                                      "flex items-center py-2 px-3 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                                      location === subItem.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                                    )}
+                                    onClick={() => {
+                                      console.log("Direct Warehouse Packing navigation triggered from submenu");
+                                      window.location.href = "/warehouse-packing";
+                                    }}
+                                  >
+                                    <span className="mr-3">{subItem.icon}</span>
+                                    {subItem.label}
+                                  </div>
+                                </li>
+                              );
+                            } else {
+                              return (
+                                <li key={subItem.id}>
+                                  <Link href={subItem.href}>
+                                    <div
+                                      className={cn(
+                                        "flex items-center py-2 px-3 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                                        location === subItem.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                                      )}
+                                    >
+                                      <span className="mr-3">{subItem.icon}</span>
+                                      {subItem.label}
+                                    </div>
+                                  </Link>
+                                </li>
+                              );
+                            }
+                          })}
+                        </ul>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </li>
+                );
+              }
+              
               // Special cases with direct navigation
               if (item.href === "/order-management") {
                 return (
