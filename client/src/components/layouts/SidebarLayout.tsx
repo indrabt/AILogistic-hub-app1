@@ -48,12 +48,15 @@ interface SidebarItemProps {
 }
 
 const SidebarItem = ({ icon, href, label, active }: SidebarItemProps) => {
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     console.log(`Clicked on sidebar item: ${label} with href: ${href}`);
     
-    // For the order management link specifically, let's try a direct navigation
-    if (href === "/order-management") {
-      console.log("Attempting direct navigation to Order Management");
+    // For certain pages that need direct navigation
+    if (href === "/order-management" || 
+        href === "/warehouse-dashboard" || 
+        href === "/warehouse-receiving") {
+      e.preventDefault(); // Prevent default Link behavior
+      console.log(`Attempting direct navigation to ${label}`);
       window.location.href = href;
     }
   };
