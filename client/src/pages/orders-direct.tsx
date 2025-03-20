@@ -60,6 +60,7 @@ export default function OrdersDirectAccess() {
     customerLocation: "",
     priority: "standard" as "standard" | "express" | "urgent",
     notes: "",
+    totalValue: 0,
     // Adding other required fields with defaults
     orderNumber: "",
     estimatedDeliveryDate: "",
@@ -157,6 +158,7 @@ export default function OrdersDirectAccess() {
         customerLocation: "",
         priority: "standard",
         notes: "",
+        totalValue: 0,
         orderNumber: "",
         estimatedDeliveryDate: "",
         paymentStatus: "pending"
@@ -601,7 +603,24 @@ export default function OrdersDirectAccess() {
               />
             </div>
             
-            <div className="col-span-2">
+            <div>
+              <Label htmlFor="totalValue">Total Value ($)</Label>
+              <Input 
+                id="totalValue" 
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Enter order value" 
+                className="mt-1"
+                value={newOrderData.totalValue?.toString() || "0"}
+                onChange={(e) => setNewOrderData({
+                  ...newOrderData, 
+                  totalValue: parseFloat(e.target.value) || 0
+                })}
+              />
+            </div>
+            
+            <div>
               <Label htmlFor="notes">Notes</Label>
               <Input 
                 id="notes" 
@@ -650,7 +669,7 @@ export default function OrdersDirectAccess() {
                   createdAt: new Date().toISOString(),
                   status: "pending",
                   items: [],
-                  totalValue: 0,
+                  totalValue: newOrderData.totalValue || 0,
                   estimatedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
                   paymentStatus: "pending",
                   orderNumber: `ORD-${Math.floor(100000 + Math.random() * 900000)}`
