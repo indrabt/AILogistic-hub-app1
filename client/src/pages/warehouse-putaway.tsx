@@ -100,6 +100,26 @@ export default function WarehousePutaway() {
     notes: "Both item and location scan match."
   });
   
+  // Effect to update verification status when both item and location scans are present
+  useEffect(() => {
+    if (scanVerification.itemScan && scanVerification.locationScan) {
+      // Check if both scans are successful and match expected values
+      const itemMatch = scanVerification.itemScan.success && scanVerification.itemScan.matchesExpected;
+      const locationMatch = scanVerification.locationScan.success && scanVerification.locationScan.matchesExpected;
+      
+      // Update verified flag based on scan matches
+      if (itemMatch && locationMatch) {
+        setScanVerification(prev => ({
+          ...prev,
+          verified: true,
+          verificationTimestamp: new Date().toISOString(),
+          verifiedBy: "manager1",
+          notes: "Both item and location scan match."
+        }));
+      }
+    }
+  }, [scanVerification.itemScan, scanVerification.locationScan]);
+  
   // Debug check for navigation flags on component mount
   useEffect(() => {
     console.log('WarehousePutaway component mounted');
