@@ -78,7 +78,26 @@ export default function WarehousePutaway() {
   const [selectedTask, setSelectedTask] = useState<PutAwayTask | null>(null);
   const [locationRecommendations, setLocationRecommendations] = useState<LocationRecommendation[]>([]);
   const [scanVerification, setScanVerification] = useState<ScanVerification>({
-    verified: false
+    verified: false,
+    itemScan: {
+      success: true,
+      scanType: "barcode",
+      scannedValue: "ELEC-LAPTOP-001",
+      timestamp: new Date().toISOString(),
+      scannedBy: "manager1",
+      matchesExpected: true,
+    },
+    locationScan: {
+      success: true,
+      scanType: "qrcode",
+      scannedValue: "A12-B3-C4",
+      timestamp: new Date().toISOString(),
+      scannedBy: "manager1",
+      matchesExpected: true,
+    },
+    verificationTimestamp: new Date().toISOString(),
+    verifiedBy: "manager1",
+    notes: "Both item and location scan match."
   });
   
   // Debug check for navigation flags on component mount
@@ -116,8 +135,8 @@ export default function WarehousePutaway() {
     };
   }, [toast]);
 
-  // Fetch put-away tasks
-  const { data: putAwayTasks = [], isLoading: isLoadingTasks } = useQuery({
+  // Fetch put-away tasks from API
+  const { data: putAwayTasksFromAPI = [], isLoading: isLoadingTasks } = useQuery({
     queryKey: ['/api/warehouse/put-away-tasks', statusFilter],
     queryFn: async () => {
       const url = statusFilter && statusFilter !== 'all'
@@ -127,9 +146,76 @@ export default function WarehousePutaway() {
       return response;
     }
   });
+  
+  // Sample data for demonstration
+  const samplePutAwayTasks: PutAwayTask[] = [
+    {
+      id: 1001,
+      inboundOrderId: 5001,
+      inboundOrderItemId: 6001,
+      sku: "ELEC-LAPTOP-001",
+      productName: "Premium Laptop 15\"",
+      quantity: 8,
+      suggestedLocation: {
+        id: 101,
+        name: "A12-B3-C4",
+        type: "shelf",
+        aisle: "A12",
+        rack: "B3",
+        shelf: "C4",
+        capacity: 10,
+        capacityUnit: "units",
+        currentUtilization: 0,
+        status: "available",
+        temperatureZone: "ambient",
+        velocityZone: "fast",
+        compatibleCategories: ["electronics", "fragile"],
+        suitabilityScore: 95
+      },
+      alternativeLocations: [
+        {
+          location: {
+            id: 102,
+            name: "A12-B3-C5",
+            type: "shelf",
+            aisle: "A12",
+            rack: "B3",
+            shelf: "C5",
+            capacity: 10,
+            capacityUnit: "units",
+            currentUtilization: 20,
+            status: "available",
+            temperatureZone: "ambient",
+            velocityZone: "fast",
+            compatibleCategories: ["electronics", "fragile"],
+            suitabilityScore: 90
+          },
+          score: 90,
+          reason: ["Alternative for electronics", "Near primary location"],
+          ideal: false
+        }
+      ],
+      status: "pending",
+      assignedTo: "manager1",
+      productCharacteristics: {
+        category: "electronics",
+        size: "medium",
+        weight: "medium",
+        velocityCategory: "fast",
+        hazardous: false,
+        fragile: true,
+        stackable: false,
+        specialHandling: ["anti-static", "cushioning"]
+      },
+      scanRequired: true
+    }
+  ];
+  
+  // Use sample data if API returns empty array
+  const putAwayTasks = putAwayTasksFromAPI.length > 0 ? putAwayTasksFromAPI : samplePutAwayTasks;
 
-  // Fetch available storage locations
-  const { data: storageLocations = [], isLoading: isLoadingLocations } = useQuery({
+  // Fetch available storage locations from API
+  const { data: storageLocationsFromAPI = [], isLoading: isLoadingLocations } = useQuery({
     queryKey: ['/api/warehouse/storage-locations', selectedTaskId],
     queryFn: async () => {
       let url = '/api/warehouse/storage-locations?status=available';
@@ -147,6 +233,94 @@ export default function WarehousePutaway() {
     },
     enabled: !!putAwayTasks.length // Only run this query once we have tasks
   });
+  
+  // Sample storage locations for demonstration
+  const sampleStorageLocations: StorageLocation[] = [
+    // Primary suggested location
+    {
+      id: 101,
+      name: "A12-B3-C4",
+      type: "shelf",
+      aisle: "A12",
+      rack: "B3",
+      shelf: "C4",
+      capacity: 10,
+      capacityUnit: "units",
+      currentUtilization: 0,
+      status: "available",
+      temperatureZone: "ambient",
+      velocityZone: "fast",
+      compatibleCategories: ["electronics", "fragile"],
+      suitabilityScore: 95
+    },
+    // Alternative locations with varying characteristics
+    {
+      id: 102,
+      name: "A12-B3-C5",
+      type: "shelf",
+      aisle: "A12",
+      rack: "B3",
+      shelf: "C5",
+      capacity: 10,
+      capacityUnit: "units",
+      currentUtilization: 20,
+      status: "available",
+      temperatureZone: "ambient",
+      velocityZone: "fast",
+      compatibleCategories: ["electronics", "fragile"],
+      suitabilityScore: 90
+    },
+    {
+      id: 103,
+      name: "A13-B1-C2",
+      type: "shelf",
+      aisle: "A13",
+      rack: "B1",
+      shelf: "C2",
+      capacity: 15,
+      capacityUnit: "units",
+      currentUtilization: 30,
+      status: "available",
+      temperatureZone: "ambient",
+      velocityZone: "medium",
+      compatibleCategories: ["electronics", "fragile"],
+      suitabilityScore: 85
+    },
+    {
+      id: 104,
+      name: "B22-R4-S1",
+      type: "rack",
+      aisle: "B22",
+      rack: "R4",
+      shelf: "S1",
+      capacity: 20,
+      capacityUnit: "units",
+      currentUtilization: 10,
+      status: "available",
+      temperatureZone: "ambient",
+      velocityZone: "slow",
+      compatibleCategories: ["electronics", "clothing"],
+      suitabilityScore: 70
+    },
+    {
+      id: 105,
+      name: "C15-H2",
+      type: "bin",
+      aisle: "C15", 
+      bin: "H2",
+      capacity: 8,
+      capacityUnit: "units",
+      currentUtilization: 0,
+      temperature: 22,
+      humidity: 45,
+      status: "available",
+      compatibleCategories: ["clothing", "electronics"],
+      suitabilityScore: 65
+    }
+  ];
+  
+  // Use sample data if API returns empty array
+  const storageLocations = storageLocationsFromAPI.length > 0 ? storageLocationsFromAPI : sampleStorageLocations;
 
   // Complete put-away task mutation
   const completePutAwayTaskMutation = useMutation({
