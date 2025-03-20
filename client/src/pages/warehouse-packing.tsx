@@ -150,8 +150,12 @@ export default function WarehousePacking() {
     const userData = JSON.parse(userJson);
     setUser(userData);
 
-    // If not a warehouse staff, redirect to appropriate dashboard
-    if (userData.role !== "warehouse_staff") {
+    // Check if this navigation came through our direct link approach
+    const usingDirectAccess = sessionStorage.getItem("usingDirectWarehouseAccess");
+    const directPackingAccess = sessionStorage.getItem("directWarehousePackingAccess");
+    
+    // Skip role-based redirect if coming through direct link or is warehouse staff
+    if (userData.role !== "warehouse_staff" && !usingDirectAccess && !directPackingAccess) {
       if (userData.role === "driver") {
         setLocation("/driver-dashboard");
       } else if (userData.role === "business_owner") {
@@ -160,6 +164,9 @@ export default function WarehousePacking() {
         setLocation("/dashboard");
       }
     }
+    
+    // Set a flag to indicate we've accessed this page successfully
+    sessionStorage.setItem("directWarehousePackingAccess", "true");
   }, [setLocation]);
 
   // API Queries
