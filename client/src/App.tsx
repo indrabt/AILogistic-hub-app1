@@ -31,6 +31,7 @@ import DriverRoutes from "@/pages/driver-routes";
 import DriverNavigation from "@/pages/driver-navigation";
 import DriverSchedule from "@/pages/driver-schedule";
 import WarehouseDashboard from "@/pages/warehouse-dashboard";
+import WarehouseReceiving from "@/pages/warehouse-receiving";
 import RealTimeDashboard from "@/pages/real-time-dashboard";
 import RetailDashboard from "@/pages/retail-dashboard";
 import LocalSourcing from "@/pages/local-sourcing";
@@ -116,6 +117,7 @@ function Router() {
           <Route path="/driver-weather" component={DriverWeather} />
           <Route path="/driver-settings" component={DriverSettings} />
           <Route path="/warehouse-dashboard" component={WarehouseDashboard} />
+          <Route path="/warehouse-receiving" component={WarehouseReceiving} />
           <Route path="/real-time-dashboard" component={RealTimeDashboard} />
           <Route path="/retail-dashboard" component={RetailDashboard} />
           <Route path="/demand-prediction" component={RetailDashboard} />
