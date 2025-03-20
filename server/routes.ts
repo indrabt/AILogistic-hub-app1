@@ -1402,7 +1402,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const validatedData = inboundOrderSchema.parse(req.body);
-      const newOrder = await storage.createInboundOrder(validatedData);
+      const newOrder = await storage.createInboundOrder({
+        ...validatedData,
+        createdAt: new Date().toISOString() 
+      });
       res.status(201).json(newOrder);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1467,7 +1470,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const validatedData = itemSchema.parse(req.body);
-      const newItem = await storage.createInboundOrderItem(validatedData);
+      const newItem = await storage.createInboundOrderItem({
+        ...validatedData,
+        discrepancies: []
+      });
       res.status(201).json(newItem);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1532,7 +1538,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const validatedData = discrepancySchema.parse(req.body);
-      const newDiscrepancy = await storage.createReceivingDiscrepancy(validatedData);
+      const newDiscrepancy = await storage.createReceivingDiscrepancy({
+        ...validatedData,
+        reportedAt: new Date().toISOString()
+      });
       res.status(201).json(newDiscrepancy);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1579,7 +1588,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         suggestedLocation: z.object({
           id: z.number(),
           name: z.string(),
-          type: z.string(),
+          type: z.enum(["aisle", "rack", "bin", "shelf", "bulk", "staging"]),
           aisle: z.string().optional(),
           rack: z.string().optional(),
           shelf: z.string().optional(),
@@ -1589,7 +1598,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currentUtilization: z.number(),
           temperature: z.number().optional(),
           humidity: z.number().optional(),
-          status: z.string()
+          status: z.enum(["available", "full", "reserved", "maintenance", "blocked"])
         }),
         status: z.enum(["pending", "in_progress", "completed", "cancelled"]),
         assignedTo: z.string().optional(),
@@ -1706,12 +1715,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: z.string().optional()
       });
 
-      const validatedData = movementSchema.parse({
-        ...req.body,
+      const validatedData = movementSchema.parse(req.body);
+      
+      const newMovement = await storage.createInventoryMovement({
+        ...validatedData,
         performedAt: new Date().toISOString()
       });
-      
-      const newMovement = await storage.createInventoryMovement(validatedData);
       res.status(201).json(newMovement);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1931,12 +1940,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: z.string().optional()
       });
 
-      const validatedData = packageSchema.parse({
-        ...req.body,
+      const validatedData = packageSchema.parse(req.body);
+      
+      const newPackage = await storage.createShipmentPackage({
+        ...validatedData,
         createdAt: new Date().toISOString()
       });
-      
-      const newPackage = await storage.createShipmentPackage(validatedData);
       res.status(201).json(newPackage);
     } catch (error) {
       if (error instanceof z.ZodError) {
