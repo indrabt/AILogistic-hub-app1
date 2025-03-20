@@ -61,12 +61,14 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     const directWarehouseAccess = sessionStorage.getItem("directWarehouseAccess") === "true";
     const directWarehouseDashboardAccess = sessionStorage.getItem("directWarehouseDashboardAccess") === "true";
     const directWarehouseReceivingAccess = sessionStorage.getItem("directWarehouseReceivingAccess") === "true";
+    const directWarehousePutawayAccess = sessionStorage.getItem("directWarehousePutawayAccess") === "true";
     const bypassRouter = sessionStorage.getItem("bypassRouter") === "true";
     
     // Check for specific routes
     const isOrdersRoute = location.includes("orders-direct");
     const isWarehouseDashboardRoute = location === "/warehouse-dashboard";
     const isWarehouseReceivingRoute = location === "/warehouse-receiving";
+    const isWarehousePutawayRoute = location === "/warehouse-putaway";
     
     // Log enhanced debugging information
     console.log(`Access check details:
@@ -76,23 +78,27 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       - Warehouse override flag: ${directWarehouseAccess}
       - Warehouse Dashboard flag: ${directWarehouseDashboardAccess}
       - Warehouse Receiving flag: ${directWarehouseReceivingAccess}
+      - Warehouse Putaway flag: ${directWarehousePutawayAccess}
       - Bypass router flag: ${bypassRouter}
       - Is orders route: ${isOrdersRoute}
       - Is warehouse dashboard: ${isWarehouseDashboardRoute}
-      - Is warehouse receiving: ${isWarehouseReceivingRoute}`);
+      - Is warehouse receiving: ${isWarehouseReceivingRoute}
+      - Is warehouse putaway: ${isWarehousePutawayRoute}`);
     
     // If authenticated, check if user has permission to access this route
     // Skip this check for root path or if bypass flags are set
     const hasOrdersOverride = isOrdersRoute && (ordersAccessOverride || bypassRouter);
     const hasWarehouseDashboardOverride = isWarehouseDashboardRoute && (directWarehouseDashboardAccess || directWarehouseAccess || bypassRouter);
     const hasWarehouseReceivingOverride = isWarehouseReceivingRoute && (directWarehouseReceivingAccess || directWarehouseAccess || bypassRouter);
+    const hasWarehousePutawayOverride = isWarehousePutawayRoute && (directWarehousePutawayAccess || directWarehouseAccess || bypassRouter);
     
     if (user && 
         location !== '/' && 
         !canAccessRoute(location) && 
         !hasOrdersOverride &&
         !hasWarehouseDashboardOverride &&
-        !hasWarehouseReceivingOverride) {
+        !hasWarehouseReceivingOverride &&
+        !hasWarehousePutawayOverride) {
       
       console.log(`Access denied for user role: ${user.role} trying to access ${location}`);
       
@@ -106,9 +112,9 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       }
       
       // Special handling for warehouse routes
-      if (isWarehouseDashboardRoute || isWarehouseReceivingRoute) {
+      if (isWarehouseDashboardRoute || isWarehouseReceivingRoute || isWarehousePutawayRoute) {
         console.log("Warehouse access denied despite being a warehouse route");
-        console.log(`Override flags: directWarehouseAccess=${directWarehouseAccess}, directWarehouseDashboardAccess=${directWarehouseDashboardAccess}, directWarehouseReceivingAccess=${directWarehouseReceivingAccess}, bypassRouter=${bypassRouter}`);
+        console.log(`Override flags: directWarehouseAccess=${directWarehouseAccess}, directWarehouseDashboardAccess=${directWarehouseDashboardAccess}, directWarehouseReceivingAccess=${directWarehouseReceivingAccess}, directWarehousePutawayAccess=${directWarehousePutawayAccess}, bypassRouter=${bypassRouter}`);
       }
       
       toast({
@@ -134,13 +140,14 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
     
     // If we're on warehouse routes and have override flags, clear them after successful access
-    if ((hasWarehouseDashboardOverride || hasWarehouseReceivingOverride) && user) {
+    if ((hasWarehouseDashboardOverride || hasWarehouseReceivingOverride || hasWarehousePutawayOverride) && user) {
       console.log("Successfully accessed warehouse with override flags, clearing flags");
       setTimeout(() => {
         // Clear after a delay to ensure navigation completes
         sessionStorage.removeItem("directWarehouseAccess");
         sessionStorage.removeItem("directWarehouseDashboardAccess");
         sessionStorage.removeItem("directWarehouseReceivingAccess");
+        sessionStorage.removeItem("directWarehousePutawayAccess");
         sessionStorage.removeItem("bypassRouter");
       }, 3000);
     }

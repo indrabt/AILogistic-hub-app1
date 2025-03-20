@@ -47,8 +47,14 @@
             sessionStorage.setItem("directWarehouseDashboardAccess", "true");
           }
           
-          // Set target destination  
-          const destination = target === 'receiving' ? '/warehouse-receiving' : '/warehouse-dashboard';
+          // Set target destination
+          let destination = '/warehouse-dashboard';
+          if (target === 'receiving') {
+            destination = '/warehouse-receiving';
+          } else if (target === 'putaway') {
+            destination = '/warehouse-putaway';
+            sessionStorage.setItem("directWarehousePutawayAccess", "true");
+          }
           
           // Use a robust multi-step approach to navigate
           console.log("Preparing multi-step navigation to " + destination);
@@ -89,7 +95,14 @@
       // Get target from URL parameter
       const urlParams = new URLSearchParams(window.location.search);
       const target = urlParams.get('target') || 'dashboard';
-      const destination = target === 'receiving' ? '/warehouse-receiving' : '/warehouse-dashboard';
+      
+      // Set destination based on target
+      let destination = '/warehouse-dashboard';
+      if (target === 'receiving') {
+        destination = '/warehouse-receiving';
+      } else if (target === 'putaway') {
+        destination = '/warehouse-putaway';
+      }
       
       // Update button links
       const directButton = document.getElementById('directButton');
@@ -108,6 +121,8 @@
           
           if (target === 'receiving') {
             sessionStorage.setItem("directWarehouseReceivingAccess", "true");
+          } else if (target === 'putaway') {
+            sessionStorage.setItem("directWarehousePutawayAccess", "true");
           } else {
             sessionStorage.setItem("directWarehouseDashboardAccess", "true");
           }
@@ -212,6 +227,7 @@
         <a href="/warehouse-dashboard" id="directLink" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Direct Path</a>
         <a href="/" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Dashboard</a>
         <a href="/warehouse-receiving" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Receiving</a>
+        <a href="/warehouse-putaway" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Put-Away</a>
       </div>
     </div>
   </div>
