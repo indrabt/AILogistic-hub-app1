@@ -45,10 +45,10 @@ import { Loader2, Plus, CheckCircle, AlertTriangle, FileBarChart, PackageOpen, T
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 // Types
-import { InboundOrder, InboundOrderItem, ReceivingDiscrepancy, PutAwayTask } from '@/shared/warehouse-types';
+import { InboundOrder, InboundOrderItem, ReceivingDiscrepancy, PutAwayTask } from '../shared/warehouse-types';
 
 // API request helper
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest } from '../lib/queryClient';
 
 // Form schemas
 const inboundOrderSchema = z.object({
@@ -100,7 +100,7 @@ export default function WarehouseReceiving() {
     isLoading: isLoadingOrders 
   } = useQuery<InboundOrder[]>({
     queryKey: ['/api/warehouse/inbound-orders'],
-    queryFn: () => apiRequest({ url: '/api/warehouse/inbound-orders' }),
+    queryFn: () => apiRequest('/api/warehouse/inbound-orders'),
   });
 
   // Fetch inbound order items when an order is selected
@@ -109,9 +109,7 @@ export default function WarehouseReceiving() {
     isLoading: isLoadingItems 
   } = useQuery<InboundOrderItem[]>({
     queryKey: ['/api/warehouse/inbound-orders', selectedOrderId, 'items'],
-    queryFn: () => apiRequest({ 
-      url: `/api/warehouse/inbound-orders/${selectedOrderId}/items` 
-    }),
+    queryFn: () => apiRequest(`/api/warehouse/inbound-orders/${selectedOrderId}/items`),
     enabled: !!selectedOrderId,
   });
 
@@ -121,22 +119,16 @@ export default function WarehouseReceiving() {
     isLoading: isLoadingDiscrepancies 
   } = useQuery<ReceivingDiscrepancy[]>({
     queryKey: ['/api/warehouse/receiving-discrepancies', selectedItemId],
-    queryFn: () => apiRequest({ 
-      url: `/api/warehouse/receiving-discrepancies/${selectedItemId}` 
-    }),
+    queryFn: () => apiRequest(`/api/warehouse/receiving-discrepancies/${selectedItemId}`),
     enabled: !!selectedItemId,
   });
 
   // Create inbound order mutation
   const createInboundOrderMutation = useMutation({
     mutationFn: (data: z.infer<typeof inboundOrderSchema>) => {
-      return apiRequest({
-        url: '/api/warehouse/inbound-orders',
-        method: 'POST',
-        data: {
-          ...data,
-          createdBy: JSON.parse(sessionStorage.getItem('user') || '{}').username || 'system',
-        }
+      return apiRequest('POST', '/api/warehouse/inbound-orders', {
+        ...data,
+        createdBy: JSON.parse(sessionStorage.getItem('user') || '{}').username || 'system',
       });
     },
     onSuccess: () => {
@@ -159,11 +151,7 @@ export default function WarehouseReceiving() {
   // Create order item mutation
   const createOrderItemMutation = useMutation({
     mutationFn: (data: z.infer<typeof inboundOrderItemSchema>) => {
-      return apiRequest({
-        url: '/api/warehouse/inbound-order-items',
-        method: 'POST',
-        data
-      });
+      return apiRequest('POST', '/api/warehouse/inbound-order-items', data);
     },
     onSuccess: () => {
       toast({
@@ -188,11 +176,7 @@ export default function WarehouseReceiving() {
   // Create discrepancy mutation
   const createDiscrepancyMutation = useMutation({
     mutationFn: (data: z.infer<typeof discrepancySchema>) => {
-      return apiRequest({
-        url: '/api/warehouse/receiving-discrepancies',
-        method: 'POST',
-        data
-      });
+      return apiRequest('POST', '/api/warehouse/receiving-discrepancies', data);
     },
     onSuccess: () => {
       toast({
@@ -217,11 +201,7 @@ export default function WarehouseReceiving() {
   // Update order item mutation (for receiving)
   const updateOrderItemMutation = useMutation({
     mutationFn: (data: { id: number, updates: Partial<InboundOrderItem> }) => {
-      return apiRequest({
-        url: `/api/warehouse/inbound-order-items/${data.id}`,
-        method: 'PATCH',
-        data: data.updates
-      });
+      return apiRequest('PATCH', `/api/warehouse/inbound-order-items/${data.id}`, data.updates);
     },
     onSuccess: () => {
       toast({
@@ -250,28 +230,24 @@ export default function WarehouseReceiving() {
       const item = orderItems.find(i => i.id === itemId);
       if (!item) throw new Error("Item not found");
       
-      return apiRequest({
-        url: '/api/warehouse/put-away-tasks',
-        method: 'POST',
-        data: {
-          inboundOrderId: item.inboundOrderId,
-          inboundOrderItemId: item.id,
-          sku: item.sku,
-          productName: item.productName,
-          quantity: item.receivedQuantity,
-          status: "pending",
-          suggestedLocation: {
-            id: 1, // This would typically come from an algorithm
-            name: "Aisle A, Rack 3, Bin 2",
-            type: "bin",
-            aisle: "A",
-            rack: "3",
-            bin: "2",
-            capacity: 1000,
-            capacityUnit: "kg",
-            currentUtilization: 30,
-            status: "available"
-          }
+      return apiRequest('POST', '/api/warehouse/put-away-tasks', {
+        inboundOrderId: item.inboundOrderId,
+        inboundOrderItemId: item.id,
+        sku: item.sku,
+        productName: item.productName,
+        quantity: item.receivedQuantity,
+        status: "pending",
+        suggestedLocation: {
+          id: 1, // This would typically come from an algorithm
+          name: "Aisle A, Rack 3, Bin 2",
+          type: "bin",
+          aisle: "A",
+          rack: "3",
+          bin: "2",
+          capacity: 1000,
+          capacityUnit: "kg",
+          currentUtilization: 30,
+          status: "available"
         }
       });
     },
@@ -294,11 +270,7 @@ export default function WarehouseReceiving() {
   // Update order status mutation
   const updateOrderStatusMutation = useMutation({
     mutationFn: (data: { id: number, status: "pending" | "received" | "partial" | "completed" | "cancelled" }) => {
-      return apiRequest({
-        url: `/api/warehouse/inbound-orders/${data.id}`,
-        method: 'PATCH',
-        data: { status: data.status }
-      });
+      return apiRequest('PATCH', `/api/warehouse/inbound-orders/${data.id}`, { status: data.status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/warehouse/inbound-orders'] });

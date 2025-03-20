@@ -86,6 +86,7 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
   warehouse_staff: [
     { icon: <LayoutDashboard size={20} />, href: "/warehouse-dashboard", label: "Dashboard", id: "warehouse-dashboard" },
     { icon: <Package size={20} />, href: "/supply-chain", label: "Inventory", id: "warehouse-inventory" },
+    { icon: <Truck size={20} />, href: "/warehouse-receiving", label: "Receiving", id: "warehouse-receiving" },
     { icon: <ClipboardCheck size={20} />, href: "/supply-chain?view=shipments", label: "Shipments", id: "warehouse-shipments" },
     { icon: <Package size={20} />, href: "/order-management", label: "Order Management", id: "warehouse-orders" },
     { icon: <Cloud size={20} />, href: "/weather-impact", label: "Weather Alerts", id: "warehouse-weather" },
@@ -96,6 +97,7 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
     { icon: <Route size={20} />, href: "/routes", label: "Route Optimization", id: "logistics-routes" },
     { icon: <Navigation size={20} />, href: "/hyper-local-routing", label: "Hyper-Local Routing", id: "logistics-hyper-local" },
     { icon: <Warehouse size={20} />, href: "/supply-chain", label: "Supply Chain", id: "logistics-supply-chain" },
+    { icon: <Truck size={20} />, href: "/warehouse-receiving", label: "Warehouse Receiving", id: "logistics-receiving" },
     { icon: <TrendingUp size={20} />, href: "/demand-forecasting", label: "Demand Forecasting", id: "logistics-demand" },
     { icon: <Cloud size={20} />, href: "/weather-impact", label: "Weather Impact", id: "logistics-weather" },
     { icon: <ClipboardCheck size={20} />, href: "/order-management", label: "Order Management", id: "logistics-orders" },
