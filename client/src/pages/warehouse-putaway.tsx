@@ -668,8 +668,8 @@ export default function WarehousePutaway() {
                     <h4 className="text-sm font-medium mb-2">Product-Location Compatibility</h4>
                     
                     {(() => {
-                      const location = storageLocations.find(l => l.id === selectedLocationId);
-                      const task = putAwayTasks.find(t => t.id === selectedTaskId);
+                      const location = storageLocations.find((l: StorageLocation) => l.id === selectedLocationId);
+                      const task = putAwayTasks.find((t: PutAwayTask) => t.id === selectedTaskId);
                       
                       if (!location || !task) {
                         return <p className="text-sm text-slate-500">Please select both a task and location to check compatibility.</p>;
@@ -744,7 +744,7 @@ export default function WarehousePutaway() {
                     <div className="border rounded-md p-4">
                       <h4 className="text-sm font-medium mb-2">Product Characteristics</h4>
                       {(() => {
-                        const task = putAwayTasks.find(t => t.id === selectedTaskId);
+                        const task = putAwayTasks.find((t: PutAwayTask) => t.id === selectedTaskId);
                         const characteristics = task?.productCharacteristics;
                         
                         if (!characteristics) {
@@ -779,7 +779,7 @@ export default function WarehousePutaway() {
                     <div className="border rounded-md p-4">
                       <h4 className="text-sm font-medium mb-2">Storage Requirements</h4>
                       {(() => {
-                        const location = storageLocations.find(l => l.id === selectedLocationId);
+                        const location = storageLocations.find((l: StorageLocation) => l.id === selectedLocationId);
                         
                         if (!location) {
                           return <p className="text-sm text-slate-500">Select a location to view details.</p>;
