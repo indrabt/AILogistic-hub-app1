@@ -57,7 +57,7 @@
             destination = '/warehouse-receiving';
           } else if (target === 'putaway') {
             destination = '/warehouse-putaway';
-            sessionStorage.setItem("directWarehousePutawayAccess", "true");
+            // Flag already set above, no need to duplicate
           }
           
           // Use a robust multi-step approach to navigate

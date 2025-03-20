@@ -92,6 +92,13 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     const hasWarehouseReceivingOverride = isWarehouseReceivingRoute && (directWarehouseReceivingAccess || directWarehouseAccess || bypassRouter);
     const hasWarehousePutawayOverride = isWarehousePutawayRoute && (directWarehousePutawayAccess || directWarehouseAccess || bypassRouter);
     
+    // Enhanced logging for put-away navigation
+    if (isWarehousePutawayRoute) {
+      console.log('Warehouse Put-Away route detected!');
+      console.log(`Override flags: directWarehouseAccess=${directWarehouseAccess}, directWarehousePutawayAccess=${directWarehousePutawayAccess}, bypassRouter=${bypassRouter}`);
+      console.log(`Override active: ${hasWarehousePutawayOverride}`);
+    }
+    
     if (user && 
         location !== '/' && 
         !canAccessRoute(location) && 
