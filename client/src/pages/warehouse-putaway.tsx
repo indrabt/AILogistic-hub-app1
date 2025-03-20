@@ -91,7 +91,7 @@ export default function WarehousePutaway() {
     },
     locationScan: {
       success: true,
-      scanType: "qrcode",
+      scanType: "qrcode" as ScanType,
       scannedValue: "A12-B3-C4",
       timestamp: new Date().toISOString(),
       scannedBy: "manager1",
