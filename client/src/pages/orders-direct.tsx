@@ -132,12 +132,14 @@ export default function OrdersDirectAccess() {
   // Mutations
   const createOrderMutation = useMutation<any, Error, Order>({
     mutationFn: async (orderData) => {
+      console.log("Sending order data:", JSON.stringify(orderData, null, 2));
       return await apiRequest('/api/orders', {
         method: 'POST',
         body: JSON.stringify(orderData),
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Order created successfully:", data);
       // Invalidate the orders query to refresh the data
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       
@@ -158,9 +160,30 @@ export default function OrdersDirectAccess() {
     },
     onError: (error: any) => {
       console.error("Failed to create order:", error);
+      
+      // More detailed error message for better debugging
+      let errorMessage = "Failed to create order. Please try again.";
+      
+      if (error.message) {
+        errorMessage += ` Error: ${error.message}`;
+      }
+      
+      if (error.response) {
+        console.error("Error response:", error.response);
+        try {
+          const responseData = JSON.parse(error.response);
+          if (responseData.errors) {
+            console.error("Validation errors:", responseData.errors);
+            errorMessage = `Validation error: ${responseData.errors[0]?.message || "Unknown validation error"}`;
+          }
+        } catch (e) {
+          console.error("Error parsing error response:", e);
+        }
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to create order. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
