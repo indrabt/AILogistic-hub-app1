@@ -443,10 +443,10 @@ export default function WarehousePutaway() {
                 <div className="bg-slate-50 rounded-md p-3 mb-2">
                   <h3 className="text-sm font-medium mb-1">Selected Item</h3>
                   <div className="text-xs text-slate-600 grid grid-cols-2 gap-2">
-                    <span><strong>SKU:</strong> {putAwayTasks.find(t => t.id === selectedTaskId)?.sku}</span>
-                    <span><strong>Product:</strong> {putAwayTasks.find(t => t.id === selectedTaskId)?.productName}</span>
-                    <span><strong>Quantity:</strong> {putAwayTasks.find(t => t.id === selectedTaskId)?.quantity}</span>
-                    <span><strong>Suggested:</strong> {putAwayTasks.find(t => t.id === selectedTaskId)?.suggestedLocation?.name || "Not assigned"}</span>
+                    <span><strong>SKU:</strong> {putAwayTasks.find((t: PutAwayTask) => t.id === selectedTaskId)?.sku}</span>
+                    <span><strong>Product:</strong> {putAwayTasks.find((t: PutAwayTask) => t.id === selectedTaskId)?.productName}</span>
+                    <span><strong>Quantity:</strong> {putAwayTasks.find((t: PutAwayTask) => t.id === selectedTaskId)?.quantity}</span>
+                    <span><strong>Suggested:</strong> {putAwayTasks.find((t: PutAwayTask) => t.id === selectedTaskId)?.suggestedLocation?.name || "Not assigned"}</span>
                   </div>
                 </div>
               )}
@@ -491,8 +491,8 @@ export default function WarehousePutaway() {
                 <div className="border rounded-md p-3 mt-2">
                   <h3 className="text-sm font-medium mb-2">Location Details</h3>
                   {storageLocations
-                    .filter(loc => loc.id === selectedLocationId)
-                    .map(location => (
+                    .filter((loc: StorageLocation) => loc.id === selectedLocationId)
+                    .map((location: StorageLocation) => (
                       <div key={location.id} className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                         <div><strong>Type:</strong> {location.type}</div>
                         <div><strong>Status:</strong> {location.status}</div>
@@ -548,7 +548,7 @@ export default function WarehousePutaway() {
                             itemScan: {
                               success: true,
                               scanType: "barcode",
-                              scannedValue: putAwayTasks.find(t => t.id === selectedTaskId)?.sku || "",
+                              scannedValue: putAwayTasks.find((t: PutAwayTask) => t.id === selectedTaskId)?.sku || "",
                               timestamp: new Date().toISOString(),
                               scannedBy: "current_user",
                               matchesExpected: true
@@ -595,7 +595,7 @@ export default function WarehousePutaway() {
                         className="w-full" 
                         onClick={() => {
                           // Simulate location scanning
-                          const location = storageLocations.find(l => l.id === selectedLocationId);
+                          const location = storageLocations.find((l: StorageLocation) => l.id === selectedLocationId);
                           
                           setScanVerification(prev => ({
                             ...prev,
