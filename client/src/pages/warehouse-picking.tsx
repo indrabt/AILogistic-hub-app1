@@ -105,7 +105,7 @@ export default function WarehousePicking() {
     isLoading: isTasksLoading 
   } = useQuery<PickTask[]>({
     queryKey: ["/api/warehouse/pick-tasks"],
-    queryFn: apiRequest,
+    queryFn: () => apiRequest("/api/warehouse/pick-tasks"),
   });
 
   const { 
@@ -113,21 +113,23 @@ export default function WarehousePicking() {
     isLoading: isTaskItemsLoading
   } = useQuery<PickTaskItem[]>({
     queryKey: ["/api/warehouse/pick-task-items", selectedTask?.id],
-    queryFn: apiRequest,
+    queryFn: () => selectedTask 
+      ? apiRequest(`/api/warehouse/pick-task-items?taskId=${selectedTask.id}`) 
+      : Promise.resolve([]),
     enabled: !!selectedTask,
   });
 
   // Complete pick item mutation
   const completePickItemMutation = useMutation({
     mutationFn: (data: { id: number, pickedQuantity: number, locationId: number }) => {
-      return apiRequest({
-        url: `/api/warehouse/pick-task-items/${data.id}/complete`,
-        method: "PUT",
-        data: {
+      return apiRequest(
+        `/api/warehouse/pick-task-items/${data.id}/complete`, 
+        { method: "PUT" }, 
+        {
           pickedQuantity: data.pickedQuantity,
           locationId: data.locationId
         }
-      });
+      );
     },
     onSuccess: () => {
       toast({
@@ -157,16 +159,18 @@ export default function WarehousePicking() {
   // Pick task update mutation (to mark as in-progress/completed)
   const updatePickTaskMutation = useMutation({
     mutationFn: (data: { id: number, status: string, assignedTo?: string }) => {
-      return apiRequest({
-        url: `/api/warehouse/pick-tasks/${data.id}`,
-        method: "PATCH",
-        data: {
-          status: data.status,
-          assignedTo: data.assignedTo || user?.username,
-          ...(data.status === "in_progress" ? { startedAt: new Date().toISOString() } : {}),
-          ...(data.status === "completed" ? { completedAt: new Date().toISOString() } : {})
-        }
-      });
+      const updateData = {
+        status: data.status,
+        assignedTo: data.assignedTo || user?.username,
+        ...(data.status === "in_progress" ? { startedAt: new Date().toISOString() } : {}),
+        ...(data.status === "completed" ? { completedAt: new Date().toISOString() } : {})
+      };
+      
+      return apiRequest(
+        `/api/warehouse/pick-tasks/${data.id}`,
+        { method: "PATCH" },
+        updateData
+      );
     },
     onSuccess: () => {
       toast({
