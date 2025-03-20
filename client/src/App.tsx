@@ -33,6 +33,7 @@ import DriverSchedule from "@/pages/driver-schedule";
 import WarehouseDashboard from "@/pages/warehouse-dashboard";
 import WarehouseReceiving from "@/pages/warehouse-receiving";
 import WarehousePutaway from "@/pages/warehouse-putaway";
+import WarehousePicking from "@/pages/warehouse-picking";
 import RealTimeDashboard from "@/pages/real-time-dashboard";
 import RetailDashboard from "@/pages/retail-dashboard";
 import LocalSourcing from "@/pages/local-sourcing";
@@ -120,6 +121,7 @@ function Router() {
           <Route path="/warehouse-dashboard" component={WarehouseDashboard} />
           <Route path="/warehouse-receiving" component={WarehouseReceiving} />
           <Route path="/warehouse-putaway" component={WarehousePutaway} />
+          <Route path="/warehouse-picking" component={WarehousePicking} />
           <Route path="/real-time-dashboard" component={RealTimeDashboard} />
           <Route path="/retail-dashboard" component={RetailDashboard} />
           <Route path="/demand-prediction" component={RetailDashboard} />
