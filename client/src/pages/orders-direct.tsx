@@ -137,10 +137,7 @@ export default function OrdersDirectAccess() {
   const createOrderMutation = useMutation<Order, Error, Omit<Order, 'id'>>({
     mutationFn: async (orderData: Omit<Order, 'id'>) => {
       console.log("Sending order data:", JSON.stringify(orderData, null, 2));
-      return await apiRequest('/api/orders', {
-        method: 'POST',
-        body: JSON.stringify(orderData),
-      });
+      return await apiRequest('POST', '/api/orders', orderData);
     },
     onSuccess: (data: Order) => {
       console.log("Order created successfully:", data);
