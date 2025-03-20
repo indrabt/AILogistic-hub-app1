@@ -105,7 +105,9 @@ function Router() {
             console.log('Current path:', window.location.pathname);
             console.log('Current URL:', window.location.href);
             console.log('Rendering timestamp:', new Date().toISOString());
-            return <OrderManagement />;
+            // Use the more reliable direct access component instead
+            sessionStorage.setItem("orderManagementRedirect", "true");
+            return <OrdersDirect />;
           }} />
           <Route path="/driver-dashboard" component={DriverDashboard} />
           <Route path="/driver-schedule" component={DriverSchedule} />

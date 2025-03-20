@@ -48,8 +48,8 @@ export default function Dashboard() {
               console.log("Current location:", window.location.href);
               console.log("Current pathname:", window.location.pathname);
               console.log("Navigation timestamp:", new Date().toISOString());
-              // Using direct DOM navigation as a workaround for router issues
-              window.location.href = "/order-management";
+              // Navigate to the direct orders page instead which is more reliable
+              window.location.href = "/orders-direct";
             }}
           >
             Order Management
