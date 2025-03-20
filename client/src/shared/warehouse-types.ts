@@ -11,6 +11,30 @@ export type StorageLocationType = "aisle" | "rack" | "bin" | "shelf" | "bulk" | 
 export type DiscrepancyType = "quantity_mismatch" | "damaged" | "wrong_item" | "quality_issue" | "missing";
 export type PriorityLevel = "low" | "medium" | "high" | "urgent";
 export type CountingMethod = "full" | "cycle" | "partial" | "audit";
+export type ProductCategory = "electronics" | "clothing" | "food" | "beverages" | "chemicals" | "fragile" | "heavy" | "bulky" | "hazardous";
+export type TemperatureZone = "ambient" | "chilled" | "frozen" | "heated";
+export type VelocityCategory = "fast" | "medium" | "slow";
+export type ScanType = "barcode" | "qrcode" | "rfid" | "manual";
+
+// Scanning and verification interfaces
+export interface ScanResult {
+  success: boolean;
+  scanType: ScanType;
+  scannedValue: string;
+  timestamp: string;
+  scannedBy: string;
+  matchesExpected: boolean;
+  errorMessage?: string;
+}
+
+export interface ScanVerification {
+  itemScan?: ScanResult;
+  locationScan?: ScanResult;
+  verified: boolean;
+  verificationTimestamp?: string;
+  verifiedBy?: string;
+  notes?: string;
+}
 
 // 1. Receiving Feature
 export interface InboundOrder {
@@ -56,6 +80,13 @@ export interface ReceivingDiscrepancy {
 }
 
 // 2. Put-Away Feature
+export interface LocationRecommendation {
+  location: StorageLocation;
+  score: number;
+  reason: string[];
+  ideal: boolean;
+}
+
 export interface PutAwayTask {
   id: number;
   inboundOrderId: number;
@@ -64,15 +95,30 @@ export interface PutAwayTask {
   productName: string;
   quantity: number;
   suggestedLocation: StorageLocation;
+  alternativeLocations?: LocationRecommendation[];
   actualLocation?: StorageLocation;
   status: "pending" | "in_progress" | "completed" | "cancelled";
   assignedTo?: string;
   startedAt?: string;
   completedAt?: string;
   notes?: string;
+  productCharacteristics?: ProductCharacteristics;
+  scanRequired?: boolean;
 }
 
 // 3. Inventory Tracking Feature
+export interface ProductCharacteristics {
+  category: ProductCategory;
+  size: "small" | "medium" | "large" | "xlarge";
+  weight: "light" | "medium" | "heavy";
+  temperatureRequirements?: TemperatureZone;
+  velocityCategory: VelocityCategory;
+  hazardous: boolean;
+  fragile: boolean;
+  stackable: boolean;
+  specialHandling?: string[];
+}
+
 export interface InventoryItem {
   id: number;
   sku: string;
@@ -88,6 +134,7 @@ export interface InventoryItem {
   locations: InventoryLocation[];
   attributes: InventoryItemAttribute[];
   lastUpdatedAt: string;
+  productCharacteristics?: ProductCharacteristics;
 }
 
 export interface InventoryLocation {
@@ -124,6 +171,11 @@ export interface StorageLocation {
   humidity?: number;
   specialAttributes?: Record<string, string>;
   status: "available" | "full" | "reserved" | "maintenance" | "blocked";
+  temperatureZone?: TemperatureZone;
+  velocityZone?: VelocityCategory;
+  compatibleCategories?: ProductCategory[];
+  incompatibleCategories?: ProductCategory[];
+  suitabilityScore?: number;
 }
 
 export interface InventoryMovement {
