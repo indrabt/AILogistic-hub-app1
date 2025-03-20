@@ -171,6 +171,19 @@ export default function DebugNav({ targetRoute = "/orders-direct" }: DebugNavPro
                 className="text-xs"
                 onClick={() => {
                   sessionStorage.setItem("directWarehouseAccess", "true");
+                  sessionStorage.setItem("directWarehousePutawayAccess", "true");
+                  window.location.href = "/warehouse-direct.html?target=putaway";
+                }}
+              >
+                Warehouse Put-Away
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs"
+                onClick={() => {
+                  sessionStorage.setItem("directWarehouseAccess", "true");
                   window.location.href = "/warehouse-dashboard";
                 }}
               >
