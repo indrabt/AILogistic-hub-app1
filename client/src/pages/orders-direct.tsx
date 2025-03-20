@@ -134,15 +134,15 @@ export default function OrdersDirectAccess() {
   } as any);
   
   // Mutations
-  const createOrderMutation = useMutation<any, Error, Order>({
-    mutationFn: async (orderData) => {
+  const createOrderMutation = useMutation<Order, Error, Omit<Order, 'id'>>({
+    mutationFn: async (orderData: Omit<Order, 'id'>) => {
       console.log("Sending order data:", JSON.stringify(orderData, null, 2));
       return await apiRequest('/api/orders', {
         method: 'POST',
         body: JSON.stringify(orderData),
       });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: Order) => {
       console.log("Order created successfully:", data);
       // Invalidate the orders query to refresh the data
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
@@ -633,25 +633,36 @@ export default function OrdersDirectAccess() {
                   return;
                 }
                 
-                // Create order data object with default values for other fields
-                const orderData = {
+                // More detailed validation
+                if (!newOrderData.customerType || !newOrderData.priority) {
+                  toast({
+                    title: "Validation Error",
+                    description: "Please select a customer type and priority level.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+
+                // Create order data compatible with the server's Omit<Order, 'id'> expectation
+                const orderData: Omit<Order, 'id'> = {
                   customerName: newOrderData.customerName,
-                  customerType: newOrderData.customerType,
+                  customerType: newOrderData.customerType as "retail" | "wholesale" | "distributor" | "internal",
                   customerLocation: newOrderData.customerLocation,
-                  priority: newOrderData.priority,
-                  notes: newOrderData.notes,
+                  priority: newOrderData.priority as "standard" | "express" | "urgent",
+                  notes: newOrderData.notes || "", 
                   createdAt: new Date().toISOString(),
                   status: "pending",
                   items: [],
                   totalValue: 0,
-                  estimatedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
+                  estimatedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
                   paymentStatus: "pending",
-                  // Generate a random order number for new orders
                   orderNumber: `ORD-${Math.floor(100000 + Math.random() * 900000)}`
                 };
                 
-                // Call the mutation
-                createOrderMutation.mutate(orderData as any);
+                console.log("Submitting order with data:", JSON.stringify(orderData, null, 2));
+                
+                // Call the mutation with properly typed data
+                createOrderMutation.mutate(orderData);
               }}
               disabled={createOrderMutation.isPending}
             >
