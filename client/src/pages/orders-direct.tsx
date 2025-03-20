@@ -646,7 +646,7 @@ export default function OrdersDirectAccess() {
                   customerType: (newOrderData.customerType as "retail" | "wholesale" | "distributor" | "internal") || "retail",
                   customerLocation: newOrderData.customerLocation || "",
                   priority: (newOrderData.priority as "standard" | "express" | "urgent") || "standard",
-                  notes: newOrderData.notes || undefined,
+                  notes: newOrderData.notes || "",
                   createdAt: new Date().toISOString(),
                   status: "pending",
                   items: [],
