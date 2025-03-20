@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warehouse Operations Direct Link</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+    }
+    h1 {
+      color: #0f172a;
+      margin-bottom: 1rem;
+    }
+    p {
+      color: #64748b;
+      margin-bottom: 2rem;
+    }
+    .actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+    .button-primary {
+      background-color: #2563eb;
+      color: white;
+    }
+    .button-primary:hover {
+      background-color: #1d4ed8;
+    }
+    .button-secondary {
+      background-color: #e2e8f0;
+      color: #0f172a;
+    }
+    .button-secondary:hover {
+      background-color: #cbd5e1;
+    }
+    .loader {
+      display: inline-block;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #2563eb;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    #statusMessage {
+      margin-top: 2rem;
+      color: #0f172a;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Warehouse Operations Portal</h1>
+    <p>Choose a direct link below to navigate to the warehouse operation you need:</p>
+    
+    <div class="actions">
+      <a href="/warehouse-picking" class="button button-primary" id="pickingLink">
+        Warehouse Picking
+      </a>
+      <a href="/warehouse-packing" class="button button-primary" id="packingLink">
+        Warehouse Packing
+      </a>
+      <a href="/dashboard" class="button button-secondary">
+        Back to Dashboard
+      </a>
+    </div>
+    
+    <div id="statusMessage"></div>
+  </div>
+
+  <script>
+    // Set analytics tracking
+    sessionStorage.setItem("usingDirectWarehouseAccess", "true");
+    sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
+    
+    function navigateTo(path, trackingKey) {
+      // Add specific tracking flag
+      sessionStorage.setItem(trackingKey, "true");
+      
+      // Show loading state
+      const statusEl = document.getElementById('statusMessage');
+      statusEl.innerHTML = '<span class="loader"></span> Navigating to ' + path + '...';
+      
+      // Direct navigation to bypass router
+      window.location.href = path;
+    }
+    
+    document.getElementById('pickingLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      navigateTo('/warehouse-picking', 'directWarehousePickingAccess');
+    });
+    
+    document.getElementById('packingLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      navigateTo('/warehouse-packing', 'directWarehousePackingAccess');
+    });
+    
+    // Check URL parameters to see if auto-navigation is needed
+    const urlParams = new URLSearchParams(window.location.search);
+    const target = urlParams.get('target');
+    
+    if (target === 'picking') {
+      setTimeout(() => {
+        navigateTo('/warehouse-picking', 'directWarehousePickingAccess');
+      }, 300);
+    } else if (target === 'packing') {
+      setTimeout(() => {
+        navigateTo('/warehouse-packing', 'directWarehousePackingAccess');
+      }, 300);
+    }
+  </script>
+</body>
+</html>

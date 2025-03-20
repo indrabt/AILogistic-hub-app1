@@ -136,6 +136,13 @@ function Router() {
           <Route path="/staff-training" component={RetailDashboard} />
           <Route path="/reports" component={Reports} />
           <Route path="/settings" component={Settings} />
+          <Route path="/navigation-test" component={() => {
+            console.log('Navigation Test page loaded for testing link functionality');
+            return import('./pages/navigation-test').then(module => {
+              const NavigationTest = module.default;
+              return <NavigationTest />;
+            });
+          }} />
           {/* Root path */}
           <Route path="/" component={() => {
             console.log('Root path component rendered - explicit placement at end');

@@ -334,14 +334,13 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                               return (
                                 <li key={subItem.id}>
                                   <a 
-                                    href="/warehouse-picking"
+                                    href="/warehouse-direct-link.html?target=picking"
                                     className={cn(
                                       "flex items-center py-2 px-3 rounded-r-lg transition-colors duration-200 cursor-pointer",
                                       location === subItem.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
                                     )}
                                     onClick={(e) => {
                                       console.log("Direct Warehouse Picking navigation triggered from submenu");
-                                      // Add tracking flags in session storage for analytics
                                       sessionStorage.setItem("usingDirectWarehouseAccess", "true");
                                       sessionStorage.setItem("directWarehousePickingAccess", "true");
                                       sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
@@ -356,7 +355,7 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                               return (
                                 <li key={subItem.id}>
                                   <a 
-                                    href="/warehouse-packing"
+                                    href="/warehouse-direct-link.html?target=packing"
                                     className={cn(
                                       "flex items-center py-2 px-3 rounded-r-lg transition-colors duration-200 cursor-pointer",
                                       location === subItem.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
@@ -503,7 +502,7 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                 return (
                   <li className="mb-2" key={item.id}>
                     <a 
-                      href="/warehouse-picking"
+                      href="/warehouse-direct-link.html?target=picking"
                       className={cn(
                         "flex items-center py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
                         location === item.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
