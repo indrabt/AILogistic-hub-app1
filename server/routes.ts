@@ -172,6 +172,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/orders", async (req, res) => {
     try {
+      // Log the raw request body for debugging
+      console.log("Order creation attempt with body:", JSON.stringify(req.body, null, 2));
+      
+      // Define the order schema with clear validation
       const orderSchema = z.object({
         orderNumber: z.string(),
         customerName: z.string(),
@@ -190,14 +194,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         invoiceNumber: z.string().optional()
       });
 
+      // Attempt to parse and validate the order data
       const validatedData = orderSchema.parse(req.body);
+      console.log("Validation passed, creating order with:", JSON.stringify(validatedData, null, 2));
+      
+      // Create the order
       const newOrder = await storage.createOrder(validatedData);
+      console.log("Order created successfully:", JSON.stringify(newOrder, null, 2));
+      
+      // Return the new order
       res.status(201).json(newOrder);
     } catch (error) {
+      // Handle validation errors with detailed information
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid order data", errors: error.errors });
+        console.error("Order validation failed:", JSON.stringify(error.errors, null, 2));
+        return res.status(400).json({ 
+          message: "Invalid order data", 
+          errors: error.errors 
+        });
       }
-      res.status(500).json({ message: "Failed to create order" });
+      
+      // Handle other errors
+      console.error("Failed to create order:", error);
+      res.status(500).json({ 
+        message: "Failed to create order", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
   });
 

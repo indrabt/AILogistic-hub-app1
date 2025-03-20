@@ -643,13 +643,13 @@ export default function OrdersDirectAccess() {
                   return;
                 }
 
-                // Create order data compatible with the server's Omit<Order, 'id'> expectation
+                // Create order data following the Order type exactly, omitting only the 'id' field
                 const orderData: Omit<Order, 'id'> = {
-                  customerName: newOrderData.customerName,
-                  customerType: newOrderData.customerType as "retail" | "wholesale" | "distributor" | "internal",
-                  customerLocation: newOrderData.customerLocation,
-                  priority: newOrderData.priority as "standard" | "express" | "urgent",
-                  notes: newOrderData.notes || "", 
+                  customerName: newOrderData.customerName || "",
+                  customerType: (newOrderData.customerType as "retail" | "wholesale" | "distributor" | "internal") || "retail",
+                  customerLocation: newOrderData.customerLocation || "",
+                  priority: (newOrderData.priority as "standard" | "express" | "urgent") || "standard",
+                  notes: newOrderData.notes || undefined,
                   createdAt: new Date().toISOString(),
                   status: "pending",
                   items: [],
@@ -657,6 +657,7 @@ export default function OrdersDirectAccess() {
                   estimatedDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
                   paymentStatus: "pending",
                   orderNumber: `ORD-${Math.floor(100000 + Math.random() * 900000)}`
+                  // Optional fields will be undefined by default since they're optional in the type
                 };
                 
                 console.log("Submitting order with data:", JSON.stringify(orderData, null, 2));
