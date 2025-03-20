@@ -41,6 +41,10 @@
             targetHeading.textContent = "Warehouse Receiving";
             targetDesc.textContent = "Loading Warehouse Receiving system...";
             sessionStorage.setItem("directWarehouseReceivingAccess", "true");
+          } else if (target === 'putaway') {
+            targetHeading.textContent = "Warehouse Put-Away";
+            targetDesc.textContent = "Loading Warehouse Put-Away system...";
+            sessionStorage.setItem("directWarehousePutawayAccess", "true");
           } else {
             targetHeading.textContent = "Warehouse Dashboard";
             targetDesc.textContent = "Loading Warehouse Dashboard...";
