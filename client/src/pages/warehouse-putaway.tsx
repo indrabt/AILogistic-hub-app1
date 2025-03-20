@@ -8,7 +8,9 @@ import {
   StorageLocation, 
   LocationRecommendation,
   ScanVerification,
-  ProductCategory
+  ProductCategory,
+  ScanType,
+  ScanResult
 } from "@/shared/warehouse-types";
 
 import {
@@ -737,17 +739,32 @@ export default function WarehousePutaway() {
                         className="w-full" 
                         onClick={() => {
                           // Simulate item scanning
-                          setScanVerification(prev => ({
-                            ...prev,
-                            itemScan: {
+                          setScanVerification(prev => {
+                            // Create the new item scan result
+                            const newItemScan = {
                               success: true,
-                              scanType: "barcode",
+                              scanType: "barcode" as ScanType,
                               scannedValue: putAwayTasks.find((t: PutAwayTask) => t.id === selectedTaskId)?.sku || "",
                               timestamp: new Date().toISOString(),
                               scannedBy: "current_user",
                               matchesExpected: true
-                            }
-                          }));
+                            };
+                            
+                            // Determine if verification is complete based on both item and location scans
+                            const isVerified = prev.locationScan && prev.locationScan.success && 
+                                              prev.locationScan.matchesExpected && 
+                                              newItemScan.success && 
+                                              newItemScan.matchesExpected;
+                                              
+                            return {
+                              ...prev,
+                              itemScan: newItemScan,
+                              verified: isVerified,
+                              verificationTimestamp: isVerified ? new Date().toISOString() : prev.verificationTimestamp,
+                              verifiedBy: isVerified ? "manager1" : prev.verifiedBy,
+                              notes: isVerified ? "Both item and location scans verified successfully." : prev.notes
+                            };
+                          });
                           toast({
                             title: "Item Scanned",
                             description: "Item barcode verified successfully.",
@@ -791,18 +808,32 @@ export default function WarehousePutaway() {
                           // Simulate location scanning
                           const location = storageLocations.find((l: StorageLocation) => l.id === selectedLocationId);
                           
-                          setScanVerification(prev => ({
-                            ...prev,
-                            locationScan: {
+                          setScanVerification(prev => {
+                            // Create the new location scan result
+                            const newLocationScan = {
                               success: true,
-                              scanType: "qrcode",
+                              scanType: "qrcode" as ScanType,
                               scannedValue: location?.name || "",
                               timestamp: new Date().toISOString(),
                               scannedBy: "current_user",
                               matchesExpected: true
-                            },
-                            verified: prev.itemScan !== undefined
-                          }));
+                            };
+                            
+                            // Determine if verification is complete based on both item and location scans
+                            const isVerified = prev.itemScan && prev.itemScan.success && 
+                                              prev.itemScan.matchesExpected && 
+                                              newLocationScan.success && 
+                                              newLocationScan.matchesExpected;
+                                              
+                            return {
+                              ...prev,
+                              locationScan: newLocationScan,
+                              verified: isVerified,
+                              verificationTimestamp: isVerified ? new Date().toISOString() : prev.verificationTimestamp,
+                              verifiedBy: isVerified ? "manager1" : prev.verifiedBy,
+                              notes: isVerified ? "Both item and location scans verified successfully." : prev.notes
+                            };
+                          });
                           
                           toast({
                             title: "Location Scanned",
