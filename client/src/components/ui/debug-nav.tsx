@@ -188,6 +188,19 @@ export default function DebugNav({ targetRoute = "/orders-direct" }: DebugNavPro
               >
                 Receiving Direct
               </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs"
+                onClick={() => {
+                  sessionStorage.setItem("directWarehouseAccess", "true");
+                  sessionStorage.setItem("directWarehousePutawayAccess", "true");
+                  window.location.href = "/warehouse-putaway";
+                }}
+              >
+                Put-Away Direct
+              </Button>
             </div>
           </div>
         </div>
