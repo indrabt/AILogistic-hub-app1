@@ -66,6 +66,43 @@ export default function WarehousePutaway() {
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
   const [selectedLocationId, setSelectedLocationId] = useState<number | null>(null);
+  const [showDebug, setShowDebug] = useState(false);
+  const [navigationFlags, setNavigationFlags] = useState<{[key: string]: boolean}>({});
+  
+  // Debug check for navigation flags on component mount
+  useEffect(() => {
+    console.log('WarehousePutaway component mounted');
+    
+    // Check all potential navigation flags in session storage
+    const flags = {
+      directWarehouseAccess: sessionStorage.getItem("directWarehouseAccess") === "true",
+      directWarehousePutawayAccess: sessionStorage.getItem("directWarehousePutawayAccess") === "true",
+      directWarehouseReceivingAccess: sessionStorage.getItem("directWarehouseReceivingAccess") === "true",
+      directWarehouseDashboardAccess: sessionStorage.getItem("directWarehouseDashboardAccess") === "true",
+      bypassRouter: sessionStorage.getItem("bypassRouter") === "true",
+      warehouseAccessMethod: sessionStorage.getItem("warehouseAccessMethod") || "unknown"
+    };
+    
+    setNavigationFlags(flags);
+    
+    console.log(`Navigation flags: directWarehouseAccess=${flags.directWarehouseAccess}, directWarehousePutawayAccess=${flags.directWarehousePutawayAccess}, bypassRouter=${flags.bypassRouter}`);
+    
+    // Ensure the page was navigated to properly
+    if (!flags.directWarehouseAccess && !flags.directWarehousePutawayAccess && !flags.bypassRouter) {
+      console.warn('Warning: Accessing warehouse-putaway without navigation flags');
+      toast({
+        title: 'Navigation Warning',
+        description: 'You may have accessed this page incorrectly. Try using the sidebar navigation.',
+        variant: 'destructive',
+      });
+    }
+    
+    // Clear flags after successful navigation
+    return () => {
+      console.log('WarehousePutaway component unmounted, clearing navigation flags');
+      sessionStorage.removeItem("directWarehousePutawayAccess");
+    };
+  }, [toast]);
 
   // Fetch put-away tasks
   const { data: putAwayTasks = [], isLoading: isLoadingTasks } = useQuery({
@@ -160,12 +197,51 @@ export default function WarehousePutaway() {
     }
   };
 
+  // Toggle debug view
+  const toggleDebugView = () => {
+    setShowDebug(!showDebug);
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Put-Away Management</h1>
-        <p className="text-muted-foreground">Manage and track put-away tasks for received inventory items</p>
+        <div className="flex flex-col space-y-2">
+          <p className="text-muted-foreground">Manage and track put-away tasks for received inventory items</p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={toggleDebugView}
+            className="self-end"
+          >
+            {showDebug ? "Hide Debug" : "Show Debug"}
+          </Button>
+        </div>
       </div>
+      
+      {/* Debug Information Panel */}
+      {showDebug && (
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
+          <h3 className="text-sm font-semibold text-blue-700 mb-2">Navigation Debug Info</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
+            {Object.entries(navigationFlags).map(([key, value]) => (
+              <div key={key} className="flex items-center gap-2 border-b border-blue-100 pb-1">
+                <span className="font-semibold">{key}:</span>
+                <span className={value ? "text-green-600" : "text-red-600"}>
+                  {typeof value === 'boolean' ? value.toString() : value}
+                </span>
+              </div>
+            ))}
+            <div className="col-span-full mt-2">
+              <p className="text-xs text-blue-700">
+                {navigationFlags.directWarehousePutawayAccess ? 
+                  "✅ Navigation flags set correctly" : 
+                  "⚠️ Missing required navigation flags"}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Card>
         <CardHeader>

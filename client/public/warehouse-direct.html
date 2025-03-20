@@ -25,13 +25,20 @@
           const user = JSON.parse(storedUser);
           console.log("Current user role:", user.role);
           
-          // Ensure necessary permission flags are set
+          // First clear any existing navigation flags to prevent conflicts
+          sessionStorage.removeItem("directWarehouseDashboardAccess");
+          sessionStorage.removeItem("directWarehouseReceivingAccess");
+          sessionStorage.removeItem("directWarehousePutawayAccess");
+          
+          // Set common permission flags
           sessionStorage.setItem("bypassRouter", "true");
           sessionStorage.setItem("directWarehouseAccess", "true");
           
           // Set target based on URL parameter
           const urlParams = new URLSearchParams(window.location.search);
           const target = urlParams.get('target') || 'dashboard';
+          
+          console.log("Warehouse onload with target:", target);
           
           // Update UI based on target
           const targetHeading = document.getElementById('target-heading');
@@ -41,14 +48,17 @@
             targetHeading.textContent = "Warehouse Receiving";
             targetDesc.textContent = "Loading Warehouse Receiving system...";
             sessionStorage.setItem("directWarehouseReceivingAccess", "true");
+            console.log("Set directWarehouseReceivingAccess flag to true");
           } else if (target === 'putaway') {
             targetHeading.textContent = "Warehouse Put-Away";
             targetDesc.textContent = "Loading Warehouse Put-Away system...";
             sessionStorage.setItem("directWarehousePutawayAccess", "true");
+            console.log("Set directWarehousePutawayAccess flag to true");
           } else {
             targetHeading.textContent = "Warehouse Dashboard";
             targetDesc.textContent = "Loading Warehouse Dashboard...";
             sessionStorage.setItem("directWarehouseDashboardAccess", "true");
+            console.log("Set directWarehouseDashboardAccess flag to true");
           }
           
           // Set target destination
@@ -100,6 +110,8 @@
       const urlParams = new URLSearchParams(window.location.search);
       const target = urlParams.get('target') || 'dashboard';
       
+      console.log("Warehouse direct page loaded with target:", target);
+      
       // Set destination based on target
       let destination = '/warehouse-dashboard';
       if (target === 'receiving') {
@@ -107,6 +119,50 @@
       } else if (target === 'putaway') {
         destination = '/warehouse-putaway';
       }
+      
+      // Add diagnostic info to page
+      const debugInfo = document.createElement('div');
+      debugInfo.style.marginTop = '20px';
+      debugInfo.style.padding = '10px';
+      debugInfo.style.backgroundColor = '#f0f9ff';
+      debugInfo.style.border = '1px solid #bae6fd';
+      debugInfo.style.borderRadius = '4px';
+      debugInfo.style.fontSize = '12px';
+      debugInfo.style.fontFamily = 'monospace';
+      debugInfo.style.display = 'none'; // Hidden by default
+      
+      debugInfo.innerHTML = `
+        <div style="font-weight: bold; margin-bottom: 5px;">Navigation Debug Info:</div>
+        <div>Target: ${target}</div>
+        <div>Destination: ${destination}</div>
+        <div>Timestamp: ${new Date().toISOString()}</div>
+      `;
+      
+      const container = document.querySelector('.container');
+      container.appendChild(debugInfo);
+      
+      // Add debug toggle button
+      const debugToggle = document.createElement('button');
+      debugToggle.innerText = "Show Debug Info";
+      debugToggle.style.marginTop = '10px';
+      debugToggle.style.padding = '4px 8px';
+      debugToggle.style.fontSize = '12px';
+      debugToggle.style.backgroundColor = '#f3f4f6';
+      debugToggle.style.border = '1px solid #d1d5db';
+      debugToggle.style.borderRadius = '4px';
+      debugToggle.style.cursor = 'pointer';
+      
+      debugToggle.addEventListener('click', function() {
+        if (debugInfo.style.display === 'none') {
+          debugInfo.style.display = 'block';
+          debugToggle.innerText = "Hide Debug Info";
+        } else {
+          debugInfo.style.display = 'none';
+          debugToggle.innerText = "Show Debug Info";
+        }
+      });
+      
+      container.appendChild(debugToggle);
       
       // Update button links
       const directButton = document.getElementById('directButton');
@@ -118,21 +174,43 @@
           e.preventDefault();
           console.log("Direct navigation button clicked");
           
-          // Set override flags
+          // First clear any existing navigation flags
+          sessionStorage.removeItem("directWarehouseDashboardAccess");
+          sessionStorage.removeItem("directWarehouseReceivingAccess");
+          sessionStorage.removeItem("directWarehousePutawayAccess");
+          
+          // Set common override flags
           sessionStorage.setItem("warehouseAccessMethod", "button-click");
           sessionStorage.setItem("bypassRouter", "true");
           sessionStorage.setItem("directWarehouseAccess", "true");
           
+          // Set specific flag based on target
           if (target === 'receiving') {
             sessionStorage.setItem("directWarehouseReceivingAccess", "true");
+            console.log("Set directWarehouseReceivingAccess flag to true");
           } else if (target === 'putaway') {
             sessionStorage.setItem("directWarehousePutawayAccess", "true");
+            console.log("Set directWarehousePutawayAccess flag to true");
           } else {
             sessionStorage.setItem("directWarehouseDashboardAccess", "true");
+            console.log("Set directWarehouseDashboardAccess flag to true");
           }
           
-          // Force navigation with cache-busting parameter
-          window.location.href = destination + "?manual=true&t=" + new Date().getTime();
+          // Update debug info
+          debugInfo.style.display = 'block';
+          debugInfo.innerHTML += `
+            <div style="margin-top: 5px; color: #0369a1;">Setting navigation flags...</div>
+            <div>warehouseAccessMethod: button-click</div>
+            <div>bypassRouter: true</div>
+            <div>directWarehouseAccess: true</div>
+            <div>directWarehouse${target.charAt(0).toUpperCase() + target.slice(1)}Access: true</div>
+          `;
+          
+          // Delay navigation slightly to allow debug info to be visible
+          setTimeout(() => {
+            // Force navigation with cache-busting parameter
+            window.location.href = destination + "?manual=true&t=" + new Date().getTime();
+          }, 1000);
         });
       }
       
@@ -231,7 +309,29 @@
         <a href="/warehouse-dashboard" id="directLink" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Direct Path</a>
         <a href="/" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Dashboard</a>
         <a href="/warehouse-receiving" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Receiving</a>
-        <a href="/warehouse-putaway" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Put-Away</a>
+        <a href="#" onclick="manualPutAwayNavigation(); return false;" style="padding: 6px 12px; background: #f3f4f6; border-radius: 4px;">Put-Away</a>
+        <script>
+          function manualPutAwayNavigation() {
+            console.log("Manual Put-Away navigation button clicked");
+            
+            // First clear any existing navigation flags
+            sessionStorage.removeItem("directWarehouseDashboardAccess");
+            sessionStorage.removeItem("directWarehouseReceivingAccess");
+            sessionStorage.removeItem("directWarehousePutawayAccess");
+            
+            // Set navigation flags
+            sessionStorage.setItem("directWarehousePutawayAccess", "true");
+            sessionStorage.setItem("directWarehouseAccess", "true");
+            sessionStorage.setItem("bypassRouter", "true");
+            sessionStorage.setItem("warehouseAccessMethod", "manual-putaway-btn");
+            
+            console.log("Set directWarehousePutawayAccess flag to true");
+            console.log("Set directWarehouseAccess flag to true"); 
+            console.log("Set bypassRouter flag to true");
+            
+            window.location.href = "/warehouse-putaway?manual=true&t=" + new Date().getTime();
+          }
+        </script>
       </div>
     </div>
   </div>

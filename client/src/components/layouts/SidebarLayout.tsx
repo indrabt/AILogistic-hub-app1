@@ -316,12 +316,20 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                       )}
                       onClick={() => {
                         console.log("Direct Warehouse Put-Away navigation triggered");
-                        // Add tracking flags in session storage
+                        // Add tracking flags in session storage with clear naming
                         sessionStorage.setItem("usingDirectWarehouseAccess", "true");
-                        sessionStorage.setItem("directWarehousePutawayAccess", "true");
+                        sessionStorage.setItem("directWarehousePutawayAccess", "true"); 
+                        sessionStorage.setItem("bypassRouter", "true");
+                        sessionStorage.setItem("directWarehouseAccess", "true");
                         sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
+                        
+                        // Add additional debug information
+                        console.log("Set directWarehousePutawayAccess flag to true");
+                        console.log("Set bypassRouter flag to true");
+                        console.log("Set directWarehouseAccess flag to true");
+                        
                         // Use direct HTML page for navigation to avoid router issues
-                        window.location.href = "/warehouse-direct.html?target=putaway";
+                        window.location.href = "/warehouse-direct.html?target=putaway&t=" + new Date().getTime();
                       }}
                     >
                       <span className="mr-3">{item.icon}</span>
