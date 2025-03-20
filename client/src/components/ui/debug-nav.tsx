@@ -146,7 +146,7 @@ export default function DebugNav({ targetRoute = "/orders-direct" }: DebugNavPro
                 onClick={() => {
                   sessionStorage.setItem("directWarehouseAccess", "true");
                   sessionStorage.setItem("directWarehouseDashboardAccess", "true");
-                  window.location.href = "/public-direct-warehouse-page.html?target=dashboard";
+                  window.location.href = "/warehouse-direct.html?target=dashboard";
                 }}
               >
                 Warehouse Dashboard
@@ -159,7 +159,7 @@ export default function DebugNav({ targetRoute = "/orders-direct" }: DebugNavPro
                 onClick={() => {
                   sessionStorage.setItem("directWarehouseAccess", "true");
                   sessionStorage.setItem("directWarehouseReceivingAccess", "true");
-                  window.location.href = "/public-direct-warehouse-page.html?target=receiving";
+                  window.location.href = "/warehouse-direct.html?target=receiving";
                 }}
               >
                 Warehouse Receiving

@@ -273,7 +273,7 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                         sessionStorage.setItem("directWarehouseDashboardAccess", "true");
                         sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
                         // Use direct HTML page for navigation to avoid router issues
-                        window.location.href = "/public-direct-warehouse-page.html?target=dashboard";
+                        window.location.href = "/warehouse-direct.html?target=dashboard";
                       }}
                     >
                       <span className="mr-3">{item.icon}</span>
@@ -296,7 +296,7 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                         sessionStorage.setItem("directWarehouseReceivingAccess", "true");
                         sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
                         // Use direct HTML page for navigation to avoid router issues
-                        window.location.href = "/public-direct-warehouse-page.html?target=receiving";
+                        window.location.href = "/warehouse-direct.html?target=receiving";
                       }}
                     >
                       <span className="mr-3">{item.icon}</span>
