@@ -333,47 +333,45 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                             } else if (subItem.href === "/warehouse-picking") {
                               return (
                                 <li key={subItem.id}>
-                                  <div
+                                  <a 
+                                    href="/warehouse-picking"
                                     className={cn(
                                       "flex items-center py-2 px-3 rounded-r-lg transition-colors duration-200 cursor-pointer",
                                       location === subItem.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
                                     )}
-                                    onClick={() => {
+                                    onClick={(e) => {
                                       console.log("Direct Warehouse Picking navigation triggered from submenu");
                                       // Add tracking flags in session storage for analytics
                                       sessionStorage.setItem("usingDirectWarehouseAccess", "true");
                                       sessionStorage.setItem("directWarehousePickingAccess", "true");
                                       sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
-                                      // Use setLocation from wouter instead of direct DOM manipulation
-                                      setLocation("/warehouse-picking");
                                     }}
                                   >
                                     <span className="mr-3">{subItem.icon}</span>
                                     {subItem.label}
-                                  </div>
+                                  </a>
                                 </li>
                               );
                             } else if (subItem.href === "/warehouse-packing") {
                               return (
                                 <li key={subItem.id}>
-                                  <div
+                                  <a 
+                                    href="/warehouse-packing"
                                     className={cn(
                                       "flex items-center py-2 px-3 rounded-r-lg transition-colors duration-200 cursor-pointer",
                                       location === subItem.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
                                     )}
-                                    onClick={() => {
+                                    onClick={(e) => {
                                       console.log("Direct Warehouse Packing navigation triggered from submenu");
                                       // Add tracking flags in session storage for analytics
                                       sessionStorage.setItem("usingDirectWarehouseAccess", "true");
                                       sessionStorage.setItem("directWarehousePackingAccess", "true");
                                       sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
-                                      // Use setLocation from wouter instead of direct DOM manipulation
-                                      setLocation("/warehouse-packing");
                                     }}
                                   >
                                     <span className="mr-3">{subItem.icon}</span>
                                     {subItem.label}
-                                  </div>
+                                  </a>
                                 </li>
                               );
                             } else {
@@ -504,47 +502,45 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
               } else if (item.href === "/warehouse-picking") {
                 return (
                   <li className="mb-2" key={item.id}>
-                    <div
+                    <a 
+                      href="/warehouse-picking"
                       className={cn(
                         "flex items-center py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
                         location === item.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
                       )}
-                      onClick={() => {
+                      onClick={(e) => {
                         console.log("Direct Warehouse Picking navigation triggered");
                         // Add tracking flags in session storage
                         sessionStorage.setItem("usingDirectWarehouseAccess", "true");
                         sessionStorage.setItem("directWarehousePickingAccess", "true");
                         sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
-                        // Use direct navigation
-                        setLocation("/warehouse-picking");
                       }}
                     >
                       <span className="mr-3">{item.icon}</span>
                       {item.label}
-                    </div>
+                    </a>
                   </li>
                 );
               } else if (item.href === "/warehouse-packing") {
                 return (
                   <li className="mb-2" key={item.id}>
-                    <div
+                    <a
+                      href="/warehouse-packing"
                       className={cn(
                         "flex items-center py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
                         location === item.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
                       )}
-                      onClick={() => {
+                      onClick={(e) => {
                         console.log("Direct Warehouse Packing navigation triggered");
                         // Add tracking flags in session storage
                         sessionStorage.setItem("usingDirectWarehouseAccess", "true");
                         sessionStorage.setItem("directWarehousePackingAccess", "true");
                         sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
-                        // Use direct navigation
-                        setLocation("/warehouse-packing");
                       }}
                     >
                       <span className="mr-3">{item.icon}</span>
                       {item.label}
-                    </div>
+                    </a>
                   </li>
                 );
               }
