@@ -1359,6 +1359,621 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Warehouse Management System API Endpoints
+  
+  // 1. Receiving Feature
+  app.get("/api/warehouse/inbound-orders", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const orders = await storage.getInboundOrders(status);
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inbound orders" });
+    }
+  });
+
+  app.get("/api/warehouse/inbound-orders/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const order = await storage.getInboundOrderById(id);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Inbound order not found" });
+      }
+      
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inbound order" });
+    }
+  });
+
+  app.post("/api/warehouse/inbound-orders", async (req, res) => {
+    try {
+      const inboundOrderSchema = z.object({
+        orderNumber: z.string(),
+        supplierName: z.string(),
+        supplierReference: z.string(),
+        expectedDeliveryDate: z.string(),
+        actualDeliveryDate: z.string().optional(),
+        status: z.enum(["pending", "received", "partial", "completed", "cancelled"]),
+        createdBy: z.string(),
+        notes: z.string().optional(),
+        items: z.array(z.any()).optional().default([])
+      });
+
+      const validatedData = inboundOrderSchema.parse(req.body);
+      const newOrder = await storage.createInboundOrder(validatedData);
+      res.status(201).json(newOrder);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid inbound order data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create inbound order" });
+    }
+  });
+
+  app.patch("/api/warehouse/inbound-orders/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const inboundOrderPartialSchema = z.object({
+        orderNumber: z.string().optional(),
+        supplierName: z.string().optional(),
+        supplierReference: z.string().optional(),
+        expectedDeliveryDate: z.string().optional(),
+        actualDeliveryDate: z.string().optional(),
+        status: z.enum(["pending", "received", "partial", "completed", "cancelled"]).optional(),
+        notes: z.string().optional()
+      });
+
+      const validatedData = inboundOrderPartialSchema.parse(req.body);
+      const updatedOrder = await storage.updateInboundOrder(id, validatedData);
+      
+      if (!updatedOrder) {
+        return res.status(404).json({ message: "Inbound order not found" });
+      }
+      
+      res.json(updatedOrder);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid inbound order data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update inbound order" });
+    }
+  });
+
+  app.get("/api/warehouse/inbound-orders/:orderId/items", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const items = await storage.getInboundOrderItems(orderId);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inbound order items" });
+    }
+  });
+
+  app.post("/api/warehouse/inbound-order-items", async (req, res) => {
+    try {
+      const itemSchema = z.object({
+        inboundOrderId: z.number(),
+        sku: z.string(),
+        productName: z.string(),
+        expectedQuantity: z.number(),
+        receivedQuantity: z.number(),
+        batchNumber: z.string().optional(),
+        lotNumber: z.string().optional(),
+        expiryDate: z.string().optional(),
+        status: z.enum(["pending", "received", "partial", "rejected"]),
+        storageLocation: z.string().optional()
+      });
+
+      const validatedData = itemSchema.parse(req.body);
+      const newItem = await storage.createInboundOrderItem(validatedData);
+      res.status(201).json(newItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid inbound order item data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create inbound order item" });
+    }
+  });
+
+  app.patch("/api/warehouse/inbound-order-items/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const itemPartialSchema = z.object({
+        sku: z.string().optional(),
+        productName: z.string().optional(),
+        expectedQuantity: z.number().optional(),
+        receivedQuantity: z.number().optional(),
+        batchNumber: z.string().optional(),
+        lotNumber: z.string().optional(),
+        expiryDate: z.string().optional(),
+        status: z.enum(["pending", "received", "partial", "rejected"]).optional(),
+        storageLocation: z.string().optional()
+      });
+
+      const validatedData = itemPartialSchema.parse(req.body);
+      const updatedItem = await storage.updateInboundOrderItem(id, validatedData);
+      
+      if (!updatedItem) {
+        return res.status(404).json({ message: "Inbound order item not found" });
+      }
+      
+      res.json(updatedItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid inbound order item data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update inbound order item" });
+    }
+  });
+
+  app.get("/api/warehouse/receiving-discrepancies/:itemId", async (req, res) => {
+    try {
+      const itemId = parseInt(req.params.itemId);
+      const discrepancies = await storage.getReceivingDiscrepancies(itemId);
+      res.json(discrepancies);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch receiving discrepancies" });
+    }
+  });
+
+  app.post("/api/warehouse/receiving-discrepancies", async (req, res) => {
+    try {
+      const discrepancySchema = z.object({
+        inboundOrderItemId: z.number(),
+        type: z.enum(["quantity_mismatch", "damaged", "wrong_item", "quality_issue", "missing"]),
+        description: z.string(),
+        quantity: z.number(),
+        attachmentUrl: z.string().optional(),
+        reportedBy: z.string(),
+        status: z.enum(["open", "resolved", "escalated"]),
+        resolutionNotes: z.string().optional()
+      });
+
+      const validatedData = discrepancySchema.parse(req.body);
+      const newDiscrepancy = await storage.createReceivingDiscrepancy(validatedData);
+      res.status(201).json(newDiscrepancy);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid discrepancy data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create receiving discrepancy" });
+    }
+  });
+
+  // 2. Put-Away Feature
+  app.get("/api/warehouse/put-away-tasks", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const tasks = await storage.getPutAwayTasks(status);
+      res.json(tasks);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch put-away tasks" });
+    }
+  });
+
+  app.get("/api/warehouse/put-away-tasks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const task = await storage.getPutAwayTaskById(id);
+      
+      if (!task) {
+        return res.status(404).json({ message: "Put-away task not found" });
+      }
+      
+      res.json(task);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch put-away task" });
+    }
+  });
+
+  app.post("/api/warehouse/put-away-tasks", async (req, res) => {
+    try {
+      const taskSchema = z.object({
+        inboundOrderId: z.number(),
+        inboundOrderItemId: z.number(),
+        sku: z.string(),
+        productName: z.string(),
+        quantity: z.number(),
+        suggestedLocation: z.object({
+          id: z.number(),
+          name: z.string(),
+          type: z.string(),
+          aisle: z.string().optional(),
+          rack: z.string().optional(),
+          shelf: z.string().optional(),
+          bin: z.string().optional(),
+          capacity: z.number(),
+          capacityUnit: z.string(),
+          currentUtilization: z.number(),
+          temperature: z.number().optional(),
+          humidity: z.number().optional(),
+          status: z.string()
+        }),
+        status: z.enum(["pending", "in_progress", "completed", "cancelled"]),
+        assignedTo: z.string().optional(),
+        notes: z.string().optional()
+      });
+
+      const validatedData = taskSchema.parse(req.body);
+      const newTask = await storage.createPutAwayTask(validatedData);
+      res.status(201).json(newTask);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid put-away task data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create put-away task" });
+    }
+  });
+
+  app.patch("/api/warehouse/put-away-tasks/:id/complete", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const completeSchema = z.object({
+        locationId: z.number()
+      });
+
+      const validatedData = completeSchema.parse(req.body);
+      const completedTask = await storage.completePutAwayTask(id, validatedData.locationId);
+      
+      if (!completedTask) {
+        return res.status(404).json({ message: "Put-away task not found" });
+      }
+      
+      res.json(completedTask);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid completion data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to complete put-away task" });
+    }
+  });
+
+  // 3. Inventory Tracking Feature
+  app.get("/api/warehouse/inventory", async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const inventory = await storage.getInventoryItems(category);
+      res.json(inventory);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inventory items" });
+    }
+  });
+
+  app.get("/api/warehouse/inventory/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const item = await storage.getInventoryItemById(id);
+      
+      if (!item) {
+        return res.status(404).json({ message: "Inventory item not found" });
+      }
+      
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inventory item" });
+    }
+  });
+
+  app.get("/api/warehouse/inventory/sku/:sku", async (req, res) => {
+    try {
+      const sku = req.params.sku;
+      const item = await storage.getInventoryItemBySku(sku);
+      
+      if (!item) {
+        return res.status(404).json({ message: "Inventory item not found" });
+      }
+      
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inventory item by SKU" });
+    }
+  });
+
+  app.get("/api/warehouse/storage-locations", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const locations = await storage.getStorageLocations(status);
+      res.json(locations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch storage locations" });
+    }
+  });
+
+  app.get("/api/warehouse/inventory-movements", async (req, res) => {
+    try {
+      const itemId = req.query.itemId ? parseInt(req.query.itemId as string) : undefined;
+      const type = req.query.type as string | undefined;
+      const movements = await storage.getInventoryMovements(itemId, type);
+      res.json(movements);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inventory movements" });
+    }
+  });
+
+  app.post("/api/warehouse/inventory-movements", async (req, res) => {
+    try {
+      const movementSchema = z.object({
+        inventoryItemId: z.number(),
+        fromLocationId: z.number().optional(),
+        toLocationId: z.number().optional(),
+        quantity: z.number(),
+        type: z.enum(["receiving", "put_away", "picking", "packing", "shipping", "adjustment", "transfer"]),
+        referenceNumber: z.string().optional(),
+        referenceType: z.string().optional(),
+        performedBy: z.string(),
+        notes: z.string().optional()
+      });
+
+      const validatedData = movementSchema.parse({
+        ...req.body,
+        performedAt: new Date().toISOString()
+      });
+      
+      const newMovement = await storage.createInventoryMovement(validatedData);
+      res.status(201).json(newMovement);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid inventory movement data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create inventory movement" });
+    }
+  });
+
+  // 4. Picking Feature
+  app.get("/api/warehouse/pick-tasks", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const tasks = await storage.getPickTasks(status);
+      res.json(tasks);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch pick tasks" });
+    }
+  });
+
+  app.get("/api/warehouse/pick-tasks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const task = await storage.getPickTaskById(id);
+      
+      if (!task) {
+        return res.status(404).json({ message: "Pick task not found" });
+      }
+      
+      res.json(task);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch pick task" });
+    }
+  });
+
+  app.post("/api/warehouse/pick-tasks", async (req, res) => {
+    try {
+      const taskSchema = z.object({
+        customerOrderId: z.number(),
+        batchId: z.number().optional(),
+        status: z.enum(["pending", "in_progress", "completed", "cancelled"]),
+        assignedTo: z.string().optional(),
+        priority: z.enum(["low", "medium", "high", "urgent"]),
+        dueDate: z.string(),
+        items: z.array(z.any()).optional().default([])
+      });
+
+      const validatedData = taskSchema.parse(req.body);
+      const newTask = await storage.createPickTask(validatedData);
+      res.status(201).json(newTask);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid pick task data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create pick task" });
+    }
+  });
+
+  app.patch("/api/warehouse/pick-tasks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const taskPartialSchema = z.object({
+        status: z.enum(["pending", "in_progress", "completed", "cancelled"]).optional(),
+        assignedTo: z.string().optional(),
+        priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
+        dueDate: z.string().optional(),
+        startedAt: z.string().optional(),
+        completedAt: z.string().optional()
+      });
+
+      const validatedData = taskPartialSchema.parse(req.body);
+      const updatedTask = await storage.updatePickTask(id, validatedData);
+      
+      if (!updatedTask) {
+        return res.status(404).json({ message: "Pick task not found" });
+      }
+      
+      res.json(updatedTask);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid pick task data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update pick task" });
+    }
+  });
+
+  app.get("/api/warehouse/pick-tasks/:taskId/items", async (req, res) => {
+    try {
+      const taskId = parseInt(req.params.taskId);
+      const items = await storage.getPickTaskItems(taskId);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch pick task items" });
+    }
+  });
+
+  app.patch("/api/warehouse/pick-task-items/:id/complete", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const completeSchema = z.object({
+        pickedQuantity: z.number(),
+        locationId: z.number()
+      });
+
+      const validatedData = completeSchema.parse(req.body);
+      const completedItem = await storage.completePickTaskItem(
+        id, 
+        validatedData.pickedQuantity,
+        validatedData.locationId
+      );
+      
+      if (!completedItem) {
+        return res.status(404).json({ message: "Pick task item not found" });
+      }
+      
+      res.json(completedItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid completion data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to complete pick task item" });
+    }
+  });
+
+  app.get("/api/warehouse/pick-batches", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const batches = await storage.getPickBatches(status);
+      res.json(batches);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch pick batches" });
+    }
+  });
+
+  // 5. Packing Feature
+  app.get("/api/warehouse/packing-tasks", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const tasks = await storage.getPackingTasks(status);
+      res.json(tasks);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch packing tasks" });
+    }
+  });
+
+  app.get("/api/warehouse/packing-tasks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const task = await storage.getPackingTaskById(id);
+      
+      if (!task) {
+        return res.status(404).json({ message: "Packing task not found" });
+      }
+      
+      res.json(task);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch packing task" });
+    }
+  });
+
+  app.post("/api/warehouse/packing-tasks", async (req, res) => {
+    try {
+      const taskSchema = z.object({
+        customerOrderId: z.number(),
+        status: z.enum(["pending", "in_progress", "completed", "cancelled"]),
+        assignedTo: z.string().optional(),
+        items: z.array(z.any()).optional().default([]),
+        packages: z.array(z.any()).optional().default([])
+      });
+
+      const validatedData = taskSchema.parse(req.body);
+      const newTask = await storage.createPackingTask(validatedData);
+      res.status(201).json(newTask);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid packing task data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create packing task" });
+    }
+  });
+
+  app.get("/api/warehouse/packing-tasks/:taskId/items", async (req, res) => {
+    try {
+      const taskId = parseInt(req.params.taskId);
+      const items = await storage.getPackingTaskItems(taskId);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch packing task items" });
+    }
+  });
+
+  app.get("/api/warehouse/packing-tasks/:taskId/packages", async (req, res) => {
+    try {
+      const taskId = parseInt(req.params.taskId);
+      const packages = await storage.getShipmentPackages(taskId);
+      res.json(packages);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch shipment packages" });
+    }
+  });
+
+  app.post("/api/warehouse/shipment-packages", async (req, res) => {
+    try {
+      const packageSchema = z.object({
+        packingTaskId: z.number(),
+        packageType: z.string(),
+        length: z.number(),
+        width: z.number(),
+        height: z.number(),
+        dimensionUnit: z.string(),
+        weight: z.number(),
+        weightUnit: z.string(),
+        trackingNumber: z.string().optional(),
+        carrier: z.string().optional(),
+        service: z.string().optional(),
+        status: z.enum(["packed", "labeled", "shipped"]),
+        notes: z.string().optional()
+      });
+
+      const validatedData = packageSchema.parse({
+        ...req.body,
+        createdAt: new Date().toISOString()
+      });
+      
+      const newPackage = await storage.createShipmentPackage(validatedData);
+      res.status(201).json(newPackage);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid shipment package data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create shipment package" });
+    }
+  });
+
+  app.patch("/api/warehouse/shipment-packages/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const packagePartialSchema = z.object({
+        trackingNumber: z.string().optional(),
+        carrier: z.string().optional(),
+        service: z.string().optional(),
+        status: z.enum(["packed", "labeled", "shipped"]).optional(),
+        shippedAt: z.string().optional(),
+        notes: z.string().optional()
+      });
+
+      const validatedData = packagePartialSchema.parse(req.body);
+      const updatedPackage = await storage.updateShipmentPackage(id, validatedData);
+      
+      if (!updatedPackage) {
+        return res.status(404).json({ message: "Shipment package not found" });
+      }
+      
+      res.json(updatedPackage);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid shipment package data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update shipment package" });
+    }
+  });
+
   // Create HTTP server
   const httpServer = createServer(app);
   
