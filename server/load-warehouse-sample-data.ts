@@ -10,7 +10,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
-import { storage } from './storage-provider';
+import { storage } from './storage';
 
 // Get the directory name from the current file
 const __filename = fileURLToPath(import.meta.url);
