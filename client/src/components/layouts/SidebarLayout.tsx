@@ -84,6 +84,8 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
     { icon: <Package size={20} />, href: "/supply-chain", label: "Inventory", id: "warehouse-inventory" },
     { icon: <Truck size={20} />, href: "/warehouse-receiving", label: "Receiving", id: "warehouse-receiving" },
     { icon: <ArrowUpDown size={20} />, href: "/warehouse-putaway", label: "Put-Away", id: "warehouse-putaway" },
+    { icon: <Package size={20} />, href: "/warehouse-picking", label: "Picking", id: "warehouse-picking" },
+    { icon: <Package size={20} />, href: "/warehouse-packing", label: "Packing", id: "warehouse-packing" },
     { icon: <ClipboardCheck size={20} />, href: "/supply-chain?view=shipments", label: "Shipments", id: "warehouse-shipments" },
     { icon: <Package size={20} />, href: "/order-management", label: "Order Management", id: "warehouse-orders" },
     { icon: <Cloud size={20} />, href: "/weather-impact", label: "Weather Alerts", id: "warehouse-weather" },
@@ -96,6 +98,8 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
     { icon: <Warehouse size={20} />, href: "/supply-chain", label: "Supply Chain", id: "logistics-supply-chain" },
     { icon: <Truck size={20} />, href: "/warehouse-receiving", label: "Warehouse Receiving", id: "logistics-receiving" },
     { icon: <ArrowUpDown size={20} />, href: "/warehouse-putaway", label: "Warehouse Put-Away", id: "logistics-putaway" },
+    { icon: <Package size={20} />, href: "/warehouse-picking", label: "Warehouse Picking", id: "logistics-picking" },
+    { icon: <Package size={20} />, href: "/warehouse-packing", label: "Warehouse Packing", id: "logistics-packing" },
     { icon: <TrendingUp size={20} />, href: "/demand-forecasting", label: "Demand Forecasting", id: "logistics-demand" },
     { icon: <Cloud size={20} />, href: "/weather-impact", label: "Weather Impact", id: "logistics-weather" },
     { icon: <ClipboardCheck size={20} />, href: "/order-management", label: "Order Management", id: "logistics-orders" },
@@ -330,6 +334,52 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                         
                         // Use direct HTML page for navigation to avoid router issues
                         window.location.href = "/warehouse-direct.html?target=putaway&t=" + new Date().getTime();
+                      }}
+                    >
+                      <span className="mr-3">{item.icon}</span>
+                      {item.label}
+                    </div>
+                  </li>
+                );
+              } else if (item.href === "/warehouse-picking") {
+                return (
+                  <li className="mb-2" key={item.id}>
+                    <div
+                      className={cn(
+                        "flex items-center py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                        location === item.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                      )}
+                      onClick={() => {
+                        console.log("Direct Warehouse Picking navigation triggered");
+                        // Add tracking flags in session storage
+                        sessionStorage.setItem("usingDirectWarehouseAccess", "true");
+                        sessionStorage.setItem("directWarehousePickingAccess", "true");
+                        sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
+                        // Use direct navigation
+                        window.location.href = "/warehouse-picking";
+                      }}
+                    >
+                      <span className="mr-3">{item.icon}</span>
+                      {item.label}
+                    </div>
+                  </li>
+                );
+              } else if (item.href === "/warehouse-packing") {
+                return (
+                  <li className="mb-2" key={item.id}>
+                    <div
+                      className={cn(
+                        "flex items-center py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                        location === item.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                      )}
+                      onClick={() => {
+                        console.log("Direct Warehouse Packing navigation triggered");
+                        // Add tracking flags in session storage
+                        sessionStorage.setItem("usingDirectWarehouseAccess", "true");
+                        sessionStorage.setItem("directWarehousePackingAccess", "true");
+                        sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
+                        // Use direct navigation
+                        window.location.href = "/warehouse-packing";
                       }}
                     >
                       <span className="mr-3">{item.icon}</span>
