@@ -19,7 +19,11 @@ import {
   Warehouse as WarehouseIcon,
   ShieldAlert,
   PanelTop,
-  Wind
+  Wind,
+  PackageCheck,
+  PackagePlus,
+  Layers,
+  ClipboardCheck
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -178,6 +182,69 @@ export default function WarehouseDashboard() {
         
         <Button variant="outline" onClick={() => setLocation("/login")}>Sign Out</Button>
       </header>
+      
+      {/* Navigation Section */}
+      <div className="flex flex-wrap gap-2 py-2">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-1"
+          onClick={() => setLocation("/warehouse-receiving")}
+        >
+          <PackageCheck className="h-4 w-4" />
+          <span>Receiving</span>
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-1"
+          onClick={() => setLocation("/warehouse-putaway")}
+        >
+          <PackagePlus className="h-4 w-4" />
+          <span>Put-Away</span>
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-1"
+          onClick={() => setLocation("/inventory-tracker")}
+        >
+          <Layers className="h-4 w-4" />
+          <span>Inventory</span>
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-1"
+          onClick={() => setLocation("/warehouse-picking")}
+        >
+          <ClipboardCheck className="h-4 w-4" />
+          <span>Picking</span>
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-1"
+          onClick={() => setLocation("/warehouse-packing")}
+        >
+          <Package className="h-4 w-4" />
+          <span>Packing</span>
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-1"
+          onClick={() => setLocation("/warehouse-shipping")}
+        >
+          <Truck className="h-4 w-4" />
+          <span>Shipping</span>
+        </Button>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
