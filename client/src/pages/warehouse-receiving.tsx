@@ -81,6 +81,7 @@ const discrepancySchema = z.object({
   reportedBy: z.string().min(1, "Reporter name is required"),
   status: z.enum(["open", "resolved", "escalated"]).default("open"),
   resolutionNotes: z.string().optional(),
+  attachmentUrl: z.string().optional(),
 });
 
 // Import our new components
@@ -388,8 +389,19 @@ export default function WarehouseReceiving() {
     createOrderItemMutation.mutate(data);
   };
 
+  // Handle image capture from the image uploader
+  const handleImageCapture = (imageData: string) => {
+    setCapturedImages(prev => [...prev, imageData]);
+  };
+
   const onAddDiscrepancy = (data: z.infer<typeof discrepancySchema>) => {
+    // Use the first captured image as attachment if available
+    if (capturedImages.length > 0) {
+      data.attachmentUrl = capturedImages[0];
+    }
     createDiscrepancyMutation.mutate(data);
+    // Clear captured images after submission
+    setCapturedImages([]);
   };
 
   const onReceiveItem = (data: any) => {
