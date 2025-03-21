@@ -109,7 +109,7 @@ export async function compareWithStoredData<T>(
   page: Page,
   key: string,
   getCurrentStateFunction: () => Promise<T[]>,
-  compareFunction: (storedItem: T, currentItem: T) => boolean | object
+  compareFunction: (storedItem: T, currentItem: T) => boolean | Record<string, any>
 ): Promise<any[]> {
   // Retrieve stored data
   const storedData = await retrieveTestData<T[]>(page, key, { fallbackToFile: true });
@@ -132,7 +132,10 @@ export async function compareWithStoredData<T>(
     if (currentItem) {
       const comparisonResult = compareFunction(storedItem, currentItem);
       if (comparisonResult !== false) {
-        differences.push(comparisonResult);
+        differences.push(comparisonResult === true ? 
+          { storedItem, currentItem } : 
+          comparisonResult
+        );
       }
     }
   }
