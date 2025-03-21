@@ -562,6 +562,22 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                     </a>
                   </li>
                 );
+              } else if (item.href === "/warehouse-shipping") {
+                return (
+                  <li className="mb-2" key={item.id}>
+                    <Link href={item.href}>
+                      <div
+                        className={cn(
+                          "flex items-center py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                          location === item.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                        )}
+                      >
+                        <span className="mr-3">{item.icon}</span>
+                        {item.label}
+                      </div>
+                    </Link>
+                  </li>
+                );
               }
               
               // For all other items, use the standard SidebarItem
