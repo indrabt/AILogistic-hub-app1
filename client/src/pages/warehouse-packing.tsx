@@ -1282,6 +1282,16 @@ export default function WarehousePacking() {
                       <TableCell>{task.packages?.length || 0} packages</TableCell>
                       <TableCell>
                         <Badge
+                          id={`packing-task-status-${task.id}`}
+                          className={
+                            task.status === "completed" 
+                              ? "text-green-600 font-medium" 
+                              : task.status === "in_progress" 
+                              ? "text-blue-600 font-medium" 
+                              : task.status === "cancelled" 
+                              ? "text-red-600 font-medium" 
+                              : ""
+                          }
                           variant={
                             task.status === "completed" 
                               ? "default" 
@@ -1298,6 +1308,7 @@ export default function WarehousePacking() {
                       <TableCell>
                         {task.status === "pending" ? (
                           <Button 
+                            id={`start-packing-button-${task.id}`}
                             variant="outline" 
                             size="sm"
                             onClick={async (e) => {
@@ -1445,6 +1456,7 @@ export default function WarehousePacking() {
                               Continue
                             </Button>
                             <Button 
+                              id={`complete-packing-button-${task.id}`}
                               variant="outline" 
                               size="sm"
                               onClick={async (e) => {
