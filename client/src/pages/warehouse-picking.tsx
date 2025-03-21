@@ -104,6 +104,11 @@ export default function WarehousePicking() {
     
     // Set a flag to indicate we've accessed this page successfully
     sessionStorage.setItem("directWarehousePickingAccess", "true");
+
+    // Cleanup function to help with development navigation
+    return () => {
+      console.log("Cleaning up warehouse picking component");
+    };
   }, [setLocation]);
 
   // API Queries
