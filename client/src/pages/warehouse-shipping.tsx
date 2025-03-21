@@ -212,20 +212,38 @@ export default function WarehouseShipping() {
   };
 
   const fetchCarriers = async () => {
+    console.log("Fetching shipping carriers...");
     try {
       const response = await fetch("/api/warehouse/shipping/carriers");
       
+      console.log(`Carriers API response status: ${response.status}`);
+      
       if (!response.ok) {
-        throw new Error("Failed to fetch carriers");
+        // Clone the response to read it twice
+        const responseClone = response.clone();
+        let errorText = "";
+        try {
+          const errorData = await responseClone.json();
+          errorText = JSON.stringify(errorData);
+        } catch (e) {
+          try {
+            errorText = await response.text();
+          } catch (textError) {
+            errorText = "Could not extract error details from response";
+          }
+        }
+        console.error(`Failed to fetch carriers: ${response.status} ${response.statusText}`, errorText);
+        throw new Error(`Failed to fetch carriers: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
+      console.log(`Successfully fetched ${data.length} shipping carriers`);
       setCarriers(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching carriers:", error);
       toast({
         title: "Error",
-        description: "Failed to load shipping carriers. Please try again.",
+        description: `Failed to load shipping carriers: ${error.message || "Unknown error"}`,
         variant: "destructive",
       });
     }
@@ -239,21 +257,50 @@ export default function WarehouseShipping() {
   };
 
   const generateManifest = async (shipmentId: number) => {
+    console.log(`Generating manifest for shipment ${shipmentId}...`);
     setIsManifestLoading(true);
     try {
       const response = await fetch(`/api/warehouse/shipments/${shipmentId}/manifest`);
       
+      console.log(`Manifest API response status: ${response.status}`);
+      
       if (!response.ok) {
-        throw new Error("Failed to generate manifest");
+        // Clone the response to read it twice
+        const responseClone = response.clone();
+        let errorText = "";
+        try {
+          const errorData = await responseClone.json();
+          errorText = JSON.stringify(errorData);
+        } catch (e) {
+          try {
+            errorText = await response.text();
+          } catch (textError) {
+            errorText = "Could not extract error details from response";
+          }
+        }
+        console.error(`Failed to generate manifest: ${response.status} ${response.statusText}`, errorText);
+        throw new Error(`Failed to generate manifest: ${response.status} ${response.statusText}`);
       }
       
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+        console.log("Manifest data generated:", data);
+      } catch (parseError) {
+        console.error("Error parsing manifest response:", parseError);
+        throw new Error("Could not parse server response for manifest");
+      }
+      
       setManifest(data);
-    } catch (error) {
+      toast({
+        title: "Success",
+        description: "Shipping manifest generated successfully.",
+      });
+    } catch (error: any) {
       console.error("Error generating manifest:", error);
       toast({
         title: "Error",
-        description: "Failed to generate shipping manifest. Please try again.",
+        description: `Failed to generate shipping manifest: ${error.message || "Unknown error"}`,
         variant: "destructive",
       });
     } finally {
@@ -411,14 +458,29 @@ export default function WarehouseShipping() {
   };
 
   const handlePrintLabels = () => {
+    console.log("Starting label printing process...");
     setIsPrinting(true);
-    setTimeout(() => {
+    
+    // In a real application, we would make an API call to a print service here
+    try {
+      // Simulate successful communication with printer service
+      setTimeout(() => {
+        console.log("Print job completed successfully");
+        setIsPrinting(false);
+        toast({
+          title: "Success",
+          description: "Shipping labels sent to printer.",
+        });
+      }, 1500);
+    } catch (error: any) {
+      console.error("Error sending print job:", error);
       setIsPrinting(false);
       toast({
-        title: "Success",
-        description: "Shipping labels sent to printer.",
+        title: "Printing Error",
+        description: `Failed to print shipping labels: ${error.message || "Unknown printing error"}`,
+        variant: "destructive",
       });
-    }, 1500);
+    }
   };
 
   const filteredShipments = shipments.filter(shipment => {
