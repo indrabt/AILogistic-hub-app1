@@ -154,6 +154,16 @@ export default function WarehousePacking() {
     const usingDirectAccess = sessionStorage.getItem("usingDirectWarehouseAccess");
     const directPackingAccess = sessionStorage.getItem("directWarehousePackingAccess");
     
+    // If using direct access, disable WebSocket connections to prevent errors
+    if (usingDirectAccess === "true" || directPackingAccess === "true") {
+      console.log("Using direct warehouse packing access - disabling WebSocket connections");
+      // Set a flag that can be used elsewhere to disable WebSocket connection attempts
+      sessionStorage.setItem("disableWebSocketConnections", "true");
+      
+      // We can also set a flag to use direct fetch exclusively
+      sessionStorage.setItem("useDirectFetchOnly", "true");
+    }
+    
     // Skip role-based redirect if coming through direct link or is warehouse staff
     if (userData.role !== "warehouse_staff" && !usingDirectAccess && !directPackingAccess) {
       if (userData.role === "driver") {
@@ -783,8 +793,8 @@ export default function WarehousePacking() {
         carrier: values.carrier || undefined,
         service: values.service || undefined,
         notes: values.notes || undefined,
-        status: "packed",
-        createdAt: new Date().toISOString()
+        status: "packed" as "packed" | "labeled" | "shipped", // Explicitly type for ShipmentPackage status
+        // Note: createdAt is set by the server
       };
       
       // Let's try a direct fetch call first
