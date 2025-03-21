@@ -9,7 +9,7 @@ import {
   ActivityItem,
   Route,
   SupplyChainNode,
-  Shipment,
+  Shipment as DeliveryShipment,
   InventoryAlert,
   ProductForecast,
   WeatherEvent,
@@ -55,7 +55,9 @@ import type {
   InventoryItem, InventoryLocation, StorageLocation, InventoryMovement,
   PickTask, PickTaskItem, PickBatch, PackingTask, PackingTaskItem,
   ShipmentPackage, CycleCountTask, CycleCountItem, YardAppointment,
-  DockDoor, CrossDockingTask, CrossDockingItem
+  DockDoor, CrossDockingTask, CrossDockingItem, 
+  // Shipping feature types
+  Shipment as WarehouseShipment, ShippingAddress, ShippingCarrier, ShippingService
 } from "@shared/warehouse-types";
 
 // modify the interface with any CRUD methods
@@ -81,7 +83,7 @@ export interface IStorage {
   
   // Supply chain data
   getSupplyChainNodes(): Promise<SupplyChainNode[]>;
-  getShipments(): Promise<Shipment[]>;
+  getShipments(): Promise<DeliveryShipment[]>;
   getInventoryAlerts(): Promise<InventoryAlert[]>;
   
   // Order Management data
@@ -281,6 +283,10 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  private shipments: Shipment[] = [];
+  private shippingAddresses: ShippingAddress[] = [];
+  private shippingCarriers: ShippingCarrier[] = [];
+  
   // Order Management methods
   async getOrders(status?: string): Promise<Order[]> {
     if (status) {

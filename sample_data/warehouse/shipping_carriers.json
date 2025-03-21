@@ -1,0 +1,152 @@
+[
+  {
+    "id": 9001,
+    "name": "Australia Post",
+    "code": "aus_post",
+    "services": [
+      {
+        "id": 9101,
+        "carrierId": 9001,
+        "name": "Express Post",
+        "code": "exp_post",
+        "description": "Next business day delivery to most metropolitan areas",
+        "estimatedDeliveryDays": 1,
+        "domestic": true,
+        "international": false,
+        "active": true
+      },
+      {
+        "id": 9102,
+        "carrierId": 9001,
+        "name": "Standard Post",
+        "code": "std_post",
+        "description": "2-6 business days delivery within Australia",
+        "estimatedDeliveryDays": 4,
+        "domestic": true,
+        "international": false,
+        "active": true
+      },
+      {
+        "id": 9103,
+        "carrierId": 9001,
+        "name": "International Standard",
+        "code": "int_std",
+        "description": "6-10 business days delivery to most countries",
+        "estimatedDeliveryDays": 8,
+        "domestic": false,
+        "international": true,
+        "active": true
+      }
+    ],
+    "active": true,
+    "logo": "/images/carriers/australia-post.png",
+    "trackingUrlTemplate": "https://auspost.com.au/track/track.html?id={{tracking_number}}"
+  },
+  {
+    "id": 9002,
+    "name": "StarTrack",
+    "code": "startrack",
+    "services": [
+      {
+        "id": 9201,
+        "carrierId": 9002,
+        "name": "Premium",
+        "code": "premium",
+        "description": "Next business day delivery across Australia",
+        "estimatedDeliveryDays": 1,
+        "domestic": true,
+        "international": false,
+        "active": true
+      },
+      {
+        "id": 9202,
+        "carrierId": 9002,
+        "name": "Express",
+        "code": "express",
+        "description": "1-2 business days delivery to metropolitan areas",
+        "estimatedDeliveryDays": 2,
+        "domestic": true,
+        "international": false,
+        "active": true
+      }
+    ],
+    "active": true,
+    "logo": "/images/carriers/startrack.png",
+    "trackingUrlTemplate": "https://startrack.com.au/track?id={{tracking_number}}"
+  },
+  {
+    "id": 9003,
+    "name": "DHL",
+    "code": "dhl",
+    "services": [
+      {
+        "id": 9301,
+        "carrierId": 9003,
+        "name": "Express Domestic",
+        "code": "exp_dom",
+        "description": "Next business day delivery within Australia",
+        "estimatedDeliveryDays": 1,
+        "domestic": true,
+        "international": false,
+        "active": true
+      },
+      {
+        "id": 9302,
+        "carrierId": 9003,
+        "name": "Express International",
+        "code": "exp_int",
+        "description": "2-5 business days delivery internationally",
+        "estimatedDeliveryDays": 3,
+        "domestic": false,
+        "international": true,
+        "active": true
+      },
+      {
+        "id": 9303,
+        "carrierId": 9003,
+        "name": "Economy Select",
+        "code": "eco_sel",
+        "description": "3-5 business days delivery within Australia",
+        "estimatedDeliveryDays": 4,
+        "domestic": true,
+        "international": false,
+        "active": true
+      }
+    ],
+    "active": true,
+    "logo": "/images/carriers/dhl.png",
+    "trackingUrlTemplate": "https://www.dhl.com/au-en/home/tracking/tracking-express.html?submit=1&tracking-id={{tracking_number}}"
+  },
+  {
+    "id": 9004,
+    "name": "TNT",
+    "code": "tnt",
+    "services": [
+      {
+        "id": 9401,
+        "carrierId": 9004,
+        "name": "Overnight Express",
+        "code": "ovn_exp",
+        "description": "Next business day delivery to most areas",
+        "estimatedDeliveryDays": 1,
+        "domestic": true,
+        "international": false,
+        "active": true
+      },
+      {
+        "id": 9402,
+        "carrierId": 9004,
+        "name": "Road Express",
+        "code": "road_exp",
+        "description": "1-3 business days delivery within Australia",
+        "estimatedDeliveryDays": 2,
+        "domestic": true,
+        "international": false,
+        "active": true
+      }
+    ],
+    "active": true,
+    "logo": "/images/carriers/tnt.png",
+    "trackingUrlTemplate": "https://www.tnt.com/express/en_au/site/shipping-tools/tracking.html?searchType=con&cons={{tracking_number}}"
+  }
+]
