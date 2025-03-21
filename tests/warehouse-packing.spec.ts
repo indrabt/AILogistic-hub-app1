@@ -159,7 +159,7 @@ test.describe('Warehouse Packing Functionality', () => {
     await taskRow.locator('button', { hasText: /View Details|Continue/ }).click();
     
     // Wait for the task details to load
-    await page.waitForSelector('h2', { hasText: `Task #${taskInfo.id} Details` });
+    await page.waitForSelector(`h2:has-text("Task #${taskInfo.id} Details")`);
     
     // Find an unpacked item
     const unpackedItemRow = page.locator('table:has-text("Items") tbody tr').filter({
@@ -230,7 +230,7 @@ test.describe('Warehouse Packing Functionality', () => {
     await taskRow.locator('button', { hasText: /View Details|Continue/ }).click();
     
     // Wait for the task details to load
-    await page.waitForSelector('h2', { hasText: `Task #${taskInfo.id} Details` });
+    await page.waitForSelector(`h2:has-text("Task #${taskInfo.id} Details")`);
     
     // Check for unpacked items
     const unpackedItemCount = await page.locator('table:has-text("Items") tbody tr').filter({

@@ -132,10 +132,11 @@ export async function compareWithStoredData<T>(
     if (currentItem) {
       const comparisonResult = compareFunction(storedItem, currentItem);
       if (comparisonResult !== false) {
-        differences.push(comparisonResult === true ? 
-          { storedItem, currentItem } : 
-          comparisonResult
-        );
+        if (comparisonResult === true) {
+          differences.push({ storedItem, currentItem });
+        } else {
+          differences.push(comparisonResult as Record<string, any>);
+        }
       }
     }
   }
