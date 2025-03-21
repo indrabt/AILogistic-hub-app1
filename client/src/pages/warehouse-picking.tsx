@@ -340,11 +340,23 @@ export default function WarehousePicking() {
         body: JSON.stringify(updateData),
         credentials: 'include'
       })
-      .then(response => {
+      .then(async response => {
         console.log("Direct API call response:", response);
+        
         if (!response.ok) {
-          throw new Error(`API responded with status ${response.status}`);
+          // Clone the response to read it twice
+          const responseClone = response.clone();
+          let errorText = "";
+          try {
+            const errorData = await responseClone.json();
+            errorText = JSON.stringify(errorData);
+          } catch (e) {
+            errorText = await response.text();
+          }
+          console.error(`Failed to update pick task: ${response.status} ${response.statusText}`, errorText);
+          throw new Error(`API responded with status ${response.status}: ${errorText}`);
         }
+        
         return response.json();
       })
       .then(updatedTask => {
@@ -447,11 +459,23 @@ export default function WarehousePicking() {
       body: JSON.stringify(updateData),
       credentials: 'include'
     })
-    .then(response => {
+    .then(async response => {
       console.log("Direct API call response for task completion:", response);
+      
       if (!response.ok) {
-        throw new Error(`API responded with status ${response.status}`);
+        // Clone the response to read it twice
+        const responseClone = response.clone();
+        let errorText = "";
+        try {
+          const errorData = await responseClone.json();
+          errorText = JSON.stringify(errorData);
+        } catch (e) {
+          errorText = await response.text();
+        }
+        console.error(`Failed to complete pick task: ${response.status} ${response.statusText}`, errorText);
+        throw new Error(`API responded with status ${response.status}: ${errorText}`);
       }
+      
       return response.json();
     })
     .then(updatedTask => {
