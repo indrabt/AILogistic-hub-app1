@@ -110,7 +110,7 @@ export async function compareWithStoredData<T>(
   key: string,
   getCurrentStateFunction: () => Promise<T[]>,
   compareFunction: (storedItem: T, currentItem: T) => boolean | Record<string, any>
-): Promise<any[]> {
+): Promise<Array<Record<string, any>>> {
   // Retrieve stored data
   const storedData = await retrieveTestData<T[]>(page, key, { fallbackToFile: true });
   if (!storedData) {
@@ -121,7 +121,7 @@ export async function compareWithStoredData<T>(
   const currentState = await getCurrentStateFunction();
 
   // Compare stored data with current state
-  const differences = [];
+  const differences: Array<Record<string, any>> = [];
   for (const storedItem of storedData) {
     // Find matching item in current state
     const currentItem = currentState.find(item => 
@@ -133,7 +133,10 @@ export async function compareWithStoredData<T>(
       const comparisonResult = compareFunction(storedItem, currentItem);
       if (comparisonResult !== false) {
         if (comparisonResult === true) {
-          differences.push({ storedItem, currentItem });
+          differences.push({ 
+            storedItem: storedItem as unknown as Record<string, any>, 
+            currentItem: currentItem as unknown as Record<string, any> 
+          });
         } else {
           differences.push(comparisonResult as Record<string, any>);
         }

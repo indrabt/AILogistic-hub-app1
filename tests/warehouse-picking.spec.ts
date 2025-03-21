@@ -287,13 +287,14 @@ test.describe('Global Memory Approach', () => {
         const statusChanges: StatusChange[] = [];
         for (const storedTask of storedData) {
           const currentTask = currentTasksData.find(t => t.id === storedTask.id);
-          if (currentTask && currentTask.status !== storedTask.status) {
-            statusChanges.push({
+          if (currentTask && currentTask.status !== storedTask.status && currentTask.status) {
+            const change: StatusChange = {
               id: storedTask.id,
               oldStatus: storedTask.status,
               newStatus: currentTask.status,
               timestamp: new Date().toISOString()
-            });
+            };
+            statusChanges.push(change);
           }
         }
         

@@ -83,6 +83,11 @@ const discrepancySchema = z.object({
   resolutionNotes: z.string().optional(),
 });
 
+// Import our new components
+import { BarcodeScanner } from '../components/warehouse/barcode-scanner';
+import { DocumentGenerator } from '../components/warehouse/document-generator';
+import { ImageUploader } from '../components/warehouse/image-uploader';
+
 export default function WarehouseReceiving() {
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
@@ -91,6 +96,10 @@ export default function WarehouseReceiving() {
   const [discrepancyDialogOpen, setDiscrepancyDialogOpen] = useState(false);
   const [receiveDialogOpen, setReceiveDialogOpen] = useState(false);
   const [putAwayDialogOpen, setPutAwayDialogOpen] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scanTarget, setScanTarget] = useState<'sku' | 'location' | null>(null);
+  const [documentOpen, setDocumentOpen] = useState(false);
+  const [capturedImages, setCapturedImages] = useState<string[]>([]);
   const [_, setLocation] = useLocation();
   const queryClient = useQueryClient();
 
