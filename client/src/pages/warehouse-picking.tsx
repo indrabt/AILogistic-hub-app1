@@ -178,13 +178,21 @@ export default function WarehousePicking() {
         ...(data.status === "completed" ? { completedAt: new Date().toISOString() } : {})
       };
       
+      console.log('Sending update task request:', {
+        endpoint: `/api/warehouse/pick-tasks/${data.id}`,
+        method: "PATCH",
+        data: updateData,
+        user: user?.username
+      });
+      
       return apiRequest(
         `/api/warehouse/pick-tasks/${data.id}`,
         { method: "PATCH" },
         updateData
       );
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      console.log('Task update successful:', response);
       toast({
         title: "Task Updated",
         description: "Pick task status has been updated"

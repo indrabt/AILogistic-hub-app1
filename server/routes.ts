@@ -1782,6 +1782,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/warehouse/pick-tasks/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      console.log('PATCH /api/warehouse/pick-tasks/:id - Request received:', {
+        id,
+        body: req.body,
+        user: req.session?.user
+      });
+      
       const taskPartialSchema = z.object({
         status: z.enum(["pending", "in_progress", "completed", "cancelled"]).optional(),
         assignedTo: z.string().optional(),
@@ -1792,15 +1798,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const validatedData = taskPartialSchema.parse(req.body);
+      console.log('Data validation passed, updating pick task:', validatedData);
+      
       const updatedTask = await storage.updatePickTask(id, validatedData);
       
       if (!updatedTask) {
+        console.log(`Pick task with ID ${id} not found`);
         return res.status(404).json({ message: "Pick task not found" });
       }
       
+      console.log('Pick task updated successfully:', updatedTask);
       res.json(updatedTask);
     } catch (error) {
+      console.error('Error in PATCH /api/warehouse/pick-tasks/:id:', error);
       if (error instanceof z.ZodError) {
+        console.log('Validation error:', error.errors);
         return res.status(400).json({ message: "Invalid pick task data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to update pick task" });
