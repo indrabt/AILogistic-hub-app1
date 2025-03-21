@@ -262,6 +262,44 @@ export interface ShippingAddress {
   email?: string;
 }
 
+export interface ShippingCarrier {
+  id: number;
+  name: string;
+  code: string;
+  accountNumber?: string;
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  status: "active" | "inactive";
+  trackingUrlTemplate?: string;
+  services: ShippingService[];
+  notes?: string;
+}
+
+export interface ShippingService {
+  id: number;
+  carrierId: number;
+  name: string;
+  code: string;
+  description?: string;
+  estimatedTransitDays: number;
+  domesticInternational: "domestic" | "international" | "both";
+  costMultiplier: number;
+  baseRate: number;
+  currencyCode: string;
+  status: "active" | "inactive";
+  restrictions?: {
+    maxWeight?: number;
+    weightUnit?: string;
+    maxDimensions?: {
+      length: number;
+      width: number;
+      height: number;
+      dimensionUnit: string;
+    };
+  };
+}
+
 // 7. Cycle Counting Feature
 export interface CycleCountTask {
   id: number;

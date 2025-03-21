@@ -262,11 +262,11 @@ export interface IStorage {
   updateShipmentPackage(id: number, pkg: Partial<ShipmentPackage>): Promise<ShipmentPackage | undefined>;
   
   // 6. Shipping Feature
-  getShipments(status?: string): Promise<Shipment[]>;
-  getShipmentById(id: number): Promise<Shipment | undefined>;
-  getShipmentByOrderId(orderId: number): Promise<Shipment | undefined>;
-  createShipment(shipment: Omit<Shipment, 'id'>): Promise<Shipment>;
-  updateShipment(id: number, shipment: Partial<Shipment>): Promise<Shipment | undefined>;
+  getWarehouseShipments(status?: string): Promise<WarehouseShipment[]>;
+  getWarehouseShipmentById(id: number): Promise<WarehouseShipment | undefined>;
+  getWarehouseShipmentByOrderId(orderId: number): Promise<WarehouseShipment | undefined>;
+  createWarehouseShipment(shipment: Omit<WarehouseShipment, 'id'>): Promise<WarehouseShipment>;
+  updateWarehouseShipment(id: number, shipment: Partial<WarehouseShipment>): Promise<WarehouseShipment | undefined>;
   
   getShippingAddresses(shipmentId: number): Promise<ShippingAddress[]>;
   getShippingAddressById(id: number): Promise<ShippingAddress | undefined>;
@@ -279,13 +279,140 @@ export interface IStorage {
   getShippingServiceById(id: number): Promise<ShippingService | undefined>;
   
   generateShippingManifest(shipmentId: number): Promise<{url: string}>;
-  confirmShipment(shipmentId: number): Promise<Shipment | undefined>;
+  confirmShipment(shipmentId: number): Promise<WarehouseShipment | undefined>;
 }
 
 export class MemStorage implements IStorage {
-  private shipments: Shipment[] = [];
+  private supplyChainShipments: DeliveryShipment[] = [];
+  private warehouseShipments: WarehouseShipment[] = [];
   private shippingAddresses: ShippingAddress[] = [];
   private shippingCarriers: ShippingCarrier[] = [];
+  private shippingServices: ShippingService[] = [];
+  
+  // Supply Chain Data methods
+  
+  async getShipments(): Promise<DeliveryShipment[]> {
+    return this.supplyChainShipments;
+  }
+  
+  // Warehouse Shipping Feature methods
+  
+  async getWarehouseShipments(status?: string): Promise<WarehouseShipment[]> {
+    if (status) {
+      return this.warehouseShipments.filter(shipment => shipment.status === status);
+    }
+    return this.warehouseShipments;
+  }
+  
+  async getWarehouseShipmentById(id: number): Promise<WarehouseShipment | undefined> {
+    return this.warehouseShipments.find(shipment => shipment.id === id);
+  }
+  
+  async getWarehouseShipmentByOrderId(orderId: number): Promise<WarehouseShipment | undefined> {
+    return this.warehouseShipments.find(shipment => shipment.customerOrderId === orderId);
+  }
+  
+  async createWarehouseShipment(shipment: Omit<WarehouseShipment, 'id'>): Promise<WarehouseShipment> {
+    const newShipment: WarehouseShipment = {
+      ...shipment,
+      id: this.warehouseShipments.length > 0 ? Math.max(...this.warehouseShipments.map(s => s.id)) + 1 : 1
+    };
+    this.warehouseShipments.push(newShipment);
+    return newShipment;
+  }
+  
+  async updateWarehouseShipment(id: number, shipment: Partial<WarehouseShipment>): Promise<WarehouseShipment | undefined> {
+    const index = this.warehouseShipments.findIndex(s => s.id === id);
+    if (index === -1) return undefined;
+    
+    this.warehouseShipments[index] = {
+      ...this.warehouseShipments[index],
+      ...shipment
+    };
+    return this.warehouseShipments[index];
+  }
+  
+  async getShippingAddresses(shipmentId: number): Promise<ShippingAddress[]> {
+    return this.shippingAddresses.filter(address => address.shipmentId === shipmentId);
+  }
+  
+  async getShippingAddressById(id: number): Promise<ShippingAddress | undefined> {
+    return this.shippingAddresses.find(address => address.id === id);
+  }
+  
+  async createShippingAddress(address: Omit<ShippingAddress, 'id'>): Promise<ShippingAddress> {
+    const newAddress: ShippingAddress = {
+      ...address,
+      id: this.shippingAddresses.length > 0 ? Math.max(...this.shippingAddresses.map(a => a.id)) + 1 : 1
+    };
+    this.shippingAddresses.push(newAddress);
+    return newAddress;
+  }
+  
+  async updateShippingAddress(id: number, address: Partial<ShippingAddress>): Promise<ShippingAddress | undefined> {
+    const index = this.shippingAddresses.findIndex(a => a.id === id);
+    if (index === -1) return undefined;
+    
+    this.shippingAddresses[index] = {
+      ...this.shippingAddresses[index],
+      ...address
+    };
+    return this.shippingAddresses[index];
+  }
+  
+  async getShippingCarriers(): Promise<ShippingCarrier[]> {
+    return this.shippingCarriers;
+  }
+  
+  async getShippingCarrierById(id: number): Promise<ShippingCarrier | undefined> {
+    return this.shippingCarriers.find(carrier => carrier.id === id);
+  }
+  
+  async getShippingServices(carrierId: number): Promise<ShippingService[]> {
+    return this.shippingServices.filter(service => service.carrierId === carrierId);
+  }
+  
+  async getShippingServiceById(id: number): Promise<ShippingService | undefined> {
+    return this.shippingServices.find(service => service.id === id);
+  }
+  
+  async generateShippingManifest(shipmentId: number): Promise<{url: string}> {
+    // This would typically generate a PDF or other document with shipment details
+    // For now, we'll just return a mock URL
+    return { url: `/api/shipments/${shipmentId}/manifest.pdf` };
+  }
+  
+  async confirmShipment(shipmentId: number): Promise<WarehouseShipment | undefined> {
+    const shipment = await this.getWarehouseShipmentById(shipmentId);
+    if (!shipment) return undefined;
+    
+    shipment.status = "shipped";
+    shipment.shippingDate = new Date().toISOString();
+    
+    // Update the status of all packages to "shipped"
+    shipment.packages.forEach(pkg => {
+      pkg.status = "shipped";
+      pkg.shippedAt = shipment.shippingDate;
+    });
+    
+    // Create inventory movement records for each package
+    for (const pkg of shipment.packages) {
+      await this.createInventoryMovement({
+        inventoryItemId: 0, // This would need to be the actual inventory item ID
+        fromLocationId: 0, // This would be the packing area location ID
+        toLocationId: 0, // This would be a "shipped" location ID
+        quantity: 0, // This would be the total quantity of items in the package
+        type: "shipping",
+        referenceNumber: `SHIPMENT-${shipmentId}`,
+        referenceType: "shipment",
+        performedBy: "system",
+        performedAt: shipment.shippingDate,
+        notes: `Shipment ${shipmentId} confirmed`
+      });
+    }
+    
+    return shipment;
+  }
   
   // Order Management methods
   async getOrders(status?: string): Promise<Order[]> {
@@ -918,7 +1045,7 @@ export class MemStorage implements IStorage {
   private activities: ActivityItem[];
   private routes: Route[];
   private supplyChainNodes: SupplyChainNode[];
-  private shipments: Shipment[];
+  // Added by data loading methods - renamed to avoid conflict
   private inventoryAlerts: InventoryAlert[];
   private productForecasts: ProductForecast[];
   private weatherEvents: WeatherEvent[];
