@@ -258,6 +258,26 @@ export interface IStorage {
   getShipmentPackages(packingTaskId: number): Promise<ShipmentPackage[]>;
   createShipmentPackage(pkg: Omit<ShipmentPackage, 'id'>): Promise<ShipmentPackage>;
   updateShipmentPackage(id: number, pkg: Partial<ShipmentPackage>): Promise<ShipmentPackage | undefined>;
+  
+  // 6. Shipping Feature
+  getShipments(status?: string): Promise<Shipment[]>;
+  getShipmentById(id: number): Promise<Shipment | undefined>;
+  getShipmentByOrderId(orderId: number): Promise<Shipment | undefined>;
+  createShipment(shipment: Omit<Shipment, 'id'>): Promise<Shipment>;
+  updateShipment(id: number, shipment: Partial<Shipment>): Promise<Shipment | undefined>;
+  
+  getShippingAddresses(shipmentId: number): Promise<ShippingAddress[]>;
+  getShippingAddressById(id: number): Promise<ShippingAddress | undefined>;
+  createShippingAddress(address: Omit<ShippingAddress, 'id'>): Promise<ShippingAddress>;
+  updateShippingAddress(id: number, address: Partial<ShippingAddress>): Promise<ShippingAddress | undefined>;
+  
+  getShippingCarriers(): Promise<ShippingCarrier[]>;
+  getShippingCarrierById(id: number): Promise<ShippingCarrier | undefined>;
+  getShippingServices(carrierId: number): Promise<ShippingService[]>;
+  getShippingServiceById(id: number): Promise<ShippingService | undefined>;
+  
+  generateShippingManifest(shipmentId: number): Promise<{url: string}>;
+  confirmShipment(shipmentId: number): Promise<Shipment | undefined>;
 }
 
 export class MemStorage implements IStorage {

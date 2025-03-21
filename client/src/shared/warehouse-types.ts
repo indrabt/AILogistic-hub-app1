@@ -269,3 +269,59 @@ export interface ShipmentPackage {
   shippedAt?: string;
   notes?: string;
 }
+
+// 6. Shipping Feature
+export interface Shipment {
+  id: number;
+  customerOrderId: number;
+  status: "pending" | "partially_shipped" | "shipped" | "delivered" | "cancelled";
+  carrier: string;
+  service: string;
+  trackingNumber?: string;
+  shippingCost?: number;
+  shippingDate?: string;
+  estimatedDeliveryDate?: string;
+  actualDeliveryDate?: string;
+  packages: ShipmentPackage[];
+  shippingAddress: ShippingAddress;
+  manifestGenerated?: boolean;
+  manifestUrl?: string;
+  notes?: string;
+}
+
+export interface ShippingAddress {
+  id: number;
+  shipmentId: number;
+  recipientName: string;
+  company?: string;
+  streetAddress1: string;
+  streetAddress2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phoneNumber?: string;
+  email?: string;
+}
+
+export interface ShippingCarrier {
+  id: number;
+  name: string;
+  code: string;
+  services: ShippingService[];
+  active: boolean;
+  logo?: string;
+  trackingUrlTemplate?: string;
+}
+
+export interface ShippingService {
+  id: number;
+  carrierId: number;
+  name: string;
+  code: string;
+  description?: string;
+  estimatedDeliveryDays: number;
+  domestic: boolean;
+  international: boolean;
+  active: boolean;
+}
