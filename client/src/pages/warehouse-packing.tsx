@@ -1162,7 +1162,43 @@ export default function WarehousePacking() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => handleStartTask(task)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              console.log("Start Packing button clicked for task:", task.id);
+                              // Apply a visual indicator that the task is updating
+                              const row = e.currentTarget.closest('tr');
+                              if (row) {
+                                row.classList.add('animate-pulse', 'bg-primary/20');
+                                setTimeout(() => {
+                                  row.classList.remove('animate-pulse', 'bg-primary/20');
+                                }, 1000);
+                              }
+                              // Call the actual handler
+                              handleStartTask(task);
+                              // Force a UI update by directly setting state
+                              // Directly update status in the row to provide instant feedback
+                              const statusCell = row?.querySelector('td:nth-child(5)');
+                              const buttonCell = row?.querySelector('td:nth-child(6)');
+                              if (statusCell) {
+                                // Create new badge to replace the old one
+                                const oldBadge = statusCell.querySelector('span');
+                                const newBadge = document.createElement('span');
+                                newBadge.className = oldBadge?.className.replace('outline', 'secondary') || 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80';
+                                newBadge.textContent = 'in_progress';
+                                if (oldBadge && oldBadge.parentNode) {
+                                  oldBadge.parentNode.replaceChild(newBadge, oldBadge);
+                                }
+                              }
+                              if (buttonCell) {
+                                // Replace the button with Continue and Complete buttons
+                                buttonCell.innerHTML = `
+                                  <div class="flex gap-2">
+                                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3 py-2">Continue</button>
+                                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 py-2">Complete</button>
+                                  </div>
+                                `;
+                              }
+                            }}
                           >
                             Start Packing
                           </Button>
@@ -1178,7 +1214,39 @@ export default function WarehousePacking() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => handleCompleteTask(task)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                console.log("Complete button clicked for task:", task.id);
+                                // Apply a visual indicator that the task is updating
+                                const row = e.currentTarget.closest('tr');
+                                if (row) {
+                                  row.classList.add('animate-pulse', 'bg-primary/20');
+                                  setTimeout(() => {
+                                    row.classList.remove('animate-pulse', 'bg-primary/20');
+                                  }, 1000);
+                                }
+                                // Call the actual handler
+                                handleCompleteTask(task);
+                                // Immediately update UI for better responsiveness
+                                const statusCell = row?.querySelector('td:nth-child(5)');
+                                const buttonCell = row?.querySelector('td:nth-child(6)');
+                                if (statusCell) {
+                                  // Create new badge to replace the old one
+                                  const oldBadge = statusCell.querySelector('span');
+                                  const newBadge = document.createElement('span');
+                                  newBadge.className = oldBadge?.className.replace('secondary', 'default') || 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80';
+                                  newBadge.textContent = 'completed';
+                                  if (oldBadge && oldBadge.parentNode) {
+                                    oldBadge.parentNode.replaceChild(newBadge, oldBadge);
+                                  }
+                                }
+                                if (buttonCell) {
+                                  // Replace both buttons with just View Details
+                                  buttonCell.innerHTML = `
+                                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 py-2">View Details</button>
+                                  `;
+                                }
+                              }}
                             >
                               Complete
                             </Button>
@@ -1220,8 +1288,50 @@ export default function WarehousePacking() {
               </Button>
               
               <Button 
-                variant="default" 
-                onClick={() => handleCompleteTask(selectedTask)}
+                variant="default"
+                onClick={(e) => {
+                  e.preventDefault();
+                  console.log("Complete task detail button clicked for task:", selectedTask.id);
+                  // Apply a visual indicator
+                  const button = e.currentTarget;
+                  button.classList.add('opacity-50');
+                  button.disabled = true;
+                  button.innerHTML = '<svg class="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Completing...';
+                  
+                  // Call the actual handler
+                  handleCompleteTask(selectedTask);
+                  
+                  // Update UI immediately
+                  setTimeout(() => {
+                    // Close the detailed view by clearing the selected task
+                    setSelectedTask(null);
+                    
+                    // Find and update the task row in the table
+                    const taskRow = document.querySelector(`table tbody tr:has-text("${selectedTask.id}")`);
+                    if (taskRow) {
+                      const statusCell = taskRow.querySelector('td:nth-child(5)');
+                      const buttonCell = taskRow.querySelector('td:nth-child(6)');
+                      
+                      if (statusCell) {
+                        // Update the status badge
+                        const oldBadge = statusCell.querySelector('span');
+                        const newBadge = document.createElement('span');
+                        newBadge.className = 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80';
+                        newBadge.textContent = 'completed';
+                        if (oldBadge && oldBadge.parentNode) {
+                          oldBadge.parentNode.replaceChild(newBadge, oldBadge);
+                        }
+                      }
+                      
+                      if (buttonCell) {
+                        // Replace with View Details button
+                        buttonCell.innerHTML = `
+                          <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 py-2">View Details</button>
+                        `;
+                      }
+                    }
+                  }, 100);
+                }}
               >
                 <Check className="h-4 w-4 mr-2" />
                 Complete Task
