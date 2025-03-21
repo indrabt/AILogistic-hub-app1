@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warehouse Button API Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.5;
+    }
+    h1 {
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+    }
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input, button {
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background-color: #0066cc;
+      color: white;
+      cursor: pointer;
+      border: none;
+      margin-right: 8px;
+    }
+    button:hover {
+      background-color: #0055aa;
+    }
+    button.secondary {
+      background-color: #6c757d;
+    }
+    button.secondary:hover {
+      background-color: #5a6268;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 12px;
+      border-radius: 4px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      margin-top: 16px;
+    }
+    .success {
+      color: #28a745;
+    }
+    .error {
+      color: #dc3545;
+    }
+  </style>
+</head>
+<body>
+  <h1>Warehouse Button API Test</h1>
+  
+  <div class="card">
+    <h2>Pick Task Test</h2>
+    <div class="form-group">
+      <label for="pickTaskId">Pick Task ID:</label>
+      <input type="number" id="pickTaskId" value="1" min="1">
+    </div>
+    
+    <div class="form-group">
+      <label for="pickUsername">Assigned To Username:</label>
+      <input type="text" id="pickUsername" value="warehouse1">
+    </div>
+    
+    <button onclick="testPickTask()">Test Pick Task API</button>
+    <button class="secondary" onclick="clearPickResult()">Clear Results</button>
+    
+    <div id="pickResult"></div>
+  </div>
+  
+  <div class="card">
+    <h2>Pack Task Test</h2>
+    <div class="form-group">
+      <label for="packTaskId">Pack Task ID:</label>
+      <input type="number" id="packTaskId" value="1" min="1">
+    </div>
+    
+    <div class="form-group">
+      <label for="packUsername">Assigned To Username:</label>
+      <input type="text" id="packUsername" value="warehouse1">
+    </div>
+    
+    <button onclick="testPackTask()">Test Pack Task API</button>
+    <button class="secondary" onclick="clearPackResult()">Clear Results</button>
+    
+    <div id="packResult"></div>
+  </div>
+  
+  <div class="card">
+    <h2>Current User Session</h2>
+    <button onclick="checkUserSession()">Check Current User Session</button>
+    <button class="secondary" onclick="clearSessionResult()">Clear Results</button>
+    <div id="sessionResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>Navigation</h2>
+    <button onclick="window.location.href = '/warehouse-picking'">Go to Picking Page</button>
+    <button onclick="window.location.href = '/warehouse-packing'">Go to Packing Page</button>
+    <button onclick="window.location.href = '/warehouse-dashboard'">Go to Warehouse Dashboard</button>
+    <button onclick="window.location.href = '/login'">Go to Login Page</button>
+  </div>
+  
+  <script>
+    async function testPickTask() {
+      const resultDiv = document.getElementById('pickResult');
+      const taskId = document.getElementById('pickTaskId').value;
+      const username = document.getElementById('pickUsername').value;
+      
+      resultDiv.innerHTML = '<p>Testing pick task ' + taskId + '...</p>';
+      
+      try {
+        const updateData = {
+          status: "in_progress",
+          assignedTo: username,
+          startedAt: new Date().toISOString()
+        };
+        
+        // Make direct API call
+        const response = await fetch(`/api/warehouse/pick-tasks/${taskId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateData),
+          credentials: 'include'
+        });
+        
+        let resultHtml = `<p>Response status: ${response.status} ${response.statusText}</p>`;
+        
+        if (!response.ok) {
+          let errorText = "";
+          try {
+            const errorData = await response.json();
+            errorText = JSON.stringify(errorData, null, 2);
+          } catch (e) {
+            errorText = await response.text();
+          }
+          
+          resultHtml += `<p class="error">Error: ${response.status} ${response.statusText}</p>`;
+          resultHtml += `<pre class="error">${errorText}</pre>`;
+        } else {
+          const data = await response.json();
+          resultHtml += `<p class="success">Success! Task updated successfully</p>`;
+          resultHtml += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+        
+        resultDiv.innerHTML = resultHtml;
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <p class="error">Error: ${error.message}</p>
+          <pre class="error">${error.stack || 'No stack trace available'}</pre>
+        `;
+      }
+    }
+    
+    async function testPackTask() {
+      const resultDiv = document.getElementById('packResult');
+      const taskId = document.getElementById('packTaskId').value;
+      const username = document.getElementById('packUsername').value;
+      
+      resultDiv.innerHTML = '<p>Testing pack task ' + taskId + '...</p>';
+      
+      try {
+        const updateData = {
+          status: "in_progress",
+          assignedTo: username,
+          startedAt: new Date().toISOString()
+        };
+        
+        // Make direct API call
+        const response = await fetch(`/api/warehouse/packing-tasks/${taskId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateData),
+          credentials: 'include'
+        });
+        
+        let resultHtml = `<p>Response status: ${response.status} ${response.statusText}</p>`;
+        
+        if (!response.ok) {
+          let errorText = "";
+          try {
+            const errorData = await response.json();
+            errorText = JSON.stringify(errorData, null, 2);
+          } catch (e) {
+            errorText = await response.text();
+          }
+          
+          resultHtml += `<p class="error">Error: ${response.status} ${response.statusText}</p>`;
+          resultHtml += `<pre class="error">${errorText}</pre>`;
+        } else {
+          const data = await response.json();
+          resultHtml += `<p class="success">Success! Task updated successfully</p>`;
+          resultHtml += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+        
+        resultDiv.innerHTML = resultHtml;
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <p class="error">Error: ${error.message}</p>
+          <pre class="error">${error.stack || 'No stack trace available'}</pre>
+        `;
+      }
+    }
+    
+    function clearPickResult() {
+      document.getElementById('pickResult').innerHTML = '';
+    }
+    
+    function clearPackResult() {
+      document.getElementById('packResult').innerHTML = '';
+    }
+    
+    function clearSessionResult() {
+      document.getElementById('sessionResult').innerHTML = '';
+    }
+    
+    function checkUserSession() {
+      const resultDiv = document.getElementById('sessionResult');
+      
+      try {
+        // Check browser session storage
+        let sessionUser = null;
+        try {
+          const userJson = sessionStorage.getItem('user');
+          if (userJson) {
+            sessionUser = JSON.parse(userJson);
+          }
+        } catch (e) {
+          console.error('Error parsing user from session storage:', e);
+        }
+        
+        // Fetch current session from API
+        fetch('/api/auth/session', {
+          credentials: 'include'
+        })
+        .then(response => {
+          let html = '<h3>Session Check Results</h3>';
+          
+          html += '<h4>Session Storage:</h4>';
+          if (sessionUser) {
+            html += `<pre class="success">${JSON.stringify(sessionUser, null, 2)}</pre>`;
+          } else {
+            html += '<p class="error">No user found in session storage</p>';
+          }
+          
+          html += '<h4>API Session:</h4>';
+          if (response.ok) {
+            return response.json().then(data => {
+              html += `<pre class="success">${JSON.stringify(data, null, 2)}</pre>`;
+              resultDiv.innerHTML = html;
+            });
+          } else {
+            html += `<p class="error">API Response: ${response.status} ${response.statusText}</p>`;
+            return response.text().then(text => {
+              try {
+                const errorData = JSON.parse(text);
+                html += `<pre class="error">${JSON.stringify(errorData, null, 2)}</pre>`;
+              } catch (e) {
+                html += `<pre class="error">${text}</pre>`;
+              }
+              resultDiv.innerHTML = html;
+            });
+          }
+        })
+        .catch(error => {
+          resultDiv.innerHTML = `
+            <h3>Session Check Results</h3>
+            <p class="error">Error: ${error.message}</p>
+            <pre class="error">${error.stack || 'No stack trace available'}</pre>
+          `;
+        });
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <h3>Session Check Results</h3>
+          <p class="error">Error: ${error.message}</p>
+          <pre class="error">${error.stack || 'No stack trace available'}</pre>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>
