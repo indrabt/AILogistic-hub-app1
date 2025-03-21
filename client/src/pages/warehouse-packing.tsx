@@ -377,69 +377,101 @@ export default function WarehousePacking() {
         startedAt: new Date().toISOString()
       };
       
-      // Make a direct fetch call - making sure to use the correct method
-      fetch(`/api/warehouse/packing-tasks/${task.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updateData),
-        credentials: 'include'
-      })
-      .then(response => {
-        console.log("Direct API call response for packing task:", response);
-        if (!response.ok) {
-          throw new Error(`API responded with status ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(updatedTask => {
-        console.log("Packing task started successfully via direct fetch:", updatedTask);
-        
-        // Set the selected task with the updated task data
-        setSelectedTask(updatedTask);
-        
-        // Force refresh the task list
-        queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
-        
-        toast({
-          title: "Task Started",
-          description: `Packing task #${task.id} is now in progress`
-        });
-      })
-      .catch(error => {
-        console.error("Error with direct API call for starting packing task:", error);
-        
-        // Now try with the mutation as a fallback
-        console.log("Falling back to mutation call...");
-        
-        updatePackingTaskMutation.mutate({
-          id: task.id,
-          status: "in_progress",
-          assignedTo: user.username
-        }, {
-          onSuccess: (updatedTask) => {
-            console.log("Task started successfully via mutation:", updatedTask);
-            setSelectedTask(updatedTask);
-            
-            // Force refresh the task list
-            queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
-            
-            toast({
-              title: "Task Started",
-              description: `Packing task #${task.id} is now in progress`
-            });
-          },
-          onError: (error) => {
-            console.error("Error starting task (mutation):", error);
-            toast({
-              title: "Error Starting Task",
-              description: `Could not start packing task #${task.id}. Please try again.`,
-              variant: "destructive"
-            });
+      // Simpler approach without fetch promises
+      try {
+        // Using async/await with a wrapped function for better error handling
+        (async () => {
+          console.log(`Sending PATCH request to /api/warehouse/packing-tasks/${task.id} with data:`, updateData);
+          
+          const response = await fetch(`/api/warehouse/packing-tasks/${task.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateData),
+            credentials: 'include'
+          });
+          
+          console.log("Response status:", response.status);
+          
+          // Make sure to clone the response before trying to parse it as JSON
+          const responseClone = response.clone();
+          let responseText = "";
+          try {
+            responseText = await responseClone.text();
+            console.log("Response text:", responseText);
+          } catch (e) {
+            console.error("Failed to get response text:", e);
           }
+          
+          if (!response.ok) {
+            throw new Error(`API responded with status ${response.status}: ${responseText}`);
+          }
+          
+          // Parse the JSON response
+          let updatedTask;
+          try {
+            updatedTask = await response.json();
+            console.log("Packing task started successfully:", updatedTask);
+          } catch (e) {
+            console.error("Failed to parse JSON:", e);
+            // If we can't parse JSON but the request was successful, create a basic task object
+            updatedTask = {
+              ...task,
+              status: "in_progress",
+              assignedTo: user.username,
+              startedAt: new Date().toISOString()
+            };
+            console.log("Created fallback task object:", updatedTask);
+          }
+          
+          // Set the selected task with the updated task data
+          setSelectedTask(updatedTask);
+          
+          // Force refresh the task list
+          queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
+          
+          toast({
+            title: "Task Started",
+            description: `Packing task #${task.id} is now in progress`
+          });
+        })().catch(error => {
+          // Handle any errors from the async function
+          console.error("Error with direct API call for starting packing task:", error);
+          
+          // Try mutation as fallback
+          console.log("Falling back to mutation call...");
+          
+          updatePackingTaskMutation.mutate({
+            id: task.id,
+            status: "in_progress",
+            assignedTo: user.username
+          }, {
+            onSuccess: (updatedTask) => {
+              console.log("Task started successfully via mutation:", updatedTask);
+              setSelectedTask(updatedTask);
+              
+              // Force refresh the task list
+              queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
+              
+              toast({
+                title: "Task Started",
+                description: `Packing task #${task.id} is now in progress`
+              });
+            },
+            onError: (error) => {
+              console.error("Error starting task (mutation):", error);
+              toast({
+                title: "Error Starting Task",
+                description: `Could not start packing task #${task.id}. Please try again.`,
+                variant: "destructive"
+              });
+            }
+          });
         });
-      });
+      } catch (e) {
+        console.error("Exception in API call handling:", e);
+      }
     } catch (err) {
       console.error("Exception when starting packing task:", err);
       toast({
@@ -522,68 +554,98 @@ export default function WarehousePacking() {
         completedAt: new Date().toISOString()
       };
       
-      // Make a direct fetch call
-      fetch(`/api/warehouse/packing-tasks/${task.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updateData),
-        credentials: 'include'
-      })
-      .then(response => {
-        console.log("Direct API call response for task completion:", response);
-        if (!response.ok) {
-          throw new Error(`API responded with status ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(updatedTask => {
-        console.log("Packing task completed successfully via direct fetch:", updatedTask);
-        
-        // Clear the selected task
-        setSelectedTask(null);
-        
-        // Force refresh the task list
-        queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
-        
-        toast({
-          title: "Task Completed",
-          description: `Packing task #${task.id} has been completed successfully`
-        });
-      })
-      .catch(error => {
-        console.error("Error with direct API call for completing packing task:", error);
-        
-        // Now try with the mutation as a fallback
-        console.log("Falling back to mutation call...");
-        
-        updatePackingTaskMutation.mutate({
-          id: task.id,
-          status: "completed"
-        }, {
-          onSuccess: (updatedTask) => {
-            console.log("Task completed successfully via mutation:", updatedTask);
-            setSelectedTask(null);
-            
-            // Force refresh the task list
-            queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
-            
-            toast({
-              title: "Task Completed",
-              description: `Packing task #${task.id} has been completed successfully`
-            });
-          },
-          onError: (error) => {
-            console.error("Error completing task (mutation):", error);
-            toast({
-              title: "Error Completing Task",
-              description: `Could not complete packing task #${task.id}. Please try again.`,
-              variant: "destructive"
-            });
+      // Using async/await for better error handling
+      try {
+        (async () => {
+          console.log(`Sending PATCH request to /api/warehouse/packing-tasks/${task.id} with data:`, updateData);
+          
+          const response = await fetch(`/api/warehouse/packing-tasks/${task.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateData),
+            credentials: 'include'
+          });
+          
+          console.log("Complete task response status:", response.status);
+          
+          // Clone the response to get text before we try to parse JSON
+          const responseClone = response.clone();
+          let responseText = "";
+          try {
+            responseText = await responseClone.text();
+            console.log("Complete task response text:", responseText);
+          } catch (e) {
+            console.error("Failed to get response text:", e);
           }
+          
+          if (!response.ok) {
+            throw new Error(`API responded with status ${response.status}: ${responseText}`);
+          }
+          
+          // Parse the JSON response
+          let updatedTask;
+          try {
+            updatedTask = await response.json();
+            console.log("Packing task completed successfully:", updatedTask);
+          } catch (e) {
+            console.error("Failed to parse JSON:", e);
+            // If we can't parse JSON but the request was successful, create a basic task object
+            updatedTask = {
+              ...task,
+              status: "completed",
+              completedAt: new Date().toISOString()
+            };
+            console.log("Created fallback task object for complete action:", updatedTask);
+          }
+          
+          // Clear the selected task
+          setSelectedTask(null);
+          
+          // Force refresh the task list
+          queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
+          
+          toast({
+            title: "Task Completed",
+            description: `Packing task #${task.id} has been completed successfully`
+          });
+        })().catch(error => {
+          // Handle any errors from the async function
+          console.error("Error with direct API call for completing packing task:", error);
+          
+          // Now try with the mutation as a fallback
+          console.log("Falling back to mutation call...");
+          
+          updatePackingTaskMutation.mutate({
+            id: task.id,
+            status: "completed"
+          }, {
+            onSuccess: (updatedTask) => {
+              console.log("Task completed successfully via mutation:", updatedTask);
+              setSelectedTask(null);
+              
+              // Force refresh the task list
+              queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
+              
+              toast({
+                title: "Task Completed",
+                description: `Packing task #${task.id} has been completed successfully`
+              });
+            },
+            onError: (error) => {
+              console.error("Error completing task (mutation):", error);
+              toast({
+                title: "Error Completing Task",
+                description: `Could not complete packing task #${task.id}. Please try again.`,
+                variant: "destructive"
+              });
+            }
+          });
         });
-      });
+      } catch (e) {
+        console.error("Exception in complete task API call handling:", e);
+      }
     } catch (err) {
       console.error("Exception when completing packing task:", err);
       toast({
@@ -663,75 +725,107 @@ export default function WarehousePacking() {
         packedAt: new Date().toISOString()
       };
       
-      // Make a direct fetch call
-      fetch(`/api/warehouse/packing-task-items/${selectedItem.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updateData),
-        credentials: 'include'
-      })
-      .then(response => {
-        console.log("Direct API call response for packing item:", response);
-        if (!response.ok) {
-          throw new Error(`API responded with status ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(updatedItem => {
-        console.log("Packing item completed successfully via direct fetch:", updatedItem);
-        
-        // Clear states
-        setScanVerification({ verified: false });
-        setPackedQuantity(0);
-        setSelectedItem(null);
-        setScanDialogOpen(false);
-        
-        // Force refresh the task items
-        queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks", selectedTask?.id, "items"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
-        
-        toast({
-          title: "Item Packed",
-          description: "Item has been successfully packed"
-        });
-      })
-      .catch(error => {
-        console.error("Error with direct API call for packing item:", error);
-        
-        // Now try with the mutation as a fallback
-        console.log("Falling back to mutation call...");
-        
-        completePackingItemMutation.mutate({
-          id: selectedItem.id,
-          packedQuantity: packedQuantity,
-          packageId: latestPackage?.id
-        }, {
-          onSuccess: (updatedItem) => {
-            console.log("Item packed successfully via mutation:", updatedItem);
-            
-            // Clear states
-            setScanVerification({ verified: false });
-            setPackedQuantity(0);
-            setSelectedItem(null);
-            setScanDialogOpen(false);
-            
-            toast({
-              title: "Item Packed",
-              description: "Item has been successfully packed"
-            });
-          },
-          onError: (error) => {
-            console.error("Error packing item (mutation):", error);
-            toast({
-              title: "Error Packing Item",
-              description: `Could not complete packing for item. Please try again.`,
-              variant: "destructive"
-            });
+      // Using async/await for better error handling
+      try {
+        (async () => {
+          console.log(`Sending PATCH request to /api/warehouse/packing-task-items/${selectedItem.id} with data:`, updateData);
+          
+          const response = await fetch(`/api/warehouse/packing-task-items/${selectedItem.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateData),
+            credentials: 'include'
+          });
+          
+          console.log("Packing item response status:", response.status);
+          
+          // Clone response to read the text before parsing
+          const responseClone = response.clone();
+          let responseText = "";
+          try {
+            responseText = await responseClone.text();
+            console.log("Packing item response text:", responseText);
+          } catch (e) {
+            console.error("Failed to get response text:", e);
           }
+          
+          if (!response.ok) {
+            throw new Error(`API responded with status ${response.status}: ${responseText}`);
+          }
+          
+          // Parse the JSON response
+          let updatedItem;
+          try {
+            updatedItem = await response.json();
+            console.log("Packing item completed successfully:", updatedItem);
+          } catch (e) {
+            console.error("Failed to parse JSON for item:", e);
+            // If we can't parse JSON but the request was successful, create a basic item object
+            updatedItem = {
+              ...selectedItem,
+              status: packedQuantity >= (selectedItem.quantity || 0) ? "packed" : "partial",
+              packedQuantity: packedQuantity,
+              packageId: latestPackage?.id,
+              packedAt: new Date().toISOString()
+            };
+            console.log("Created fallback item object:", updatedItem);
+          }
+          
+          // Clear states
+          setScanVerification({ verified: false });
+          setPackedQuantity(0);
+          setSelectedItem(null);
+          setScanDialogOpen(false);
+          
+          // Force refresh the task items
+          queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks", selectedTask?.id, "items"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
+          
+          toast({
+            title: "Item Packed",
+            description: "Item has been successfully packed"
+          });
+        })().catch(error => {
+          // Handle any errors from the async function
+          console.error("Error with direct API call for packing item:", error);
+          
+          // Now try with the mutation as a fallback
+          console.log("Falling back to mutation call...");
+          
+          completePackingItemMutation.mutate({
+            id: selectedItem.id,
+            packedQuantity: packedQuantity,
+            packageId: latestPackage?.id
+          }, {
+            onSuccess: (updatedItem) => {
+              console.log("Item packed successfully via mutation:", updatedItem);
+              
+              // Clear states
+              setScanVerification({ verified: false });
+              setPackedQuantity(0);
+              setSelectedItem(null);
+              setScanDialogOpen(false);
+              
+              toast({
+                title: "Item Packed",
+                description: "Item has been successfully packed"
+              });
+            },
+            onError: (error) => {
+              console.error("Error packing item (mutation):", error);
+              toast({
+                title: "Error Packing Item",
+                description: `Could not complete packing for item. Please try again.`,
+                variant: "destructive"
+              });
+            }
+          });
         });
-      });
+      } catch (e) {
+        console.error("Exception in complete packing item API call handling:", e);
+      }
     } catch (err) {
       console.error("Exception when completing packing item:", err);
       toast({
@@ -800,66 +894,96 @@ export default function WarehousePacking() {
       // Let's try a direct fetch call first
       console.log("Trying direct fetch call to create package...");
       
-      // Make a direct fetch call
-      fetch(`/api/warehouse/packing-tasks/${selectedTask.id}/packages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(packageData),
-        credentials: 'include'
-      })
-      .then(response => {
-        console.log("Direct API call response for package creation:", response);
-        if (!response.ok) {
-          throw new Error(`API responded with status ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(newPackage => {
-        console.log("Package created successfully via direct fetch:", newPackage);
-        
-        // Clear form and close dialog
-        packageForm.reset();
-        setPackageDialogOpen(false);
-        
-        // Force refresh the packages list
-        queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks", selectedTask.id, "packages"] });
-        
-        toast({
-          title: "Package Created",
-          description: `Package #${newPackage.id} has been created successfully`
-        });
-      })
-      .catch(error => {
-        console.error("Error with direct API call for creating package:", error);
-        
-        // Now try with the mutation as a fallback
-        console.log("Falling back to mutation call...");
-        
-        createPackageMutation.mutate(packageData, {
-          onSuccess: (data) => {
-            console.log("Package created successfully via mutation:", data);
-            
-            // Clear form and close dialog
-            packageForm.reset();
-            setPackageDialogOpen(false);
-            
-            toast({
-              title: "Package Created",
-              description: `Package #${data.id} has been created successfully`
-            });
-          },
-          onError: (error) => {
-            console.error("Error creating package (mutation):", error);
-            toast({
-              title: "Error Creating Package",
-              description: `Could not create package. Please try again.`,
-              variant: "destructive"
-            });
+      // Using async/await for better error handling
+      try {
+        (async () => {
+          console.log(`Sending POST request to /api/warehouse/packing-tasks/${selectedTask.id}/packages with data:`, packageData);
+          
+          const response = await fetch(`/api/warehouse/packing-tasks/${selectedTask.id}/packages`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(packageData),
+            credentials: 'include'
+          });
+          
+          console.log("Create package response status:", response.status);
+          
+          // Clone response to read the text before parsing
+          const responseClone = response.clone();
+          let responseText = "";
+          try {
+            responseText = await responseClone.text();
+            console.log("Create package response text:", responseText);
+          } catch (e) {
+            console.error("Failed to get response text:", e);
           }
+          
+          if (!response.ok) {
+            throw new Error(`API responded with status ${response.status}: ${responseText}`);
+          }
+          
+          // Parse the JSON response
+          let newPackage;
+          try {
+            newPackage = await response.json();
+            console.log("Package created successfully:", newPackage);
+          } catch (e) {
+            console.error("Failed to parse JSON for package:", e);
+            // If we can't parse JSON but the request was successful, create a basic package object
+            newPackage = {
+              id: Date.now(), // Temporary ID 
+              ...packageData,
+              createdAt: new Date().toISOString()
+            };
+            console.log("Created fallback package object:", newPackage);
+          }
+          
+          // Clear form and close dialog
+          packageForm.reset();
+          setPackageDialogOpen(false);
+          
+          // Force refresh the packages list
+          queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks", selectedTask.id, "packages"] });
+          
+          toast({
+            title: "Package Created",
+            description: `Package #${newPackage.id} has been created successfully`
+          });
+        })().catch(error => {
+          // Handle any errors from the async function
+          console.error("Error with direct API call for creating package:", error);
+          
+          // Now try with the mutation as a fallback
+          console.log("Falling back to mutation call...");
+          
+          createPackageMutation.mutate(packageData, {
+            onSuccess: (data) => {
+              console.log("Package created successfully via mutation:", data);
+              
+              // Clear form and close dialog
+              packageForm.reset();
+              setPackageDialogOpen(false);
+              
+              toast({
+                title: "Package Created",
+                description: `Package #${data.id} has been created successfully`
+              });
+            },
+            onError: (error) => {
+              console.error("Error creating package (mutation):", error);
+              toast({
+                title: "Error Creating Package",
+                description: `Could not create package. Please try again.`,
+                variant: "destructive"
+              });
+            }
+          });
         });
-      });
+      } catch (e) {
+        console.error("Exception in create package API call handling:", e);
+      }
     } catch (err) {
       console.error("Exception when creating package:", err);
       toast({
