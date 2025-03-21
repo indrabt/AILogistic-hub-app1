@@ -505,65 +505,123 @@ export default function WarehouseShipping() {
   };
 
   const getCarrierServices = (carrierId: string) => {
-    const carrier = carriers.find(c => c.id === parseInt(carrierId));
-    return carrier?.services || [];
+    try {
+      // Safely parse the carrier ID to an integer
+      const id = parseInt(carrierId);
+      if (isNaN(id)) {
+        console.warn(`Invalid carrier ID format: ${carrierId}`);
+        return [];
+      }
+      
+      const carrier = carriers.find(c => c.id === id);
+      if (!carrier) {
+        console.warn(`Carrier not found with ID: ${id}`);
+        return [];
+      }
+      
+      console.log(`Found ${carrier.services.length} services for carrier: ${carrier.name}`);
+      return carrier.services || [];
+    } catch (error) {
+      console.error("Error in getCarrierServices:", error);
+      return [];
+    }
   };
 
-  const handleConfirmAndShip = (shipment: WarehouseShipment) => {
+  const handleConfirmAndShip = async (shipment: WarehouseShipment) => {
     console.log("handleConfirmAndShip called with shipment:", shipment);
     console.log("Selected carrier:", selectedCarrier);
     console.log("Selected service:", selectedService);
     console.log("Tracking number:", trackingNumber);
     
-    if (!selectedCarrier || !selectedService || !trackingNumber) {
-      console.log("Missing required shipping information");
+    // Validate required inputs
+    if (!selectedCarrier || !selectedCarrier.trim()) {
+      console.log("Missing carrier information");
       toast({
         title: "Missing information",
-        description: "Please select a carrier, service, and enter a tracking number.",
+        description: "Please select a shipping carrier.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!selectedService || !selectedService.trim()) {
+      console.log("Missing service information");
+      toast({
+        title: "Missing information",
+        description: "Please select a shipping service.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!trackingNumber || !trackingNumber.trim()) {
+      console.log("Missing tracking number");
+      toast({
+        title: "Missing information",
+        description: "Please enter a tracking number.",
         variant: "destructive"
       });
       return;
     }
     
     // Get the full carrier name and service name for display and debugging
-    const carrierName = carriers.find(c => c.id.toString() === selectedCarrier)?.name || "";
-    const serviceName = getCarrierServices(selectedCarrier).find(s => s.id.toString() === selectedService)?.name || "";
+    const carrierObject = carriers.find(c => c.id.toString() === selectedCarrier);
+    if (!carrierObject) {
+      console.error(`Carrier not found with ID: ${selectedCarrier}`);
+      toast({
+        title: "Error",
+        description: "Selected carrier was not found. Please try selecting again.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const carrierName = carrierObject.name;
+    
+    const services = getCarrierServices(selectedCarrier);
+    const serviceObject = services.find(s => s.id.toString() === selectedService);
+    if (!serviceObject) {
+      console.error(`Service not found with ID: ${selectedService} for carrier: ${selectedCarrier}`);
+      toast({
+        title: "Error",
+        description: "Selected shipping service was not found. Please try selecting again.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const serviceName = serviceObject.name;
     
     console.log(`Updating shipment ${shipment.id} with carrier: ${carrierName}, service: ${serviceName}`);
     
     try {
-      updateShipment(shipment.id, {
+      // First update the shipment details
+      const updatedShipment = await updateShipment(shipment.id, {
         carrier: carrierName,
         service: serviceName,
         trackingNumber: trackingNumber
-      })
-      .then((updatedShipment) => {
-        console.log("Shipment updated successfully:", updatedShipment);
-        console.log(`Now confirming shipment ${shipment.id}`);
-        
-        // Only proceed to confirm if the update was successful
-        return confirmShipment(shipment.id);
-      })
-      .then((confirmedShipment) => {
-        console.log("Shipment confirmed successfully:", confirmedShipment);
-        toast({
-          title: "Shipment Confirmed",
-          description: "The shipment has been confirmed and marked as shipped."
-        });
-      })
-      .catch((error: any) => {
-        console.error("Error processing shipment:", error);
-        toast({
-          title: "Error",
-          description: `Failed to process shipment: ${error.message || "Unknown error"}`,
-          variant: "destructive"
-        });
       });
-    } catch (err) {
-      console.error("Exception in handleConfirmAndShip:", err);
+      
+      console.log("Shipment updated successfully:", updatedShipment);
+      console.log(`Now confirming shipment ${shipment.id}`);
+      
+      // Then confirm the shipment
+      const confirmedShipment = await confirmShipment(shipment.id);
+      
+      console.log("Shipment confirmed successfully:", confirmedShipment);
       toast({
-        title: "System Error",
-        description: "An unexpected error occurred while processing the shipment.",
+        title: "Shipment Confirmed",
+        description: "The shipment has been confirmed and marked as shipped."
+      });
+      
+      // Refresh the shipments list after confirmation
+      fetchShipments();
+      
+    } catch (error: any) {
+      console.error("Error processing shipment:", error);
+      toast({
+        title: "Error",
+        description: `Failed to process shipment: ${error.message || "Unknown error"}`,
         variant: "destructive"
       });
     }
@@ -907,7 +965,8 @@ export default function WarehouseShipping() {
                                                 <Button
                                                   variant="outline"
                                                   className="flex-1"
-                                                  onClick={() => generateManifest(selectedShipment.id)}
+                                                  onClick={() => selectedShipment && generateManifest(selectedShipment.id)}
+                                                  disabled={!selectedShipment}
                                                 >
                                                   {isManifestLoading ? (
                                                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -921,7 +980,9 @@ export default function WarehouseShipping() {
                                                 <DialogHeader>
                                                   <DialogTitle>Shipping Manifest</DialogTitle>
                                                   <DialogDescription>
-                                                    Shipping manifest details for order #{selectedShipment.customerOrderId}
+                                                    {selectedShipment 
+                                                      ? `Shipping manifest details for order #${selectedShipment.customerOrderId}` 
+                                                      : 'Shipping manifest details'}
                                                   </DialogDescription>
                                                 </DialogHeader>
                                                 {manifest ? (
