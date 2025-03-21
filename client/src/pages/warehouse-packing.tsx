@@ -734,29 +734,130 @@ export default function WarehousePacking() {
 
   // Handle creating a new package
   const handleCreatePackage = (values: PackageFormValues) => {
-    if (!selectedTask) {
+    console.log("Attempting to create package with values:", values);
+    
+    try {
+      // Check if we have necessary data
+      if (!selectedTask) {
+        console.error("No task selected for package creation");
+        toast({
+          title: "Error",
+          description: "No packing task selected",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Check if user is available
+      if (!user?.username) {
+        console.error("Authentication error: No username found in user object", user);
+        toast({
+          title: "Authentication Error",
+          description: "You must be logged in to create packages",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Check if task is in correct state
+      if (selectedTask.status !== "in_progress") {
+        console.error(`Task status error: Task #${selectedTask.id} is ${selectedTask.status}, but should be in_progress to add packages`);
+        toast({
+          title: "Task Status Error",
+          description: `Task #${selectedTask.id} must be in progress before you can add packages`,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Create package data object
+      const packageData = {
+        packingTaskId: selectedTask.id,
+        packageType: values.packageType,
+        length: values.length,
+        width: values.width,
+        height: values.height,
+        dimensionUnit: values.dimensionUnit,
+        weight: values.weight,
+        weightUnit: values.weightUnit,
+        carrier: values.carrier || undefined,
+        service: values.service || undefined,
+        notes: values.notes || undefined,
+        status: "packed",
+        createdAt: new Date().toISOString()
+      };
+      
+      // Let's try a direct fetch call first
+      console.log("Trying direct fetch call to create package...");
+      
+      // Make a direct fetch call
+      fetch(`/api/warehouse/packing-tasks/${selectedTask.id}/packages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(packageData),
+        credentials: 'include'
+      })
+      .then(response => {
+        console.log("Direct API call response for package creation:", response);
+        if (!response.ok) {
+          throw new Error(`API responded with status ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(newPackage => {
+        console.log("Package created successfully via direct fetch:", newPackage);
+        
+        // Clear form and close dialog
+        packageForm.reset();
+        setPackageDialogOpen(false);
+        
+        // Force refresh the packages list
+        queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks", selectedTask.id, "packages"] });
+        
+        toast({
+          title: "Package Created",
+          description: `Package #${newPackage.id} has been created successfully`
+        });
+      })
+      .catch(error => {
+        console.error("Error with direct API call for creating package:", error);
+        
+        // Now try with the mutation as a fallback
+        console.log("Falling back to mutation call...");
+        
+        createPackageMutation.mutate(packageData, {
+          onSuccess: (data) => {
+            console.log("Package created successfully via mutation:", data);
+            
+            // Clear form and close dialog
+            packageForm.reset();
+            setPackageDialogOpen(false);
+            
+            toast({
+              title: "Package Created",
+              description: `Package #${data.id} has been created successfully`
+            });
+          },
+          onError: (error) => {
+            console.error("Error creating package (mutation):", error);
+            toast({
+              title: "Error Creating Package",
+              description: `Could not create package. Please try again.`,
+              variant: "destructive"
+            });
+          }
+        });
+      });
+    } catch (err) {
+      console.error("Exception when creating package:", err);
       toast({
         title: "Error",
-        description: "No packing task selected",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
-      return;
     }
-
-    createPackageMutation.mutate({
-      packingTaskId: selectedTask.id,
-      packageType: values.packageType,
-      length: values.length,
-      width: values.width,
-      height: values.height,
-      dimensionUnit: values.dimensionUnit,
-      weight: values.weight,
-      weightUnit: values.weightUnit,
-      carrier: values.carrier || undefined,
-      service: values.service || undefined,
-      notes: values.notes || undefined,
-      status: "packed"
-    });
   };
 
   // Handle printing shipping label
