@@ -179,6 +179,15 @@ export default function WarehousePacking() {
     sessionStorage.setItem("directWarehousePackingAccess", "true");
   }, [setLocation]);
   
+  // API Queries
+  const { 
+    data: packingTasks = [], 
+    isLoading: isTasksLoading 
+  } = useQuery<PackingTask[]>({
+    queryKey: ["/api/warehouse/packing-tasks"],
+    queryFn: () => apiRequest("/api/warehouse/packing-tasks"),
+  });
+
   // Event listeners for the custom events from dynamically created buttons
   useEffect(() => {
     // Handler for continuing a task (setting selected task)
@@ -226,15 +235,6 @@ export default function WarehousePacking() {
       document.removeEventListener('task-complete', handleTaskComplete);
     };
   }, [packingTasks]);
-
-  // API Queries
-  const { 
-    data: packingTasks = [], 
-    isLoading: isTasksLoading 
-  } = useQuery<PackingTask[]>({
-    queryKey: ["/api/warehouse/packing-tasks"],
-    queryFn: () => apiRequest("/api/warehouse/packing-tasks"),
-  });
 
   const { 
     data: packingTaskItems = [], 

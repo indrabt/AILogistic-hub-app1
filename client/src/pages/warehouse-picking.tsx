@@ -110,7 +110,7 @@ export default function WarehousePicking() {
       console.log("Cleaning up warehouse picking component");
     };
   }, [setLocation]);
-
+  
   // API Queries
   const { 
     data: pickTasks = [], 
@@ -119,6 +119,54 @@ export default function WarehousePicking() {
     queryKey: ["/api/warehouse/pick-tasks"],
     queryFn: () => apiRequest("/api/warehouse/pick-tasks"),
   });
+
+  // Event listeners for the custom events from dynamically created buttons
+  useEffect(() => {
+    // Handler for continuing a task (setting selected task)
+    const handleTaskContinue = (event: any) => {
+      const taskId = event.detail?.taskId;
+      console.log("Task continue event received for task:", taskId);
+      if (taskId) {
+        const task = pickTasks.find(t => t.id === taskId);
+        if (task) {
+          setSelectedTask(task);
+        }
+      }
+    };
+    
+    // Handler for completing a task
+    const handleTaskComplete = (event: any) => {
+      const taskId = event.detail?.taskId;
+      console.log("Task complete event received for task:", taskId);
+      if (taskId) {
+        const task = pickTasks.find(t => t.id === taskId);
+        if (task) {
+          // Find the Complete button for this task and click it programmatically
+          const rows = document.querySelectorAll('table tbody tr');
+          for (const row of Array.from(rows)) {
+            const idCell = row.querySelector('td:first-child');
+            if (idCell && idCell.textContent?.trim() === String(taskId)) {
+              const completeButton = row.querySelector('button:nth-of-type(2)');
+              if (completeButton) {
+                (completeButton as HTMLButtonElement).click();
+                break;
+              }
+            }
+          }
+        }
+      }
+    };
+    
+    // Add event listeners
+    document.addEventListener('task-continue', handleTaskContinue);
+    document.addEventListener('task-complete', handleTaskComplete);
+    
+    // Clean up event listeners
+    return () => {
+      document.removeEventListener('task-continue', handleTaskContinue);
+      document.removeEventListener('task-complete', handleTaskComplete);
+    };
+  }, [pickTasks]);
 
   const { 
     data: pickTaskItems = [], 
