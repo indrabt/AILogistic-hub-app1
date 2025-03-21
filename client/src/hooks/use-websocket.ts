@@ -37,6 +37,26 @@ export function useWebSocket(
   
   // Connect to WebSocket server
   const connect = useCallback(() => {
+    // Check if WebSocket connections are explicitly disabled in session storage
+    const disableWebSockets = sessionStorage.getItem('disableWebSocketConnections') === 'true';
+    if (disableWebSockets) {
+      console.log('WebSocket connections are explicitly disabled');
+      setStatus('fallback');
+      
+      // Simulate a system message in fallback mode
+      if (onMessage) {
+        const fallbackMessage: WebSocketMessage = {
+          type: 'SYSTEM_MESSAGE',
+          message: 'WebSocket connections disabled. Using direct API calls instead.',
+          timestamp: new Date().toISOString()
+        };
+        setLastMessage(fallbackMessage);
+        onMessage(fallbackMessage);
+      }
+      
+      return;
+    }
+
     // If we've already tried reconnecting too many times, use fallback mode
     if (reconnectCountRef.current >= maxReconnectAttemptsRef.current) {
       console.log(`Max reconnection attempts (${maxReconnectAttemptsRef.current}) reached, using fallback mode`);
@@ -289,6 +309,14 @@ export function useWebSocket(
   
   // Function to manually reconnect
   const reconnect = useCallback(() => {
+    // Check if WebSocket connections are explicitly disabled
+    const disableWebSockets = sessionStorage.getItem('disableWebSocketConnections') === 'true';
+    if (disableWebSockets) {
+      console.log('Cannot reconnect: WebSocket connections are explicitly disabled');
+      setStatus('fallback');
+      return;
+    }
+    
     // Reset fallback mode
     setStatus('closed');
     

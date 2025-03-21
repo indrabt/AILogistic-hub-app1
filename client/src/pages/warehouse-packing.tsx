@@ -377,7 +377,7 @@ export default function WarehousePacking() {
         startedAt: new Date().toISOString()
       };
       
-      // Make a direct fetch call
+      // Make a direct fetch call - making sure to use the correct method
       fetch(`/api/warehouse/packing-tasks/${task.id}`, {
         method: 'PATCH',
         headers: {
