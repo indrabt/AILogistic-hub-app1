@@ -238,8 +238,21 @@ export default function WarehousePicking() {
       id: task.id,
       status: "in_progress",
       assignedTo: user?.username
+    }, {
+      onSuccess: (updatedTask) => {
+        console.log("Task updated successfully:", updatedTask);
+        // Set the selected task with the updated task data
+        setSelectedTask(updatedTask);
+        
+        // Force refresh the task list
+        queryClient.invalidateQueries({ queryKey: ["/api/warehouse/pick-tasks"] });
+        
+        toast({
+          title: "Task Started",
+          description: `Picking task #${task.id} is now in progress`
+        });
+      }
     });
-    setSelectedTask(task);
   };
 
   // Handle completing a picking task
@@ -261,8 +274,20 @@ export default function WarehousePicking() {
     updatePickTaskMutation.mutate({
       id: task.id,
       status: "completed"
+    }, {
+      onSuccess: () => {
+        toast({
+          title: "Task Completed",
+          description: `Picking task #${task.id} has been completed`
+        });
+        
+        // Invalidate queries
+        queryClient.invalidateQueries({ queryKey: ["/api/warehouse/pick-tasks"] });
+        
+        // Clear selection
+        setSelectedTask(null);
+      }
     });
-    setSelectedTask(null);
   };
 
   // Handle completing a pick item
@@ -280,6 +305,19 @@ export default function WarehousePicking() {
       id: selectedItem.id,
       pickedQuantity: scannedQuantity,
       locationId: selectedItem.locationId
+    }, {
+      onSuccess: () => {
+        console.log("Item picking completed successfully");
+        
+        // Force refresh the task items list
+        queryClient.invalidateQueries({ queryKey: ["/api/warehouse/pick-task-items", selectedTask?.id] });
+        
+        // Clear scanning states
+        setScanVerification({ verified: false });
+        setScannedQuantity(0);
+        setSelectedItem(null);
+        setScanDialogOpen(false);
+      }
     });
   };
 
@@ -289,11 +327,18 @@ export default function WarehousePicking() {
       id: item.id,
       pickedQuantity: 0,
       locationId: item.locationId
-    });
-    
-    toast({
-      title: "Item Marked as Unavailable",
-      description: `${item.productName} has been marked as unavailable`
+    }, {
+      onSuccess: () => {
+        console.log("Item marked as unavailable successfully");
+        
+        // Force refresh the task items list
+        queryClient.invalidateQueries({ queryKey: ["/api/warehouse/pick-task-items", selectedTask?.id] });
+        
+        toast({
+          title: "Item Marked as Unavailable",
+          description: `${item.productName} has been marked as unavailable`
+        });
+      }
     });
   };
 
