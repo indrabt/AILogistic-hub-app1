@@ -479,6 +479,36 @@ export default function WarehousePacking() {
           // Force refresh the task list
           queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
           
+          // Manually update the DOM for better UX while the query refreshes
+          try {
+            // Try to find the status element by ID and update it
+            const statusElement = document.getElementById(`packing-task-status-${task.id}`);
+            if (statusElement) {
+              statusElement.textContent = "in_progress";
+              statusElement.className = "text-blue-600 font-medium";
+            }
+            
+            // Try to update the button to be disabled
+            const startButton = document.getElementById(`start-packing-button-${task.id}`);
+            if (startButton) {
+              startButton.setAttribute("disabled", "true");
+              startButton.classList.add("opacity-50", "cursor-not-allowed");
+              startButton.textContent = "In Progress";
+            }
+          } catch (e) {
+            console.error("Failed to directly update DOM elements:", e);
+          }
+          
+          // Dispatch custom event for external listeners (like direct-access.html)
+          const taskUpdateEvent = new CustomEvent('task-updated', { 
+            detail: { 
+              taskId: task.id, 
+              newStatus: 'in_progress',
+              taskType: 'packing' 
+            } 
+          });
+          document.dispatchEvent(taskUpdateEvent);
+          
           toast({
             title: "Task Started",
             description: `Packing task #${task.id} is now in progress`
@@ -501,6 +531,36 @@ export default function WarehousePacking() {
               
               // Force refresh the task list
               queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
+              
+              // Manually update the DOM for better UX while the query refreshes
+              try {
+                // Try to find the status element by ID and update it
+                const statusElement = document.getElementById(`packing-task-status-${task.id}`);
+                if (statusElement) {
+                  statusElement.textContent = "in_progress";
+                  statusElement.className = "text-blue-600 font-medium";
+                }
+                
+                // Try to update the button to be disabled
+                const startButton = document.getElementById(`start-packing-button-${task.id}`);
+                if (startButton) {
+                  startButton.setAttribute("disabled", "true");
+                  startButton.classList.add("opacity-50", "cursor-not-allowed");
+                  startButton.textContent = "In Progress";
+                }
+              } catch (e) {
+                console.error("Failed to directly update DOM elements:", e);
+              }
+              
+              // Dispatch custom event for external listeners (like direct-access.html)
+              const taskUpdateEvent = new CustomEvent('task-updated', { 
+                detail: { 
+                  taskId: task.id, 
+                  newStatus: 'in_progress',
+                  taskType: 'packing' 
+                } 
+              });
+              document.dispatchEvent(taskUpdateEvent);
               
               toast({
                 title: "Task Started",
@@ -653,6 +713,36 @@ export default function WarehousePacking() {
           
           // Force refresh the task list
           queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
+          
+          // Manually update the DOM for better UX while the query refreshes
+          try {
+            // Try to find the status element by ID and update it
+            const statusElement = document.getElementById(`packing-task-status-${task.id}`);
+            if (statusElement) {
+              statusElement.textContent = "completed";
+              statusElement.className = "text-green-600 font-medium";
+            }
+            
+            // Try to update the button
+            const completeButton = document.getElementById(`complete-packing-button-${task.id}`);
+            if (completeButton) {
+              completeButton.setAttribute("disabled", "true");
+              completeButton.classList.add("opacity-50", "cursor-not-allowed");
+              completeButton.textContent = "Completed";
+            }
+          } catch (e) {
+            console.error("Failed to directly update DOM elements:", e);
+          }
+          
+          // Dispatch custom event for external listeners (like direct-access.html)
+          const taskUpdateEvent = new CustomEvent('task-updated', { 
+            detail: { 
+              taskId: task.id, 
+              newStatus: 'completed',
+              taskType: 'packing' 
+            } 
+          });
+          document.dispatchEvent(taskUpdateEvent);
           
           toast({
             title: "Task Completed",
