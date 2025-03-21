@@ -1,6 +1,11 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { loadSampleData } from './load-warehouse-sample-data';
 
 const app = express();
 app.use(express.json());
@@ -64,7 +69,16 @@ app.use((req, res, next) => {
     port,
     host: "0.0.0.0",
     reusePort: true,
-  }, () => {
+  }, async () => {
     log(`serving on port ${port}`);
+    
+    // Load sample warehouse data on server startup
+    try {
+      log('Loading warehouse sample data on server startup...');
+      await loadSampleData();
+      log('Warehouse sample data loaded successfully on server startup.');
+    } catch (error) {
+      log(`Error loading warehouse sample data: ${error}`);
+    }
   });
 })();

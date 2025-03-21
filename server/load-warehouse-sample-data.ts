@@ -25,7 +25,7 @@ if (!fs.existsSync(SAMPLE_DATA_DIR)) {
   process.exit(1);
 }
 
-async function loadSampleData() {
+export async function loadSampleData() {
   console.log('Loading warehouse sample data...');
   
   try {
