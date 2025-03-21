@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Warehouse Direct Access</title>
+  <title>Order Management Direct Access</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
@@ -88,7 +88,7 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>Warehouse Direct Access</h1>
+      <h1>Order Management Direct Access</h1>
       <p>This page bypasses WebSocket connections for improved stability.</p>
     </div>
     
@@ -98,12 +98,10 @@
     </div>
     
     <div class="button-group">
-      <button id="login-button" onclick="handleLogin()">Login as Warehouse Staff</button>
-      <button id="dashboard-button" onclick="navigateToWarehousePage('dashboard')" disabled>Warehouse Dashboard</button>
-      <button id="receiving-button" onclick="navigateToWarehousePage('receiving')" disabled>Receiving</button>
-      <button id="putaway-button" onclick="navigateToWarehousePage('putaway')" disabled>Put-Away</button>
-      <button id="picking-button" onclick="navigateToWarehousePage('picking')" disabled>Picking</button>
-      <button id="packing-button" onclick="navigateToWarehousePage('packing')" disabled>Packing</button>
+      <button id="login-staff-button" onclick="handleLogin('warehouse1')">Login as Warehouse Staff</button>
+      <button id="login-manager-button" onclick="handleLogin('logistics1')">Login as Logistics Manager</button>
+      <button id="login-owner-button" onclick="handleLogin('owner1')">Login as Business Owner</button>
+      <button id="order-button" onclick="navigateToOrderPage('order-management')" disabled>Order Management</button>
       <button id="logout-button" onclick="handleLogout()" disabled>Logout</button>
     </div>
     
@@ -150,30 +148,23 @@
     
     function updateUserStatus() {
       const statusEl = document.getElementById('user-status');
-      const loginBtn = document.getElementById('login-button');
       const logoutBtn = document.getElementById('logout-button');
-      const warehouseButtons = [
-        'dashboard-button', 
-        'receiving-button', 
-        'putaway-button', 
-        'picking-button', 
-        'packing-button'
-      ];
+      const orderButton = document.getElementById('order-button');
       
       if (currentUser) {
         statusEl.textContent = `Logged in as ${currentUser.username} (${currentUser.role})`;
-        loginBtn.disabled = true;
+        document.getElementById('login-staff-button').disabled = true;
+        document.getElementById('login-manager-button').disabled = true;
+        document.getElementById('login-owner-button').disabled = true;
         logoutBtn.disabled = false;
-        warehouseButtons.forEach(id => {
-          document.getElementById(id).disabled = false;
-        });
+        orderButton.disabled = false;
       } else {
         statusEl.textContent = 'Not logged in';
-        loginBtn.disabled = false;
+        document.getElementById('login-staff-button').disabled = false;
+        document.getElementById('login-manager-button').disabled = false;
+        document.getElementById('login-owner-button').disabled = false;
         logoutBtn.disabled = true;
-        warehouseButtons.forEach(id => {
-          document.getElementById(id).disabled = true;
-        });
+        orderButton.disabled = true;
       }
     }
     
@@ -207,7 +198,7 @@
       }
     }
     
-    async function handleLogin() {
+    async function handleLogin(username) {
       showLoader();
       try {
         const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -217,7 +208,7 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            username: 'warehouse1',
+            username: username,
             password: 'password'
           })
         });
@@ -228,10 +219,10 @@
           
           // Set a session flag to disable WebSocket connections
           sessionStorage.setItem('disableWebSocketConnections', 'true');
-          sessionStorage.setItem('warehouseDirect', 'true');
+          sessionStorage.setItem('orderManagementRedirect', 'true');
           
           updateUserStatus();
-          showSuccess('Successfully logged in as warehouse staff');
+          showSuccess(`Successfully logged in as ${username}`);
           updateLastAction('Logged in successfully');
         } else {
           const error = await response.json();
@@ -263,7 +254,7 @@
           
           // Clear session storage flags
           sessionStorage.removeItem('disableWebSocketConnections');
-          sessionStorage.removeItem('warehouseDirect');
+          sessionStorage.removeItem('orderManagementRedirect');
         } else {
           showError('Logout failed');
           updateLastAction('Logout failed');
@@ -277,16 +268,16 @@
       }
     }
     
-    function navigateToWarehousePage(page) {
+    function navigateToOrderPage(page) {
       // Set navigation flags
       sessionStorage.setItem('disableWebSocketConnections', 'true');
-      sessionStorage.setItem('warehouseDirect', 'true');
+      sessionStorage.setItem('orderManagementRedirect', 'true');
       sessionStorage.setItem('bypassRouter', 'true');
       
-      updateLastAction(`Navigating to warehouse ${page} page`);
+      updateLastAction(`Navigating to ${page} page`);
       
       // Navigate to the page
-      window.location.href = `/warehouse-${page}`;
+      window.location.href = `/${page}`;
     }
     
     // Initialize

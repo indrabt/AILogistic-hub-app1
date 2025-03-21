@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Direct Access Portal</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .card-container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .card {
+      flex: 1 1 300px;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .card-description {
+      margin-bottom: 20px;
+      color: #555;
+    }
+    .card-button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+    .card-button:hover {
+      background-color: #0069d9;
+    }
+    .card-warehouse .card-button {
+      background-color: #28a745;
+    }
+    .card-warehouse .card-button:hover {
+      background-color: #218838;
+    }
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>AI Logistics Hub - Direct Access Portal</h1>
+      <p>Use these direct access links for better stability with WebSocket-sensitive components</p>
+    </div>
+    
+    <div class="card-container">
+      <div class="card card-warehouse">
+        <div class="card-title">Warehouse Management</div>
+        <div class="card-description">
+          Access warehouse functions including receiving, put-away, picking, and packing directly 
+          without WebSocket connections for improved stability.
+        </div>
+        <a href="/warehouse-direct.html" class="card-button">Access Warehouse Portal</a>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">Order Management</div>
+        <div class="card-description">
+          Manage orders, view order details, and process orders with a direct connection
+          that bypasses WebSocket for better reliability.
+        </div>
+        <a href="/order-direct.html" class="card-button">Access Order Portal</a>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>
+        Direct Access Portal provides stable access routes for critical components by bypassing WebSocket 
+        connections that may cause connectivity issues in some environments.
+      </p>
+      <p>
+        <a href="/" style="color: #6c757d;">Return to Main Application</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Disable WebSocket connections immediately 
+    sessionStorage.setItem('disableWebSocketConnections', 'true');
+  </script>
+</body>
+</html>
