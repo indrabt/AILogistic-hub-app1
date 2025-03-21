@@ -151,7 +151,8 @@ test('Complete task from detail view works', async ({ page }) => {
     }).first();
     
     if (await inProgressTask.count() === 0) {
-      test.fail(true, 'No pending or in-progress tasks available for testing');
+      console.log('No in-progress tasks available for testing');
+      test.fail(/* message */ 'No pending or in-progress tasks available for testing');
       return;
     }
     
