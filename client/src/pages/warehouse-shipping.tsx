@@ -177,13 +177,27 @@ export default function WarehouseShipping() {
         ? "/api/warehouse/shipments" 
         : `/api/warehouse/shipments?status=${filterStatus}`;
       
+      console.log(`Fetching shipments from ${url}`);
       const response = await fetch(url);
       
+      console.log(`Shipments API response status: ${response.status}`);
+      
       if (!response.ok) {
-        throw new Error("Failed to fetch shipments");
+        // Clone the response to read it twice
+        const responseClone = response.clone();
+        let errorText = "";
+        try {
+          const errorData = await responseClone.json();
+          errorText = JSON.stringify(errorData);
+        } catch (e) {
+          errorText = await response.text();
+        }
+        console.error(`Failed to fetch shipments: ${response.status} ${response.statusText}`, errorText);
+        throw new Error(`Failed to fetch shipments: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
+      console.log("Fetched shipments data:", data);
       setShipments(data);
     } catch (error) {
       console.error("Error fetching shipments:", error);
@@ -250,6 +264,7 @@ export default function WarehouseShipping() {
   const updateShipment = async (id: number, data: any) => {
     setIsUpdating(true);
     try {
+      console.log(`Updating shipment ${id} with data:`, data);
       const response = await fetch(`/api/warehouse/shipments/${id}`, {
         method: "PATCH",
         headers: {
@@ -258,11 +273,24 @@ export default function WarehouseShipping() {
         body: JSON.stringify(data),
       });
       
+      console.log(`Update shipment API response status: ${response.status}`);
+      
       if (!response.ok) {
-        throw new Error("Failed to update shipment");
+        // Clone the response to read it twice
+        const responseClone = response.clone();
+        let errorText = "";
+        try {
+          const errorData = await responseClone.json();
+          errorText = JSON.stringify(errorData);
+        } catch (e) {
+          errorText = await response.text();
+        }
+        console.error(`Failed to update shipment: ${response.status} ${response.statusText}`, errorText);
+        throw new Error(`Failed to update shipment: ${response.status} ${response.statusText}`);
       }
       
       const updatedShipment = await response.json();
+      console.log("Updated shipment data:", updatedShipment);
       setShipments(shipments.map(s => s.id === id ? updatedShipment : s));
       setSelectedShipment(updatedShipment);
       
@@ -287,6 +315,7 @@ export default function WarehouseShipping() {
   const confirmShipment = async (id: number) => {
     setIsConfirming(true);
     try {
+      console.log(`Confirming shipment ${id}`);
       const response = await fetch(`/api/warehouse/shipments/${id}/confirm`, {
         method: "POST",
         headers: {
@@ -294,11 +323,24 @@ export default function WarehouseShipping() {
         },
       });
       
+      console.log(`Confirm shipment API response status: ${response.status}`);
+      
       if (!response.ok) {
-        throw new Error("Failed to confirm shipment");
+        // Clone the response to read it twice
+        const responseClone = response.clone();
+        let errorText = "";
+        try {
+          const errorData = await responseClone.json();
+          errorText = JSON.stringify(errorData);
+        } catch (e) {
+          errorText = await response.text();
+        }
+        console.error(`Failed to confirm shipment: ${response.status} ${response.statusText}`, errorText);
+        throw new Error(`Failed to confirm shipment: ${response.status} ${response.statusText}`);
       }
       
       const confirmedShipment = await response.json();
+      console.log("Confirmed shipment data:", confirmedShipment);
       setShipments(shipments.map(s => s.id === id ? confirmedShipment : s));
       setSelectedShipment(confirmedShipment);
       
