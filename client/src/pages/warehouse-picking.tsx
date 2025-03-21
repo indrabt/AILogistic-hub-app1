@@ -253,6 +253,7 @@ export default function WarehousePicking() {
     try {
       // Check if user is available
       if (!user?.username) {
+        console.error("Authentication error: No username found in user object", user);
         toast({
           title: "Authentication Error",
           description: "You must be logged in to start a task",
@@ -263,6 +264,7 @@ export default function WarehousePicking() {
       
       // Check if task can be started
       if (task.status !== "pending") {
+        console.error(`Task status error: Task #${task.id} is already ${task.status}`);
         toast({
           title: "Task Status Error",
           description: `Task #${task.id} cannot be started because it is already ${task.status}`,
@@ -271,33 +273,79 @@ export default function WarehousePicking() {
         return;
       }
       
-      // Proceed with the mutation
-      updatePickTaskMutation.mutate({
-        id: task.id,
+      // Let's try a direct fetch call first to debug the API
+      console.log("Trying direct fetch call to update task status...");
+      
+      // Create the update object
+      const updateData = {
         status: "in_progress",
-        assignedTo: user.username
-      }, {
-        onSuccess: (updatedTask) => {
-          console.log("Task updated successfully:", updatedTask);
-          // Set the selected task with the updated task data
-          setSelectedTask(updatedTask);
-          
-          // Force refresh the task list
-          queryClient.invalidateQueries({ queryKey: ["/api/warehouse/pick-tasks"] });
-          
-          toast({
-            title: "Task Started",
-            description: `Picking task #${task.id} is now in progress`
-          });
+        assignedTo: user.username,
+        startedAt: new Date().toISOString()
+      };
+      
+      // Make a direct fetch call
+      fetch(`/api/warehouse/pick-tasks/${task.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        onError: (error) => {
-          console.error("Error starting task:", error);
-          toast({
-            title: "Error Starting Task",
-            description: `Could not start picking task #${task.id}. Please try again.`,
-            variant: "destructive"
-          });
+        body: JSON.stringify(updateData),
+        credentials: 'include'
+      })
+      .then(response => {
+        console.log("Direct API call response:", response);
+        if (!response.ok) {
+          throw new Error(`API responded with status ${response.status}`);
         }
+        return response.json();
+      })
+      .then(updatedTask => {
+        console.log("Task updated successfully via direct fetch:", updatedTask);
+        // Set the selected task with the updated task data
+        setSelectedTask(updatedTask);
+        
+        // Force refresh the task list
+        queryClient.invalidateQueries({ queryKey: ["/api/warehouse/pick-tasks"] });
+        
+        toast({
+          title: "Task Started",
+          description: `Picking task #${task.id} is now in progress`
+        });
+      })
+      .catch(error => {
+        console.error("Error with direct API call:", error);
+        
+        // Now try with the mutation as a fallback
+        console.log("Falling back to mutation call...");
+        
+        // Proceed with the mutation
+        updatePickTaskMutation.mutate({
+          id: task.id,
+          status: "in_progress",
+          assignedTo: user.username
+        }, {
+          onSuccess: (updatedTask) => {
+            console.log("Task updated successfully via mutation:", updatedTask);
+            // Set the selected task with the updated task data
+            setSelectedTask(updatedTask);
+            
+            // Force refresh the task list
+            queryClient.invalidateQueries({ queryKey: ["/api/warehouse/pick-tasks"] });
+            
+            toast({
+              title: "Task Started",
+              description: `Picking task #${task.id} is now in progress`
+            });
+          },
+          onError: (error) => {
+            console.error("Error starting task (mutation):", error);
+            toast({
+              title: "Error Starting Task",
+              description: `Could not start picking task #${task.id}. Please try again.`,
+              variant: "destructive"
+            });
+          }
+        });
       });
     } catch (err) {
       console.error("Exception when starting task:", err);

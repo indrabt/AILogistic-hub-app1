@@ -1785,7 +1785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('PATCH /api/warehouse/pick-tasks/:id - Request received:', {
         id,
         body: req.body,
-        user: req.session?.user
+        user: (req as any).session?.user
       });
       
       const taskPartialSchema = z.object({
