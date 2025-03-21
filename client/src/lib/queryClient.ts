@@ -2,8 +2,15 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    let text;
+    try {
+      text = await res.text();
+      console.error(`API Error: Status ${res.status} - Response:`, text);
+    } catch (e) {
+      console.error(`Could not read error response text:`, e);
+      text = res.statusText;
+    }
+    throw new Error(`${res.status}: ${text || res.statusText}`);
   }
 }
 
@@ -26,16 +33,31 @@ export async function apiRequest(
     bodyData = urlOrData;
   }
 
-  const res = await fetch(url, {
-    method,
-    headers: bodyData ? { "Content-Type": "application/json" } : {},
-    body: bodyData ? JSON.stringify(bodyData) : undefined,
-    credentials: "include",
-  });
+  console.log(`API Request: ${method} ${url}`);
+  if (bodyData) {
+    console.log('Request body:', JSON.stringify(bodyData, null, 2));
+  }
 
-  await throwIfResNotOk(res);
-  // Return the parsed JSON directly
-  return res.json();
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: bodyData ? { "Content-Type": "application/json" } : {},
+      body: bodyData ? JSON.stringify(bodyData) : undefined,
+      credentials: "include",
+    });
+
+    console.log(`API Response Status: ${res.status} ${res.statusText}`);
+    
+    await throwIfResNotOk(res);
+    
+    // Return the parsed JSON directly
+    const json = await res.json();
+    console.log('API Response Data:', json);
+    return json;
+  } catch (err) {
+    console.error(`API Request Failed: ${method} ${url}`, err);
+    throw err;
+  }
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

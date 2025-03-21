@@ -345,7 +345,18 @@ export default function WarehouseReceiving() {
     },
   });
 
+  // Create a validator for receive item form
+  const receiveItemSchema = z.object({
+    receivedQuantity: z.number().min(0, "Quantity cannot be negative"),
+    status: z.enum(["received", "partial", "rejected"]),
+    storageLocation: z.string().optional(),
+    batchNumber: z.string().optional(),
+    lotNumber: z.string().optional(),
+    expiryDate: z.string().optional()
+  });
+
   const receiveItemForm = useForm({
+    resolver: zodResolver(receiveItemSchema),
     defaultValues: {
       receivedQuantity: 0,
       status: "received",
@@ -405,6 +416,8 @@ export default function WarehouseReceiving() {
   };
 
   const onReceiveItem = (data: any) => {
+    console.log("onReceiveItem called with form data:", data);
+    
     if (!selectedItemId) {
       console.error("Cannot receive item: No item selected");
       toast({
@@ -415,27 +428,39 @@ export default function WarehouseReceiving() {
       return;
     }
     
-    console.log("Receiving item:", selectedItemId, "with data:", data);
+    const selectedItem = orderItems.find(item => item.id === selectedItemId);
+    console.log("Selected item object:", selectedItem);
+    console.log("Receiving item with ID:", selectedItemId, "with data:", data);
     
     try {
+      const updates = {
+        receivedQuantity: data.receivedQuantity,
+        status: data.status,
+        storageLocation: data.storageLocation,
+        batchNumber: data.batchNumber,
+        lotNumber: data.lotNumber,
+        expiryDate: data.expiryDate
+      };
+      
+      console.log("Preparing to send API request to:", `/api/warehouse/inbound-order-items/${selectedItemId}`);
+      console.log("With update payload:", updates);
+      
       updateOrderItemMutation.mutate({ 
         id: selectedItemId,
-        updates: {
-          receivedQuantity: data.receivedQuantity,
-          status: data.status,
-          storageLocation: data.storageLocation,
-          batchNumber: data.batchNumber,
-          lotNumber: data.lotNumber,
-          expiryDate: data.expiryDate
-        }
+        updates: updates
       }, {
+        onSuccess: (data) => {
+          console.log("Successfully received item. Response:", data);
+        },
         onError: (error: any) => {
           console.error("Error receiving item:", error);
+          console.error("Error details:", error.message);
           // Error is already handled in the mutation's onError
         }
       });
     } catch (err) {
       console.error("Exception in receive item operation:", err);
+      console.error("Stack trace:", err instanceof Error ? err.stack : "No stack trace available");
       toast({
         title: "System Error",
         description: "An unexpected error occurred while receiving the item.",
