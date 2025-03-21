@@ -1,152 +1,228 @@
 [
   {
-    "id": 9001,
+    "id": 1,
+    "name": "Western Sydney Express",
+    "code": "WSE",
+    "accountNumber": "WSE-5789312",
+    "contactName": "Sarah Johnson",
+    "contactEmail": "s.johnson@wsexpress.com.au",
+    "contactPhone": "+61 2 8765 4321",
+    "status": "active",
+    "trackingUrlTemplate": "https://tracking.wsexpress.com.au/track/{trackingNumber}",
+    "services": [
+      {
+        "id": 1,
+        "carrierId": 1,
+        "name": "Same Day",
+        "code": "WSE-SAME",
+        "description": "Guaranteed delivery within metro Sydney area on the same day",
+        "estimatedTransitDays": 0,
+        "domesticInternational": "domestic",
+        "costMultiplier": 2.5,
+        "baseRate": 25.00,
+        "currencyCode": "AUD",
+        "status": "active",
+        "restrictions": {
+          "maxWeight": 20,
+          "weightUnit": "kg",
+          "maxDimensions": {
+            "length": 100,
+            "width": 60,
+            "height": 40,
+            "dimensionUnit": "cm"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "carrierId": 1,
+        "name": "Next Day",
+        "code": "WSE-NEXT",
+        "description": "Delivery by end of next business day within Sydney metro",
+        "estimatedTransitDays": 1,
+        "domesticInternational": "domestic",
+        "costMultiplier": 1.5,
+        "baseRate": 15.00,
+        "currencyCode": "AUD",
+        "status": "active",
+        "restrictions": {
+          "maxWeight": 30,
+          "weightUnit": "kg",
+          "maxDimensions": {
+            "length": 120,
+            "width": 80,
+            "height": 60,
+            "dimensionUnit": "cm"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "carrierId": 1,
+        "name": "Standard",
+        "code": "WSE-STD",
+        "description": "Standard delivery within 2-3 business days",
+        "estimatedTransitDays": 3,
+        "domesticInternational": "domestic",
+        "costMultiplier": 1.0,
+        "baseRate": 10.00,
+        "currencyCode": "AUD",
+        "status": "active",
+        "restrictions": {
+          "maxWeight": 50,
+          "weightUnit": "kg",
+          "maxDimensions": {
+            "length": 150,
+            "width": 100,
+            "height": 80,
+            "dimensionUnit": "cm"
+          }
+        }
+      }
+    ],
+    "notes": "Preferred carrier for Sydney metro area"
+  },
+  {
+    "id": 2,
     "name": "Australia Post",
-    "code": "aus_post",
+    "code": "AUSPOST",
+    "accountNumber": "AP-9856743",
+    "contactName": "Michael Williams",
+    "contactEmail": "m.williams@auspost.com.au",
+    "contactPhone": "+61 2 9101 1234",
+    "status": "active",
+    "trackingUrlTemplate": "https://auspost.com.au/mypost/track/#/details/{trackingNumber}",
     "services": [
       {
-        "id": 9101,
-        "carrierId": 9001,
+        "id": 4,
+        "carrierId": 2,
         "name": "Express Post",
-        "code": "exp_post",
-        "description": "Next business day delivery to most metropolitan areas",
-        "estimatedDeliveryDays": 1,
-        "domestic": true,
-        "international": false,
-        "active": true
+        "code": "AP-EXP",
+        "description": "Next business day delivery within Express Post network",
+        "estimatedTransitDays": 1,
+        "domesticInternational": "domestic",
+        "costMultiplier": 1.8,
+        "baseRate": 14.95,
+        "currencyCode": "AUD",
+        "status": "active",
+        "restrictions": {
+          "maxWeight": 5,
+          "weightUnit": "kg",
+          "maxDimensions": {
+            "length": 105,
+            "width": 40,
+            "height": 25,
+            "dimensionUnit": "cm"
+          }
+        }
       },
       {
-        "id": 9102,
-        "carrierId": 9001,
-        "name": "Standard Post",
-        "code": "std_post",
-        "description": "2-6 business days delivery within Australia",
-        "estimatedDeliveryDays": 4,
-        "domestic": true,
-        "international": false,
-        "active": true
+        "id": 5,
+        "carrierId": 2,
+        "name": "Parcel Post",
+        "code": "AP-PP",
+        "description": "Standard delivery within 3-6 business days",
+        "estimatedTransitDays": 6,
+        "domesticInternational": "domestic",
+        "costMultiplier": 1.0,
+        "baseRate": 8.95,
+        "currencyCode": "AUD",
+        "status": "active",
+        "restrictions": {
+          "maxWeight": 22,
+          "weightUnit": "kg",
+          "maxDimensions": {
+            "length": 105,
+            "width": 105,
+            "height": 105,
+            "dimensionUnit": "cm"
+          }
+        }
       },
       {
-        "id": 9103,
-        "carrierId": 9001,
+        "id": 6,
+        "carrierId": 2,
         "name": "International Standard",
-        "code": "int_std",
-        "description": "6-10 business days delivery to most countries",
-        "estimatedDeliveryDays": 8,
-        "domestic": false,
-        "international": true,
-        "active": true
+        "code": "AP-INT",
+        "description": "International shipping to major destinations",
+        "estimatedTransitDays": 10,
+        "domesticInternational": "international",
+        "costMultiplier": 2.5,
+        "baseRate": 42.95,
+        "currencyCode": "AUD",
+        "status": "active",
+        "restrictions": {
+          "maxWeight": 20,
+          "weightUnit": "kg",
+          "maxDimensions": {
+            "length": 105,
+            "width": 50,
+            "height": 50,
+            "dimensionUnit": "cm"
+          }
+        }
       }
     ],
-    "active": true,
-    "logo": "/images/carriers/australia-post.png",
-    "trackingUrlTemplate": "https://auspost.com.au/track/track.html?id={{tracking_number}}"
+    "notes": "National carrier with extensive coverage"
   },
   {
-    "id": 9002,
-    "name": "StarTrack",
-    "code": "startrack",
+    "id": 3,
+    "name": "Fast Freight",
+    "code": "FASTF",
+    "accountNumber": "FF-675438",
+    "contactName": "David Chen",
+    "contactEmail": "service@fastfreight.com.au",
+    "contactPhone": "+61 2 7890 6543",
+    "status": "active",
+    "trackingUrlTemplate": "https://fastfreight.com.au/track/{trackingNumber}",
     "services": [
       {
-        "id": 9201,
-        "carrierId": 9002,
-        "name": "Premium",
-        "code": "premium",
-        "description": "Next business day delivery across Australia",
-        "estimatedDeliveryDays": 1,
-        "domestic": true,
-        "international": false,
-        "active": true
+        "id": 7,
+        "carrierId": 3,
+        "name": "Priority Freight",
+        "code": "FF-PRIO",
+        "description": "Expedited freight delivery for business customers",
+        "estimatedTransitDays": 1,
+        "domesticInternational": "domestic",
+        "costMultiplier": 2.2,
+        "baseRate": 35.00,
+        "currencyCode": "AUD",
+        "status": "active",
+        "restrictions": {
+          "maxWeight": 500,
+          "weightUnit": "kg",
+          "maxDimensions": {
+            "length": 240,
+            "width": 120,
+            "height": 120,
+            "dimensionUnit": "cm"
+          }
+        }
       },
       {
-        "id": 9202,
-        "carrierId": 9002,
-        "name": "Express",
-        "code": "express",
-        "description": "1-2 business days delivery to metropolitan areas",
-        "estimatedDeliveryDays": 2,
-        "domestic": true,
-        "international": false,
-        "active": true
+        "id": 8,
+        "carrierId": 3,
+        "name": "Economy Freight",
+        "code": "FF-ECO",
+        "description": "Cost-effective solution for larger shipments",
+        "estimatedTransitDays": 5,
+        "domesticInternational": "domestic",
+        "costMultiplier": 1.0,
+        "baseRate": 25.00,
+        "currencyCode": "AUD",
+        "status": "active",
+        "restrictions": {
+          "maxWeight": 1000,
+          "weightUnit": "kg",
+          "maxDimensions": {
+            "length": 300,
+            "width": 200,
+            "height": 200,
+            "dimensionUnit": "cm"
+          }
+        }
       }
     ],
-    "active": true,
-    "logo": "/images/carriers/startrack.png",
-    "trackingUrlTemplate": "https://startrack.com.au/track?id={{tracking_number}}"
-  },
-  {
-    "id": 9003,
-    "name": "DHL",
-    "code": "dhl",
-    "services": [
-      {
-        "id": 9301,
-        "carrierId": 9003,
-        "name": "Express Domestic",
-        "code": "exp_dom",
-        "description": "Next business day delivery within Australia",
-        "estimatedDeliveryDays": 1,
-        "domestic": true,
-        "international": false,
-        "active": true
-      },
-      {
-        "id": 9302,
-        "carrierId": 9003,
-        "name": "Express International",
-        "code": "exp_int",
-        "description": "2-5 business days delivery internationally",
-        "estimatedDeliveryDays": 3,
-        "domestic": false,
-        "international": true,
-        "active": true
-      },
-      {
-        "id": 9303,
-        "carrierId": 9003,
-        "name": "Economy Select",
-        "code": "eco_sel",
-        "description": "3-5 business days delivery within Australia",
-        "estimatedDeliveryDays": 4,
-        "domestic": true,
-        "international": false,
-        "active": true
-      }
-    ],
-    "active": true,
-    "logo": "/images/carriers/dhl.png",
-    "trackingUrlTemplate": "https://www.dhl.com/au-en/home/tracking/tracking-express.html?submit=1&tracking-id={{tracking_number}}"
-  },
-  {
-    "id": 9004,
-    "name": "TNT",
-    "code": "tnt",
-    "services": [
-      {
-        "id": 9401,
-        "carrierId": 9004,
-        "name": "Overnight Express",
-        "code": "ovn_exp",
-        "description": "Next business day delivery to most areas",
-        "estimatedDeliveryDays": 1,
-        "domestic": true,
-        "international": false,
-        "active": true
-      },
-      {
-        "id": 9402,
-        "carrierId": 9004,
-        "name": "Road Express",
-        "code": "road_exp",
-        "description": "1-3 business days delivery within Australia",
-        "estimatedDeliveryDays": 2,
-        "domestic": true,
-        "international": false,
-        "active": true
-      }
-    ],
-    "active": true,
-    "logo": "/images/carriers/tnt.png",
-    "trackingUrlTemplate": "https://www.tnt.com/express/en_au/site/shipping-tools/tracking.html?searchType=con&cons={{tracking_number}}"
+    "notes": "Specialized in business-to-business freight"
   }
 ]

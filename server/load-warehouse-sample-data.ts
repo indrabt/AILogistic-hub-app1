@@ -158,6 +158,84 @@ export async function loadSampleData() {
       console.log(`Loaded ${packingTasks.length} packing tasks`);
     }
     
+    // Load shipping carriers data
+    const shippingCarriersPath = path.join(SAMPLE_DATA_DIR, 'shipping_carriers.json');
+    if (fs.existsSync(shippingCarriersPath)) {
+      console.log('Loading shipping carriers data...');
+      const carriers = JSON.parse(fs.readFileSync(shippingCarriersPath, 'utf8'));
+      
+      for (const carrier of carriers) {
+        // Store the carrier without services first
+        const services = [...carrier.services]; // Save services
+        const carrierCopy = { ...carrier };
+        delete carrierCopy.services; // Remove services from carrier object
+        
+        // Initialize shippingCarriers if needed
+        if (!storage['shippingCarriers']) {
+          storage['shippingCarriers'] = [];
+        }
+        
+        // Add carrier directly to storage
+        storage['shippingCarriers'].push(carrierCopy);
+        
+        // Initialize shippingServices if needed
+        if (!storage['shippingServices']) {
+          storage['shippingServices'] = [];
+        }
+        
+        // Add services directly to storage
+        storage['shippingServices'].push(...services);
+      }
+      console.log(`Loaded ${carriers.length} shipping carriers with their services`);
+    }
+    
+    // Load warehouse shipments data
+    const shipmentsPath = path.join(SAMPLE_DATA_DIR, 'shipments.json');
+    if (fs.existsSync(shipmentsPath)) {
+      console.log('Loading warehouse shipments data...');
+      const shipments = JSON.parse(fs.readFileSync(shipmentsPath, 'utf8'));
+      
+      for (const shipment of shipments) {
+        // Extract packages and shipping address
+        const packages = [...shipment.packages];
+        const shippingAddress = { ...shipment.shippingAddress };
+        
+        // Remove them from shipment object to avoid duplication
+        const shipmentCopy = { ...shipment };
+        delete shipmentCopy.packages;
+        delete shipmentCopy.shippingAddress;
+        
+        // Initialize warehouseShipments if needed
+        if (!storage['warehouseShipments']) {
+          storage['warehouseShipments'] = [];
+        }
+        
+        // Add shipment directly to storage
+        storage['warehouseShipments'].push({
+          ...shipmentCopy,
+          packages,
+          shippingAddress
+        });
+        
+        // Initialize shipmentPackages if needed
+        if (!storage['shipmentPackages']) {
+          storage['shipmentPackages'] = [];
+        }
+        
+        // Add packages directly to storage
+        storage['shipmentPackages'].push(...packages);
+        
+        // Initialize shippingAddresses if needed
+        if (!storage['shippingAddresses']) {
+          storage['shippingAddresses'] = [];
+        }
+        
+        // Add shipping address directly to storage
+        storage['shippingAddresses'].push(shippingAddress);
+      }
+      console.log(`Loaded ${shipments.length} warehouse shipments`);
+    }
+    
     console.log('Warehouse sample data loaded successfully!');
   } catch (error) {
     console.error('Error loading sample data:', error);
