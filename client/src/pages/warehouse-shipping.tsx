@@ -262,22 +262,32 @@ export default function WarehouseShipping() {
   };
 
   const updateShipment = async (id: number, data: any) => {
+    console.log(`Starting to update shipment ${id} with data:`, data);
     setIsUpdating(true);
     try {
-      console.log(`Updating shipment ${id} with data:`, data);
+      // Create a safe copy of the data to send
+      const safeData = {
+        carrier: data.carrier || "",
+        service: data.service || "",
+        trackingNumber: data.trackingNumber || ""
+      };
+      
+      console.log(`Sending update request for shipment ${id} with safe data:`, safeData);
+      
       const response = await fetch(`/api/warehouse/shipments/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(safeData),
       });
       
       console.log(`Update shipment API response status: ${response.status}`);
       
+      // Clone the response so we can read it multiple times if needed
+      const responseClone = response.clone();
+      
       if (!response.ok) {
-        // Clone the response to read it twice
-        const responseClone = response.clone();
         let errorText = "";
         try {
           const errorData = await responseClone.json();
@@ -289,8 +299,16 @@ export default function WarehouseShipping() {
         throw new Error(`Failed to update shipment: ${response.status} ${response.statusText}`);
       }
       
-      const updatedShipment = await response.json();
-      console.log("Updated shipment data:", updatedShipment);
+      let updatedShipment;
+      try {
+        updatedShipment = await response.json();
+        console.log("Updated shipment data:", updatedShipment);
+      } catch (error) {
+        console.error("Error parsing response JSON:", error);
+        throw new Error("Failed to parse server response");
+      }
+      
+      // Update the state with the new shipment data
       setShipments(shipments.map(s => s.id === id ? updatedShipment : s));
       setSelectedShipment(updatedShipment);
       
@@ -298,12 +316,13 @@ export default function WarehouseShipping() {
         title: "Success",
         description: "Shipment updated successfully.",
       });
+      
       return updatedShipment;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating shipment:", error);
       toast({
         title: "Error",
-        description: "Failed to update shipment. Please try again.",
+        description: `Failed to update shipment: ${error.message || "Unknown error"}`,
         variant: "destructive",
       });
       throw error;
@@ -313,48 +332,79 @@ export default function WarehouseShipping() {
   };
 
   const confirmShipment = async (id: number) => {
+    console.log(`Starting to confirm shipment ${id}`);
     setIsConfirming(true);
+    
     try {
-      console.log(`Confirming shipment ${id}`);
-      const response = await fetch(`/api/warehouse/shipments/${id}/confirm`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      console.log(`Sending confirm request for shipment ${id}`);
       
-      console.log(`Confirm shipment API response status: ${response.status}`);
+      // Create a specific try/catch block for the fetch operation
+      let response;
+      try {
+        response = await fetch(`/api/warehouse/shipments/${id}/confirm`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        
+        console.log(`Confirm shipment API response status: ${response.status}`);
+      } catch (fetchError: any) {
+        console.error("Network error during shipment confirmation:", fetchError);
+        throw new Error(`Network error: ${fetchError.message || "Failed to connect to server"}`);
+      }
+      
+      // Clone the response so we can read it multiple times if needed
+      const responseClone = response.clone();
       
       if (!response.ok) {
-        // Clone the response to read it twice
-        const responseClone = response.clone();
         let errorText = "";
         try {
           const errorData = await responseClone.json();
           errorText = JSON.stringify(errorData);
         } catch (e) {
-          errorText = await response.text();
+          try {
+            errorText = await response.text();
+          } catch (textError) {
+            errorText = "Could not extract error details from response";
+          }
         }
         console.error(`Failed to confirm shipment: ${response.status} ${response.statusText}`, errorText);
         throw new Error(`Failed to confirm shipment: ${response.status} ${response.statusText}`);
       }
       
-      const confirmedShipment = await response.json();
-      console.log("Confirmed shipment data:", confirmedShipment);
-      setShipments(shipments.map(s => s.id === id ? confirmedShipment : s));
-      setSelectedShipment(confirmedShipment);
+      let confirmedShipment;
+      try {
+        confirmedShipment = await response.json();
+        console.log("Confirmed shipment data:", confirmedShipment);
+      } catch (parseError) {
+        console.error("Error parsing confirmed shipment response:", parseError);
+        throw new Error("Could not parse server response for confirmed shipment");
+      }
       
-      toast({
-        title: "Success",
-        description: "Shipment confirmed and marked as shipped.",
-      });
-    } catch (error) {
+      // Only update state if we got valid shipment data
+      if (confirmedShipment && confirmedShipment.id) {
+        setShipments(prevShipments => prevShipments.map(s => s.id === id ? confirmedShipment : s));
+        setSelectedShipment(confirmedShipment);
+        
+        toast({
+          title: "Success",
+          description: "Shipment confirmed and marked as shipped.",
+        });
+      } else {
+        console.error("Invalid confirmed shipment data received:", confirmedShipment);
+        throw new Error("Server returned invalid shipment data");
+      }
+      
+      return confirmedShipment;
+    } catch (error: any) {
       console.error("Error confirming shipment:", error);
       toast({
         title: "Error",
-        description: "Failed to confirm shipment. Please try again.",
+        description: `Failed to confirm shipment: ${error.message || "Unknown error"}`,
         variant: "destructive",
       });
+      throw error; // Re-throw so calling code can handle it
     } finally {
       setIsConfirming(false);
     }
@@ -398,7 +448,13 @@ export default function WarehouseShipping() {
   };
 
   const handleConfirmAndShip = (shipment: WarehouseShipment) => {
+    console.log("handleConfirmAndShip called with shipment:", shipment);
+    console.log("Selected carrier:", selectedCarrier);
+    console.log("Selected service:", selectedService);
+    console.log("Tracking number:", trackingNumber);
+    
     if (!selectedCarrier || !selectedService || !trackingNumber) {
+      console.log("Missing required shipping information");
       toast({
         title: "Missing information",
         description: "Please select a carrier, service, and enter a tracking number.",
@@ -407,21 +463,48 @@ export default function WarehouseShipping() {
       return;
     }
     
-    updateShipment(shipment.id, {
-      carrier: carriers.find(c => c.id.toString() === selectedCarrier)?.name,
-      service: getCarrierServices(selectedCarrier).find(s => s.id.toString() === selectedService)?.name,
-      trackingNumber: trackingNumber
-    })
-    .then(() => {
-      confirmShipment(shipment.id);
-      toast({
-        title: "Shipment Confirmed",
-        description: "The shipment has been confirmed and marked as shipped."
+    // Get the full carrier name and service name for display and debugging
+    const carrierName = carriers.find(c => c.id.toString() === selectedCarrier)?.name || "";
+    const serviceName = getCarrierServices(selectedCarrier).find(s => s.id.toString() === selectedService)?.name || "";
+    
+    console.log(`Updating shipment ${shipment.id} with carrier: ${carrierName}, service: ${serviceName}`);
+    
+    try {
+      updateShipment(shipment.id, {
+        carrier: carrierName,
+        service: serviceName,
+        trackingNumber: trackingNumber
+      })
+      .then((updatedShipment) => {
+        console.log("Shipment updated successfully:", updatedShipment);
+        console.log(`Now confirming shipment ${shipment.id}`);
+        
+        // Only proceed to confirm if the update was successful
+        return confirmShipment(shipment.id);
+      })
+      .then((confirmedShipment) => {
+        console.log("Shipment confirmed successfully:", confirmedShipment);
+        toast({
+          title: "Shipment Confirmed",
+          description: "The shipment has been confirmed and marked as shipped."
+        });
+      })
+      .catch((error: any) => {
+        console.error("Error processing shipment:", error);
+        toast({
+          title: "Error",
+          description: `Failed to process shipment: ${error.message || "Unknown error"}`,
+          variant: "destructive"
+        });
       });
-    })
-    .catch(error => {
-      console.error("Error processing shipment:", error);
-    });
+    } catch (err) {
+      console.error("Exception in handleConfirmAndShip:", err);
+      toast({
+        title: "System Error",
+        description: "An unexpected error occurred while processing the shipment.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
