@@ -178,6 +178,54 @@ export default function WarehousePacking() {
     // Set a flag to indicate we've accessed this page successfully
     sessionStorage.setItem("directWarehousePackingAccess", "true");
   }, [setLocation]);
+  
+  // Event listeners for the custom events from dynamically created buttons
+  useEffect(() => {
+    // Handler for continuing a task (setting selected task)
+    const handleTaskContinue = (event: any) => {
+      const taskId = event.detail?.taskId;
+      console.log("Task continue event received for task:", taskId);
+      if (taskId) {
+        const task = packingTasks.find(t => t.id === taskId);
+        if (task) {
+          setSelectedTask(task);
+        }
+      }
+    };
+    
+    // Handler for completing a task
+    const handleTaskComplete = (event: any) => {
+      const taskId = event.detail?.taskId;
+      console.log("Task complete event received for task:", taskId);
+      if (taskId) {
+        const task = packingTasks.find(t => t.id === taskId);
+        if (task) {
+          // Find the Complete button for this task and click it programmatically
+          const rows = document.querySelectorAll('table tbody tr');
+          for (const row of Array.from(rows)) {
+            const idCell = row.querySelector('td:first-child');
+            if (idCell && idCell.textContent?.trim() === String(taskId)) {
+              const completeButton = row.querySelector('button:nth-of-type(2)');
+              if (completeButton) {
+                (completeButton as HTMLButtonElement).click();
+                break;
+              }
+            }
+          }
+        }
+      }
+    };
+    
+    // Add event listeners
+    document.addEventListener('task-continue', handleTaskContinue);
+    document.addEventListener('task-complete', handleTaskComplete);
+    
+    // Clean up event listeners
+    return () => {
+      document.removeEventListener('task-continue', handleTaskContinue);
+      document.removeEventListener('task-complete', handleTaskComplete);
+    };
+  }, [packingTasks]);
 
   // API Queries
   const { 
@@ -1162,41 +1210,136 @@ export default function WarehousePacking() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={(e) => {
+                            onClick={async (e) => {
                               e.preventDefault();
                               console.log("Start Packing button clicked for task:", task.id);
+                              
+                              // Get the button and save its original state
+                              const button = e.currentTarget;
+                              const originalContent = button.innerHTML;
+                              
                               // Apply a visual indicator that the task is updating
-                              const row = e.currentTarget.closest('tr');
+                              const row = button.closest('tr');
                               if (row) {
                                 row.classList.add('animate-pulse', 'bg-primary/20');
                                 setTimeout(() => {
                                   row.classList.remove('animate-pulse', 'bg-primary/20');
                                 }, 1000);
                               }
-                              // Call the actual handler
-                              handleStartTask(task);
-                              // Force a UI update by directly setting state
-                              // Directly update status in the row to provide instant feedback
-                              const statusCell = row?.querySelector('td:nth-child(5)');
-                              const buttonCell = row?.querySelector('td:nth-child(6)');
-                              if (statusCell) {
-                                // Create new badge to replace the old one
-                                const oldBadge = statusCell.querySelector('span');
-                                const newBadge = document.createElement('span');
-                                newBadge.className = oldBadge?.className.replace('outline', 'secondary') || 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80';
-                                newBadge.textContent = 'in_progress';
-                                if (oldBadge && oldBadge.parentNode) {
-                                  oldBadge.parentNode.replaceChild(newBadge, oldBadge);
+                              
+                              // Show loading state in button
+                              button.disabled = true;
+                              button.innerHTML = '<svg class="animate-spin h-4 w-4 mr-1" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Starting...';
+                              
+                              // Make a direct API call to start the task
+                              try {
+                                // Do basic validation first
+                                if (!user?.username) {
+                                  toast({
+                                    title: "Authentication Error",
+                                    description: "You must be logged in to start this task",
+                                    variant: "destructive"
+                                  });
+                                  button.disabled = false;
+                                  button.innerHTML = originalContent;
+                                  return;
                                 }
-                              }
-                              if (buttonCell) {
-                                // Replace the button with Continue and Complete buttons
-                                buttonCell.innerHTML = `
-                                  <div class="flex gap-2">
-                                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3 py-2">Continue</button>
-                                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 py-2">Complete</button>
-                                  </div>
-                                `;
+                                
+                                // Create the update data
+                                const updateData = {
+                                  status: "in_progress",
+                                  assignedTo: user.username,
+                                  startedAt: new Date().toISOString()
+                                };
+                                
+                                console.log(`Sending PATCH request to /api/warehouse/packing-tasks/${task.id} with data:`, updateData);
+                                
+                                const response = await fetch(`/api/warehouse/packing-tasks/${task.id}`, {
+                                  method: 'PATCH',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                  },
+                                  body: JSON.stringify(updateData),
+                                  credentials: 'include'
+                                });
+                                
+                                console.log("Start task response status:", response.status);
+                                
+                                // If the request was successful, update the UI
+                                if (response.ok) {
+                                  // Update the status cell
+                                  const statusCell = row?.querySelector('td:nth-child(5)');
+                                  const buttonCell = row?.querySelector('td:nth-child(6)');
+                                  
+                                  if (statusCell) {
+                                    // Create new badge to replace the old one
+                                    const oldBadge = statusCell.querySelector('span');
+                                    const newBadge = document.createElement('span');
+                                    newBadge.className = oldBadge?.className.replace('outline', 'secondary') || 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80';
+                                    newBadge.textContent = 'in_progress';
+                                    if (oldBadge && oldBadge.parentNode) {
+                                      oldBadge.parentNode.replaceChild(newBadge, oldBadge);
+                                    }
+                                  }
+                                  
+                                  if (buttonCell) {
+                                    // Replace the button with Continue and Complete buttons
+                                    buttonCell.innerHTML = `
+                                      <div class="flex gap-2">
+                                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3 py-2" 
+                                          onclick="(function() { 
+                                            const customEvent = new CustomEvent('task-continue', { detail: { taskId: ${task.id} } });
+                                            document.dispatchEvent(customEvent);
+                                          })()">Continue</button>
+                                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 py-2"
+                                          onclick="(function() {
+                                            const customEvent = new CustomEvent('task-complete', { detail: { taskId: ${task.id} } });
+                                            document.dispatchEvent(customEvent);
+                                          })()">Complete</button>
+                                      </div>
+                                    `;
+                                  }
+                                  
+                                  // Force refresh the task list 
+                                  queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
+                                  
+                                  toast({
+                                    title: "Task Started",
+                                    description: `Packing task #${task.id} is now in progress`
+                                  });
+                                } else {
+                                  // If the request failed, show an error
+                                  button.disabled = false;
+                                  button.innerHTML = originalContent;
+                                  
+                                  // Try to get the error message
+                                  let errorMessage = 'An error occurred while starting the task';
+                                  try {
+                                    const responseClone = response.clone();
+                                    const responseData = await responseClone.json();
+                                    errorMessage = responseData.message || errorMessage;
+                                  } catch (e) {
+                                    console.error("Could not parse error response:", e);
+                                  }
+                                  
+                                  toast({
+                                    title: "Error Starting Task",
+                                    description: errorMessage,
+                                    variant: "destructive"
+                                  });
+                                }
+                              } catch (error) {
+                                console.error("Error starting task:", error);
+                                
+                                // Restore the button
+                                button.disabled = false;
+                                button.innerHTML = originalContent;
+                                
+                                toast({
+                                  title: "Error",
+                                  description: "An unexpected error occurred while starting the task",
+                                  variant: "destructive"
+                                });
                               }
                             }}
                           >
