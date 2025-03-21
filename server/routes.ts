@@ -1913,6 +1913,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create packing task" });
     }
   });
+  
+  app.patch("/api/warehouse/packing-tasks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const taskSchema = z.object({
+        status: z.enum(["pending", "in_progress", "completed", "cancelled"]).optional(),
+        assignedTo: z.string().optional(),
+        startedAt: z.string().optional(),
+        completedAt: z.string().optional()
+      });
+
+      const validatedData = taskSchema.parse(req.body);
+      const updatedTask = await storage.updatePackingTask(id, validatedData);
+      
+      if (!updatedTask) {
+        return res.status(404).json({ message: "Packing task not found" });
+      }
+      
+      res.json(updatedTask);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid packing task data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update packing task" });
+    }
+  });
 
   app.get("/api/warehouse/packing-tasks/:taskId/items", async (req, res) => {
     try {
