@@ -1368,41 +1368,32 @@ export default function WarehousePacking() {
                                 
                                 // If the request was successful, update the UI
                                 if (response.ok) {
-                                  // Update the status cell
-                                  const statusCell = row?.querySelector('td:nth-child(5)');
-                                  const buttonCell = row?.querySelector('td:nth-child(6)');
-                                  
-                                  if (statusCell) {
-                                    // Create new badge to replace the old one
-                                    const oldBadge = statusCell.querySelector('span');
-                                    const newBadge = document.createElement('span');
-                                    newBadge.className = oldBadge?.className.replace('outline', 'secondary') || 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80';
-                                    newBadge.textContent = 'in_progress';
-                                    if (oldBadge && oldBadge.parentNode) {
-                                      oldBadge.parentNode.replaceChild(newBadge, oldBadge);
-                                    }
-                                  }
-                                  
-                                  if (buttonCell) {
-                                    // Replace the button with Continue and Complete buttons
-                                    buttonCell.innerHTML = `
-                                      <div class="flex gap-2">
-                                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3 py-2" 
-                                          onclick="(function() { 
-                                            const customEvent = new CustomEvent('task-continue', { detail: { taskId: ${task.id} } });
-                                            document.dispatchEvent(customEvent);
-                                          })()">Continue</button>
-                                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 py-2"
-                                          onclick="(function() {
-                                            const customEvent = new CustomEvent('task-complete', { detail: { taskId: ${task.id} } });
-                                            document.dispatchEvent(customEvent);
-                                          })()">Complete</button>
-                                      </div>
-                                    `;
-                                  }
-                                  
-                                  // Force refresh the task list 
+                                  // Instead of manipulating the DOM directly, let React handle the updates
+                                  // by refreshing the data
                                   queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
+                                  
+                                  // Also try to update the selected task if needed
+                                  try {
+                                    const updatedTask = await response.json();
+                                    console.log("Task updated successfully:", updatedTask);
+                                    
+                                    // If this is the currently selected task, update it
+                                    if (selectedTask && selectedTask.id === task.id) {
+                                      setSelectedTask(updatedTask);
+                                    }
+                                    
+                                    // Create a task update event that any component can listen for
+                                    const taskUpdateEvent = new CustomEvent('task-update', {
+                                      detail: {
+                                        taskId: task.id,
+                                        status: 'in_progress',
+                                        task: updatedTask
+                                      }
+                                    });
+                                    document.dispatchEvent(taskUpdateEvent);
+                                  } catch (e) {
+                                    console.error("Failed to parse updated task JSON:", e);
+                                  }
                                   
                                   toast({
                                     title: "Task Started",
