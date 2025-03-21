@@ -1520,30 +1520,32 @@ export default function WarehousePacking() {
                                   
                                   // If the request was successful, update the UI
                                   if (response.ok) {
-                                    // Update the status cell
-                                    const statusCell = row?.querySelector('td:nth-child(5)');
-                                    const buttonCell = row?.querySelector('td:nth-child(6)');
-                                    
-                                    if (statusCell) {
-                                      // Create new badge to replace the old one
-                                      const oldBadge = statusCell.querySelector('span');
-                                      const newBadge = document.createElement('span');
-                                      newBadge.className = 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80';
-                                      newBadge.textContent = 'completed';
-                                      if (oldBadge && oldBadge.parentNode) {
-                                        oldBadge.parentNode.replaceChild(newBadge, oldBadge);
-                                      }
-                                    }
-                                    
-                                    if (buttonCell) {
-                                      // Replace both buttons with just View Details
-                                      buttonCell.innerHTML = `
-                                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 py-2">View Details</button>
-                                      `;
-                                    }
-                                    
-                                    // Force refresh the task list
+                                    // Instead of manipulating the DOM directly, let React handle the updates
+                                    // by refreshing the data
                                     queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
+                                    
+                                    // Also try to update the selected task if needed
+                                    try {
+                                      const updatedTask = await response.json();
+                                      console.log("Task completed successfully:", updatedTask);
+                                      
+                                      // If this is the currently selected task, update it
+                                      if (selectedTask && selectedTask.id === task.id) {
+                                        setSelectedTask(updatedTask);
+                                      }
+                                      
+                                      // Create a task update event that any component can listen for
+                                      const taskUpdateEvent = new CustomEvent('task-update', {
+                                        detail: {
+                                          taskId: task.id,
+                                          status: 'completed',
+                                          task: updatedTask
+                                        }
+                                      });
+                                      document.dispatchEvent(taskUpdateEvent);
+                                    } catch (e) {
+                                      console.error("Failed to parse completed task JSON:", e);
+                                    }
                                     
                                     toast({
                                       title: "Task Completed",
@@ -1687,36 +1689,31 @@ export default function WarehousePacking() {
                     
                     // If the request was successful
                     if (response.ok) {
-                      // Close the detailed view
-                      setSelectedTask(null);
+                      try {
+                        // Try to get the updated task data
+                        const updatedTask = await response.json();
+                        console.log("Task completed successfully from detail view:", updatedTask);
+                        
+                        // Create a task update event that other components can listen for
+                        const taskUpdateEvent = new CustomEvent('task-update', {
+                          detail: {
+                            taskId: selectedTask.id,
+                            status: 'completed',
+                            task: updatedTask
+                          }
+                        });
+                        document.dispatchEvent(taskUpdateEvent);
+                      } catch (e) {
+                        console.error("Failed to parse completed task JSON from detail view:", e);
+                      }
                       
-                      // Force refresh the task list
+                      // Force refresh the task list before closing the detail view
                       queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
                       
-                      // Also update UI directly for immediate feedback
-                      const taskRow = document.querySelector(`table tbody tr:has(td:first-child:contains("${selectedTask.id}"))`);
-                      if (taskRow) {
-                        const statusCell = taskRow.querySelector('td:nth-child(5)');
-                        const buttonCell = taskRow.querySelector('td:nth-child(6)');
-                        
-                        if (statusCell) {
-                          // Update the status badge
-                          const oldBadge = statusCell.querySelector('span');
-                          const newBadge = document.createElement('span');
-                          newBadge.className = 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80';
-                          newBadge.textContent = 'completed';
-                          if (oldBadge && oldBadge.parentNode) {
-                            oldBadge.parentNode.replaceChild(newBadge, oldBadge);
-                          }
-                        }
-                        
-                        if (buttonCell) {
-                          // Replace with View Details button
-                          buttonCell.innerHTML = `
-                            <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 py-2">View Details</button>
-                          `;
-                        }
-                      }
+                      // Close the detailed view after ensuring the data is refreshed
+                      setTimeout(() => {
+                        setSelectedTask(null);
+                      }, 100);
                       
                       toast({
                         title: "Task Completed",
