@@ -41,7 +41,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Plus, CheckCircle, AlertTriangle, FileBarChart, PackageOpen, Truck } from 'lucide-react';
+import { Loader2, Plus, CheckCircle, AlertTriangle, FileBarChart, PackageOpen, Truck, FileText } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 // Types
@@ -662,16 +662,29 @@ export default function WarehouseReceiving() {
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedOrderId(order.id);
-                                  setActiveTab("items");
-                                }}
-                              >
-                                View Items
-                              </Button>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedOrderId(order.id);
+                                    setActiveTab("items");
+                                  }}
+                                >
+                                  View Items
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedOrderId(order.id);
+                                    setDocumentOpen(true);
+                                  }}
+                                >
+                                  <FileText className="h-4 w-4 mr-1" />
+                                  Slip
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -1205,6 +1218,18 @@ export default function WarehouseReceiving() {
                           </FormItem>
                         )}
                       />
+                      
+                      <div className="space-y-2">
+                        <Label>Attachment Images</Label>
+                        <ImageUploader 
+                          onImageCapture={handleImageCapture}
+                          existingImages={capturedImages}
+                          maxImages={3}
+                        />
+                        <FormDescription>
+                          Add images to document the discrepancy
+                        </FormDescription>
+                      </div>
                     </form>
                   </Form>
 
@@ -1280,6 +1305,51 @@ export default function WarehouseReceiving() {
           </Card>
         </TabsContent>
       </Tabs>
+      
+      {/* Document Generator Modal */}
+      {documentOpen && selectedOrderId && (
+        <DocumentGenerator
+          documentType="receiving-slip"
+          data={inboundOrders.find(o => o.id === selectedOrderId)}
+          isOpen={documentOpen}
+          onClose={() => setDocumentOpen(false)}
+        />
+      )}
+      
+      {/* Barcode Scanner Modal */}
+      {scannerOpen && (
+        <Dialog open={scannerOpen} onOpenChange={setScannerOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {scanTarget === 'sku' ? 'Scan Product' : 'Scan Location'}
+              </DialogTitle>
+              <DialogDescription>
+                {scanTarget === 'sku' 
+                  ? 'Scan the product barcode to verify the item'
+                  : 'Scan the location code to assign storage location'
+                }
+              </DialogDescription>
+            </DialogHeader>
+            
+            <BarcodeScanner
+              onScanComplete={(result) => {
+                toast({
+                  title: "Scan Complete",
+                  description: `Scanned value: ${result.scannedValue}`,
+                });
+                setScannerOpen(false);
+              }}
+              onCancel={() => setScannerOpen(false)}
+              expectedValue={scanTarget === 'sku' 
+                ? orderItems.find(i => i.id === selectedItemId)?.sku 
+                : undefined
+              }
+              scanLabel={scanTarget === 'sku' ? 'Scan Product' : 'Scan Location'}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
