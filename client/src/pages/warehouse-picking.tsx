@@ -296,7 +296,7 @@ export default function WarehousePicking() {
   // Handle starting a picking task
   const handleStartTask = (task: PickTask) => {
     // Add loading state if needed
-    console.log("Starting task:", task);
+    console.log("Starting picking task:", task);
     
     try {
       // Check if user is available
@@ -321,6 +321,10 @@ export default function WarehousePicking() {
         return;
       }
       
+      // Store current user info in local variable for debugging
+      const currentUser = user;
+      console.log("Current user when starting picking task:", currentUser);
+      
       // Let's try a direct fetch call first to debug the API
       console.log("Trying direct fetch call to update task status...");
       
@@ -330,6 +334,8 @@ export default function WarehousePicking() {
         assignedTo: user.username,
         startedAt: new Date().toISOString()
       };
+      
+      console.log(`Sending PATCH request to /api/warehouse/pick-tasks/${task.id} with data:`, updateData);
       
       // Make a direct fetch call
       fetch(`/api/warehouse/pick-tasks/${task.id}`, {
@@ -777,9 +783,29 @@ export default function WarehousePicking() {
                       <TableCell>
                         {task.status === "pending" && (
                           <Button 
+                            id={`start-picking-button-${task.id}`}
                             variant="outline" 
                             size="sm"
-                            onClick={() => handleStartTask(task)}
+                            onClick={(e) => {
+                              console.log('Start Picking button clicked for task:', task.id);
+                              
+                              // Add visual feedback
+                              const button = e.currentTarget;
+                              const originalContent = button.innerHTML;
+                              
+                              // Show loading state
+                              button.disabled = true;
+                              button.innerHTML = '<svg class="animate-spin h-4 w-4 mr-1" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Starting...';
+                              
+                              // Call the handler
+                              handleStartTask(task);
+                              
+                              // Restore the button after a delay
+                              setTimeout(() => {
+                                button.disabled = false;
+                                button.innerHTML = originalContent;
+                              }, 5000);
+                            }}
                           >
                             Start Picking
                           </Button>
