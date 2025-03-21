@@ -1214,37 +1214,138 @@ export default function WarehousePacking() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={(e) => {
+                              onClick={async (e) => {
                                 e.preventDefault();
                                 console.log("Complete button clicked for task:", task.id);
+                                
+                                // Get the button and save its original state
+                                const button = e.currentTarget;
+                                const originalContent = button.innerHTML;
+                                
                                 // Apply a visual indicator that the task is updating
-                                const row = e.currentTarget.closest('tr');
+                                const row = button.closest('tr');
                                 if (row) {
                                   row.classList.add('animate-pulse', 'bg-primary/20');
                                   setTimeout(() => {
                                     row.classList.remove('animate-pulse', 'bg-primary/20');
                                   }, 1000);
                                 }
-                                // Call the actual handler
-                                handleCompleteTask(task);
-                                // Immediately update UI for better responsiveness
-                                const statusCell = row?.querySelector('td:nth-child(5)');
-                                const buttonCell = row?.querySelector('td:nth-child(6)');
-                                if (statusCell) {
-                                  // Create new badge to replace the old one
-                                  const oldBadge = statusCell.querySelector('span');
-                                  const newBadge = document.createElement('span');
-                                  newBadge.className = oldBadge?.className.replace('secondary', 'default') || 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80';
-                                  newBadge.textContent = 'completed';
-                                  if (oldBadge && oldBadge.parentNode) {
-                                    oldBadge.parentNode.replaceChild(newBadge, oldBadge);
+                                
+                                // Show loading state in button
+                                button.disabled = true;
+                                button.innerHTML = '<svg class="animate-spin h-4 w-4 mr-1" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Completing...';
+                                
+                                // Make a direct API call to complete the task
+                                try {
+                                  // Do basic validation first
+                                  if (!user?.username) {
+                                    toast({
+                                      title: "Authentication Error",
+                                      description: "You must be logged in to complete this task",
+                                      variant: "destructive"
+                                    });
+                                    button.disabled = false;
+                                    button.innerHTML = originalContent;
+                                    return;
                                   }
-                                }
-                                if (buttonCell) {
-                                  // Replace both buttons with just View Details
-                                  buttonCell.innerHTML = `
-                                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 py-2">View Details</button>
-                                  `;
+                                  
+                                  // Check if task can be completed (right status)
+                                  if (task.status !== "in_progress") {
+                                    toast({
+                                      title: "Task Status Error",
+                                      description: `Task #${task.id} must be in progress before it can be completed`,
+                                      variant: "destructive"
+                                    });
+                                    button.disabled = false;
+                                    button.innerHTML = originalContent;
+                                    return;
+                                  }
+                                  
+                                  const bypassVerification = sessionStorage.getItem("bypassPackingVerification") === "true";
+                                  
+                                  // Create the update data
+                                  const updateData = {
+                                    status: "completed",
+                                    completedAt: new Date().toISOString()
+                                  };
+                                  
+                                  console.log(`Sending PATCH request to /api/warehouse/packing-tasks/${task.id} with data:`, updateData);
+                                  
+                                  const response = await fetch(`/api/warehouse/packing-tasks/${task.id}`, {
+                                    method: 'PATCH',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify(updateData),
+                                    credentials: 'include'
+                                  });
+                                  
+                                  console.log("Complete task response status:", response.status);
+                                  
+                                  // If the request was successful, update the UI
+                                  if (response.ok) {
+                                    // Update the status cell
+                                    const statusCell = row?.querySelector('td:nth-child(5)');
+                                    const buttonCell = row?.querySelector('td:nth-child(6)');
+                                    
+                                    if (statusCell) {
+                                      // Create new badge to replace the old one
+                                      const oldBadge = statusCell.querySelector('span');
+                                      const newBadge = document.createElement('span');
+                                      newBadge.className = 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80';
+                                      newBadge.textContent = 'completed';
+                                      if (oldBadge && oldBadge.parentNode) {
+                                        oldBadge.parentNode.replaceChild(newBadge, oldBadge);
+                                      }
+                                    }
+                                    
+                                    if (buttonCell) {
+                                      // Replace both buttons with just View Details
+                                      buttonCell.innerHTML = `
+                                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 py-2">View Details</button>
+                                      `;
+                                    }
+                                    
+                                    // Force refresh the task list
+                                    queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
+                                    
+                                    toast({
+                                      title: "Task Completed",
+                                      description: `Packing task #${task.id} has been completed successfully`
+                                    });
+                                  } else {
+                                    // If the request failed, show an error
+                                    button.disabled = false;
+                                    button.innerHTML = originalContent;
+                                    
+                                    // Try to get the error message
+                                    let errorMessage = 'An error occurred while completing the task';
+                                    try {
+                                      const responseClone = response.clone();
+                                      const responseData = await responseClone.json();
+                                      errorMessage = responseData.message || errorMessage;
+                                    } catch (e) {
+                                      console.error("Could not parse error response:", e);
+                                    }
+                                    
+                                    toast({
+                                      title: "Error Completing Task",
+                                      description: errorMessage,
+                                      variant: "destructive"
+                                    });
+                                  }
+                                } catch (error) {
+                                  console.error("Error completing task:", error);
+                                  
+                                  // Restore the button
+                                  button.disabled = false;
+                                  button.innerHTML = originalContent;
+                                  
+                                  toast({
+                                    title: "Error",
+                                    description: "An unexpected error occurred while completing the task",
+                                    variant: "destructive"
+                                  });
                                 }
                               }}
                             >
@@ -1289,48 +1390,136 @@ export default function WarehousePacking() {
               
               <Button 
                 variant="default"
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.preventDefault();
                   console.log("Complete task detail button clicked for task:", selectedTask.id);
-                  // Apply a visual indicator
+                  
+                  // Get the button and save its original state
                   const button = e.currentTarget;
-                  button.classList.add('opacity-50');
+                  const originalContent = button.innerHTML;
+                  
+                  // Update visual state
                   button.disabled = true;
                   button.innerHTML = '<svg class="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Completing...';
                   
-                  // Call the actual handler
-                  handleCompleteTask(selectedTask);
-                  
-                  // Update UI immediately
-                  setTimeout(() => {
-                    // Close the detailed view by clearing the selected task
-                    setSelectedTask(null);
+                  // Make a direct API call to complete the task
+                  try {
+                    // Do basic validation first
+                    if (!user?.username) {
+                      toast({
+                        title: "Authentication Error",
+                        description: "You must be logged in to complete this task",
+                        variant: "destructive"
+                      });
+                      button.disabled = false;
+                      button.innerHTML = originalContent;
+                      return;
+                    }
                     
-                    // Find and update the task row in the table
-                    const taskRow = document.querySelector(`table tbody tr:has-text("${selectedTask.id}")`);
-                    if (taskRow) {
-                      const statusCell = taskRow.querySelector('td:nth-child(5)');
-                      const buttonCell = taskRow.querySelector('td:nth-child(6)');
+                    // Check if task can be completed (right status)
+                    if (selectedTask.status !== "in_progress") {
+                      toast({
+                        title: "Task Status Error",
+                        description: `Task #${selectedTask.id} must be in progress before it can be completed`,
+                        variant: "destructive"
+                      });
+                      button.disabled = false;
+                      button.innerHTML = originalContent;
+                      return;
+                    }
+                    
+                    const bypassVerification = sessionStorage.getItem("bypassPackingVerification") === "true";
+                    
+                    // Create the update data
+                    const updateData = {
+                      status: "completed",
+                      completedAt: new Date().toISOString()
+                    };
+                    
+                    console.log(`Sending PATCH request to /api/warehouse/packing-tasks/${selectedTask.id} with data:`, updateData);
+                    
+                    const response = await fetch(`/api/warehouse/packing-tasks/${selectedTask.id}`, {
+                      method: 'PATCH',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify(updateData),
+                      credentials: 'include'
+                    });
+                    
+                    console.log("Complete task detail view response status:", response.status);
+                    
+                    // If the request was successful
+                    if (response.ok) {
+                      // Close the detailed view
+                      setSelectedTask(null);
                       
-                      if (statusCell) {
-                        // Update the status badge
-                        const oldBadge = statusCell.querySelector('span');
-                        const newBadge = document.createElement('span');
-                        newBadge.className = 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80';
-                        newBadge.textContent = 'completed';
-                        if (oldBadge && oldBadge.parentNode) {
-                          oldBadge.parentNode.replaceChild(newBadge, oldBadge);
+                      // Force refresh the task list
+                      queryClient.invalidateQueries({ queryKey: ["/api/warehouse/packing-tasks"] });
+                      
+                      // Also update UI directly for immediate feedback
+                      const taskRow = document.querySelector(`table tbody tr:has(td:first-child:contains("${selectedTask.id}"))`);
+                      if (taskRow) {
+                        const statusCell = taskRow.querySelector('td:nth-child(5)');
+                        const buttonCell = taskRow.querySelector('td:nth-child(6)');
+                        
+                        if (statusCell) {
+                          // Update the status badge
+                          const oldBadge = statusCell.querySelector('span');
+                          const newBadge = document.createElement('span');
+                          newBadge.className = 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80';
+                          newBadge.textContent = 'completed';
+                          if (oldBadge && oldBadge.parentNode) {
+                            oldBadge.parentNode.replaceChild(newBadge, oldBadge);
+                          }
+                        }
+                        
+                        if (buttonCell) {
+                          // Replace with View Details button
+                          buttonCell.innerHTML = `
+                            <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 py-2">View Details</button>
+                          `;
                         }
                       }
                       
-                      if (buttonCell) {
-                        // Replace with View Details button
-                        buttonCell.innerHTML = `
-                          <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 py-2">View Details</button>
-                        `;
+                      toast({
+                        title: "Task Completed",
+                        description: `Packing task #${selectedTask.id} has been completed successfully`
+                      });
+                    } else {
+                      // If the request failed, show an error
+                      button.disabled = false;
+                      button.innerHTML = originalContent;
+                      
+                      // Try to get the error message
+                      let errorMessage = 'An error occurred while completing the task';
+                      try {
+                        const responseClone = response.clone();
+                        const responseData = await responseClone.json();
+                        errorMessage = responseData.message || errorMessage;
+                      } catch (e) {
+                        console.error("Could not parse error response:", e);
                       }
+                      
+                      toast({
+                        title: "Error Completing Task",
+                        description: errorMessage,
+                        variant: "destructive"
+                      });
                     }
-                  }, 100);
+                  } catch (error) {
+                    console.error("Error completing task from detail view:", error);
+                    
+                    // Restore button state
+                    button.disabled = false;
+                    button.innerHTML = originalContent;
+                    
+                    toast({
+                      title: "Error",
+                      description: "An unexpected error occurred while completing the task",
+                      variant: "destructive"
+                    });
+                  }
                 }}
               >
                 <Check className="h-4 w-4 mr-2" />
