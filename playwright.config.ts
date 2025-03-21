@@ -7,8 +7,9 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
+  // Use the port the server is actually running on
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:5000',
     trace: 'on-first-retry',
     video: 'on',
     // Automatically capture a screenshot after each test
@@ -19,11 +20,6 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-  ],
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: true,
-    timeout: 120000, // Allow 2 minutes for server to start
-  },
+  ]
+  // No webServer config needed as we're using the running server
 });
