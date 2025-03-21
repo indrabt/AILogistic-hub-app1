@@ -256,28 +256,43 @@ test.describe('Global Memory Approach', () => {
     if (hasData) {
       // Use the stored data to verify UI state
       const currentStatus = await page.evaluate(() => {
+        // Define interfaces for type safety
+        interface TaskBasicInfo {
+          id: string;
+          status: string;
+        }
+        
+        interface StatusChange {
+          id: string;
+          oldStatus: string;
+          newStatus: string;
+          timestamp: string;
+        }
+        
         // Get stored test data
-        const storedData = JSON.parse(sessionStorage.getItem('warehouseTasksTestData') || '[]');
+        const storedData = JSON.parse(sessionStorage.getItem('warehouseTasksTestData') || '[]') as TaskBasicInfo[];
         
         // Get current task rows
         const currentTaskRows = Array.from(document.querySelectorAll('table tbody tr'));
         const currentTasksData = currentTaskRows.map(row => {
           const cells = Array.from(row.querySelectorAll('td'));
-          return {
-            id: cells[0]?.textContent?.trim(),
-            status: cells[5]?.textContent?.trim(),
+          const taskInfo: TaskBasicInfo = {
+            id: cells[0]?.textContent?.trim() || '',
+            status: cells[5]?.textContent?.trim() || ''
           };
+          return taskInfo;
         });
         
         // Compare with stored data to see if statuses changed
-        const statusChanges = [];
+        const statusChanges: StatusChange[] = [];
         for (const storedTask of storedData) {
           const currentTask = currentTasksData.find(t => t.id === storedTask.id);
           if (currentTask && currentTask.status !== storedTask.status) {
             statusChanges.push({
               id: storedTask.id,
               oldStatus: storedTask.status,
-              newStatus: currentTask.status
+              newStatus: currentTask.status,
+              timestamp: new Date().toISOString()
             });
           }
         }
