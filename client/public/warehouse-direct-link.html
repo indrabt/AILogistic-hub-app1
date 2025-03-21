@@ -87,6 +87,9 @@
     <p>Choose a direct link below to navigate to the warehouse operation you need:</p>
     
     <div class="actions">
+      <a href="/warehouse-receiving" class="button button-primary" id="receivingLink">
+        Warehouse Receiving
+      </a>
       <a href="/warehouse-picking" class="button button-primary" id="pickingLink">
         Warehouse Picking
       </a>
@@ -118,6 +121,11 @@
       window.location.href = path;
     }
     
+    document.getElementById('receivingLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      navigateTo('/warehouse-receiving', 'directWarehouseReceivingAccess');
+    });
+    
     document.getElementById('pickingLink').addEventListener('click', function(e) {
       e.preventDefault();
       navigateTo('/warehouse-picking', 'directWarehousePickingAccess');
@@ -132,7 +140,11 @@
     const urlParams = new URLSearchParams(window.location.search);
     const target = urlParams.get('target');
     
-    if (target === 'picking') {
+    if (target === 'receiving') {
+      setTimeout(() => {
+        navigateTo('/warehouse-receiving', 'directWarehouseReceivingAccess');
+      }, 300);
+    } else if (target === 'picking') {
       setTimeout(() => {
         navigateTo('/warehouse-picking', 'directWarehousePickingAccess');
       }, 300);

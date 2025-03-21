@@ -189,7 +189,7 @@ export default function WarehouseDashboard() {
           variant="outline" 
           size="sm" 
           className="flex items-center gap-1"
-          onClick={() => setLocation("/warehouse-receiving")}
+          onClick={() => window.location.href = "/warehouse-direct-link.html?target=receiving"}
         >
           <PackageCheck className="h-4 w-4" />
           <span>Receiving</span>
@@ -219,7 +219,7 @@ export default function WarehouseDashboard() {
           variant="outline" 
           size="sm" 
           className="flex items-center gap-1"
-          onClick={() => setLocation("/warehouse-picking")}
+          onClick={() => window.location.href = "/warehouse-direct-link.html?target=picking"}
         >
           <ClipboardCheck className="h-4 w-4" />
           <span>Picking</span>
@@ -229,7 +229,7 @@ export default function WarehouseDashboard() {
           variant="outline" 
           size="sm" 
           className="flex items-center gap-1"
-          onClick={() => setLocation("/warehouse-packing")}
+          onClick={() => window.location.href = "/warehouse-direct-link.html?target=packing"}
         >
           <Package className="h-4 w-4" />
           <span>Packing</span>
