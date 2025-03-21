@@ -85,6 +85,7 @@ const warehouseOperations = [
   { icon: <ArrowUpDown size={20} />, href: "/warehouse-putaway", label: "Put-Away", id: "warehouse-putaway" },
   { icon: <Package size={20} />, href: "/warehouse-picking", label: "Picking", id: "warehouse-picking" },
   { icon: <Package size={20} />, href: "/warehouse-packing", label: "Packing", id: "warehouse-packing" },
+  { icon: <Truck size={20} />, href: "/warehouse-shipping", label: "Shipping", id: "warehouse-shipping" },
 ];
 
 // Define navigation items for each role
@@ -371,6 +372,25 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                                     <span className="mr-3">{subItem.icon}</span>
                                     {subItem.label}
                                   </a>
+                                </li>
+                              );
+                            } else if (subItem.href === "/warehouse-shipping") {
+                              return (
+                                <li key={subItem.id}>
+                                  <Link href={subItem.href}>
+                                    <div
+                                      className={cn(
+                                        "flex items-center py-2 px-3 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                                        location === subItem.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                                      )}
+                                      onClick={() => {
+                                        console.log("Warehouse Shipping navigation triggered from submenu");
+                                      }}
+                                    >
+                                      <span className="mr-3">{subItem.icon}</span>
+                                      {subItem.label}
+                                    </div>
+                                  </Link>
                                 </li>
                               );
                             } else {
