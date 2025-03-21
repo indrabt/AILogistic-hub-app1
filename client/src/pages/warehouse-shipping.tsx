@@ -2,10 +2,18 @@ import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -17,22 +25,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { CheckIcon, Loader2, PackageIcon, PrinterIcon, SearchIcon, TruckIcon, AlertCircleIcon } from "lucide-react";
+import { CheckIcon, Loader2, PackageIcon, PrinterIcon, SearchIcon, TruckIcon, AlertCircleIcon, SendIcon, FileIcon } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { getCurrentUser } from "@/utils/auth";
@@ -157,6 +156,7 @@ export default function WarehouseShipping() {
   const [trackingNumber, setTrackingNumber] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isPrinting, setIsPrinting] = useState<boolean>(false);
   const [isManifestLoading, setIsManifestLoading] = useState<boolean>(false);
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -248,6 +248,7 @@ export default function WarehouseShipping() {
   };
 
   const updateShipment = async (id: number, data: any) => {
+    setIsUpdating(true);
     try {
       const response = await fetch(`/api/warehouse/shipments/${id}`, {
         method: "PATCH",
@@ -269,6 +270,7 @@ export default function WarehouseShipping() {
         title: "Success",
         description: "Shipment updated successfully.",
       });
+      return updatedShipment;
     } catch (error) {
       console.error("Error updating shipment:", error);
       toast({
@@ -276,6 +278,9 @@ export default function WarehouseShipping() {
         description: "Failed to update shipment. Please try again.",
         variant: "destructive",
       });
+      throw error;
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -350,6 +355,33 @@ export default function WarehouseShipping() {
     return carrier?.services || [];
   };
 
+  const handleConfirmAndShip = (shipment: WarehouseShipment) => {
+    if (!selectedCarrier || !selectedService || !trackingNumber) {
+      toast({
+        title: "Missing information",
+        description: "Please select a carrier, service, and enter a tracking number.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    updateShipment(shipment.id, {
+      carrier: carriers.find(c => c.id.toString() === selectedCarrier)?.name,
+      service: getCarrierServices(selectedCarrier).find(s => s.id.toString() === selectedService)?.name,
+      trackingNumber: trackingNumber
+    })
+    .then(() => {
+      confirmShipment(shipment.id);
+      toast({
+        title: "Shipment Confirmed",
+        description: "The shipment has been confirmed and marked as shipped."
+      });
+    })
+    .catch(error => {
+      console.error("Error processing shipment:", error);
+    });
+  };
+
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
@@ -391,19 +423,89 @@ export default function WarehouseShipping() {
         </div>
       </div>
 
-      <Tabs defaultValue="active">
+      <Tabs defaultValue="outgoing">
         <TabsList className="mb-4">
-          <TabsTrigger value="active">Active Shipments</TabsTrigger>
+          <TabsTrigger value="outgoing">Outgoing Shipments</TabsTrigger>
+          <TabsTrigger value="incoming">Incoming Shipments</TabsTrigger>
           <TabsTrigger value="completed">Completed Shipments</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="active">
+        <TabsContent value="outgoing">
           <Card>
-            <CardHeader>
-              <CardTitle>Pending and In-Progress Shipments</CardTitle>
-              <CardDescription>
-                Manage and process shipments that need to be confirmed and dispatched.
-              </CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div>
+                <CardTitle>Outgoing Shipments</CardTitle>
+                <CardDescription>
+                  Manage and process shipments that need to be confirmed and dispatched to customers.
+                </CardDescription>
+              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="ml-auto">
+                    <PackageIcon className="h-4 w-4 mr-2" />
+                    Create Shipment
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Create New Shipment</DialogTitle>
+                    <DialogDescription>
+                      Create a new outgoing shipment for a completed order
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="orderNumber" className="text-right">
+                        Order ID
+                      </Label>
+                      <Input
+                        id="orderNumber"
+                        defaultValue=""
+                        placeholder="Enter order number"
+                        className="col-span-3"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="carrier" className="text-right">
+                        Carrier
+                      </Label>
+                      <Select defaultValue="">
+                        <SelectTrigger id="carrier" className="col-span-3">
+                          <SelectValue placeholder="Select shipping carrier" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {carriers.map((carrier) => (
+                            <SelectItem key={carrier.id} value={carrier.id.toString()}>
+                              {carrier.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="recipient" className="text-right">
+                        Recipient
+                      </Label>
+                      <Input
+                        id="recipient"
+                        defaultValue=""
+                        placeholder="Recipient name"
+                        className="col-span-3"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => {
+                      toast({
+                        title: "Feature Coming Soon",
+                        description: "The shipment creation feature will be available in the next update."
+                      });
+                    }}>
+                      Create Shipment
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </CardHeader>
             <CardContent>
               <div className="border rounded-md">
@@ -475,6 +577,7 @@ export default function WarehouseShipping() {
                                   <SheetHeader>
                                     <SheetTitle>Manage Shipment #{selectedShipment?.id}</SheetTitle>
                                   </SheetHeader>
+                                  
                                   {selectedShipment && (
                                     <div className="py-4">
                                       <div className="space-y-4">
@@ -582,159 +685,142 @@ export default function WarehouseShipping() {
                                           ))}
                                         </div>
                                         
-                                        <div className="flex space-x-2 pt-4">
+                                        <div className="flex flex-col space-y-4 pt-4">
                                           <Button
-                                            variant="outline"
-                                            onClick={handlePrintLabels}
-                                            disabled={isPrinting}
-                                            className="flex-1"
+                                            variant="default"
+                                            onClick={() => handleConfirmAndShip(selectedShipment)}
+                                            disabled={isUpdating || isConfirming || !selectedCarrier || !selectedService || !trackingNumber}
+                                            className="w-full"
                                           >
-                                            {isPrinting ? (
+                                            {isUpdating || isConfirming ? (
                                               <Loader2 className="h-4 w-4 animate-spin mr-2" />
                                             ) : (
-                                              <PrinterIcon className="h-4 w-4 mr-2" />
+                                              <SendIcon className="h-4 w-4 mr-2" />
                                             )}
-                                            Print Labels
+                                            Confirm & Ship
                                           </Button>
                                           
-                                          <Dialog>
-                                            <DialogTrigger asChild>
-                                              <Button
-                                                variant="outline"
-                                                className="flex-1"
-                                                onClick={() => generateManifest(selectedShipment.id)}
-                                              >
-                                                {isManifestLoading ? (
-                                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                                ) : (
-                                                  <FileIcon className="h-4 w-4 mr-2" />
-                                                )}
-                                                Manifest
-                                              </Button>
-                                            </DialogTrigger>
-                                            <DialogContent className="max-w-md">
-                                              <DialogHeader>
-                                                <DialogTitle>Shipping Manifest</DialogTitle>
-                                                <DialogDescription>
-                                                  Shipping manifest details for order #{selectedShipment.customerOrderId}
-                                                </DialogDescription>
-                                              </DialogHeader>
-                                              {manifest ? (
-                                                <div className="space-y-4">
-                                                  <div className="flex justify-between">
-                                                    <div>
-                                                      <p className="text-sm font-medium">Manifest #{manifest.id}</p>
-                                                      <p className="text-sm text-gray-500">
-                                                        Generated: {format(new Date(manifest.generatedAt), "MMM d, yyyy h:mm a")}
-                                                      </p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                      <p className="text-sm font-medium">{manifest.packageCount} Packages</p>
-                                                      <p className="text-sm text-gray-500">
-                                                        Total Weight: {manifest.totalWeight} {manifest.weightUnit}
-                                                      </p>
-                                                    </div>
-                                                  </div>
-                                                  
-                                                  <Separator />
-                                                  
-                                                  <div className="space-y-2">
-                                                    <h4 className="text-sm font-medium">Carriers</h4>
-                                                    <div className="flex flex-wrap gap-2">
-                                                      {manifest.carriers.map((carrier, index) => (
-                                                        <Badge key={index} variant="outline">{carrier}</Badge>
-                                                      ))}
-                                                    </div>
-                                                  </div>
-                                                  
-                                                  <div className="space-y-2">
-                                                    <h4 className="text-sm font-medium">Packages</h4>
-                                                    <div className="border rounded-md divide-y max-h-60 overflow-y-auto">
-                                                      {manifest.manifestItems.map((item, index) => (
-                                                        <div key={index} className="p-3 text-sm">
-                                                          <div className="flex justify-between mb-1">
-                                                            <span className="font-medium">
-                                                              Package #{item.packageId}
-                                                            </span>
-                                                            <span className="text-gray-500">
-                                                              {item.weight} {manifest.weightUnit}
-                                                            </span>
-                                                          </div>
-                                                          <div className="grid grid-cols-2 gap-1">
-                                                            <span className="text-gray-500">Tracking:</span>
-                                                            <span>{item.trackingNumber}</span>
-                                                            <span className="text-gray-500">Carrier:</span>
-                                                            <span>{item.carrier} - {item.service}</span>
-                                                            <span className="text-gray-500">Recipient:</span>
-                                                            <span>{item.recipient}</span>
-                                                            <span className="text-gray-500">Destination:</span>
-                                                            <span>{item.destination}</span>
-                                                            <span className="text-gray-500">Dimensions:</span>
-                                                            <span>{item.dimensions}</span>
-                                                          </div>
-                                                        </div>
-                                                      ))}
-                                                    </div>
-                                                  </div>
-                                                  
-                                                  <DialogFooter>
-                                                    <Button
-                                                      variant="outline"
-                                                      onClick={handlePrintLabels}
-                                                      disabled={isPrinting}
-                                                    >
-                                                      {isPrinting ? (
-                                                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                                      ) : (
-                                                        <PrinterIcon className="h-4 w-4 mr-2" />
-                                                      )}
-                                                      Print Manifest
-                                                    </Button>
-                                                  </DialogFooter>
-                                                </div>
+                                          <div className="flex space-x-2">
+                                            <Button
+                                              variant="outline"
+                                              onClick={handlePrintLabels}
+                                              disabled={isPrinting}
+                                              className="flex-1"
+                                            >
+                                              {isPrinting ? (
+                                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
                                               ) : (
-                                                <div className="flex flex-col items-center justify-center py-6">
-                                                  <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-                                                  <p className="mt-2 text-sm text-gray-500">
-                                                    Generating manifest...
-                                                  </p>
-                                                </div>
+                                                <PrinterIcon className="h-4 w-4 mr-2" />
                                               )}
-                                            </DialogContent>
-                                          </Dialog>
-                                        </div>
-                                        
-                                        <div className="pt-4">
-                                          <Button
-                                            className="w-full"
-                                            disabled={
-                                              isConfirming || 
-                                              !selectedCarrier || 
-                                              !selectedService || 
-                                              selectedShipment.packages.length === 0 ||
-                                              selectedShipment.status === "shipped" ||
-                                              selectedShipment.status === "delivered" ||
-                                              selectedShipment.status === "cancelled"
-                                            }
-                                            onClick={() => {
-                                              updateShipment(selectedShipment.id, {
-                                                carrier: carriers.find(c => c.id.toString() === selectedCarrier)?.name,
-                                                service: getCarrierServices(selectedCarrier).find(s => s.id.toString() === selectedService)?.name,
-                                                trackingNumber
-                                              }).then(() => {
-                                                if (trackingNumber) {
-                                                  confirmShipment(selectedShipment.id);
-                                                }
-                                              });
-                                            }}
-                                          >
-                                            {isConfirming ? (
-                                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                            ) : (
-                                              <TruckIcon className="h-4 w-4 mr-2" />
-                                            )}
-                                            {selectedShipment.status === "shipped" ? "Already Shipped" : "Confirm Shipment"}
-                                          </Button>
+                                              Print Labels
+                                            </Button>
+                                            
+                                            <Dialog>
+                                              <DialogTrigger asChild>
+                                                <Button
+                                                  variant="outline"
+                                                  className="flex-1"
+                                                  onClick={() => generateManifest(selectedShipment.id)}
+                                                >
+                                                  {isManifestLoading ? (
+                                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                                  ) : (
+                                                    <FileIcon className="h-4 w-4 mr-2" />
+                                                  )}
+                                                  Manifest
+                                                </Button>
+                                              </DialogTrigger>
+                                              <DialogContent className="max-w-md">
+                                                <DialogHeader>
+                                                  <DialogTitle>Shipping Manifest</DialogTitle>
+                                                  <DialogDescription>
+                                                    Shipping manifest details for order #{selectedShipment.customerOrderId}
+                                                  </DialogDescription>
+                                                </DialogHeader>
+                                                {manifest ? (
+                                                  <div className="space-y-4">
+                                                    <div className="flex justify-between">
+                                                      <div>
+                                                        <p className="text-sm font-medium">Manifest #{manifest.id}</p>
+                                                        <p className="text-sm text-gray-500">
+                                                          Generated: {format(new Date(manifest.generatedAt), "MMM d, yyyy h:mm a")}
+                                                        </p>
+                                                      </div>
+                                                      <div className="text-right">
+                                                        <p className="text-sm font-medium">{manifest.packageCount} Packages</p>
+                                                        <p className="text-sm text-gray-500">
+                                                          Total Weight: {manifest.totalWeight} {manifest.weightUnit}
+                                                        </p>
+                                                      </div>
+                                                    </div>
+                                                    
+                                                    <Separator />
+                                                    
+                                                    <div className="space-y-2">
+                                                      <h4 className="text-sm font-medium">Carriers</h4>
+                                                      <div className="flex flex-wrap gap-2">
+                                                        {manifest.carriers.map((carrier, index) => (
+                                                          <Badge key={index} variant="outline">{carrier}</Badge>
+                                                        ))}
+                                                      </div>
+                                                    </div>
+                                                    
+                                                    <div className="space-y-2">
+                                                      <h4 className="text-sm font-medium">Packages</h4>
+                                                      <div className="border rounded-md divide-y max-h-60 overflow-y-auto">
+                                                        {manifest.manifestItems.map((item, index) => (
+                                                          <div key={index} className="p-3 text-sm">
+                                                            <div className="flex justify-between mb-1">
+                                                              <span className="font-medium">
+                                                                Package #{item.packageId}
+                                                              </span>
+                                                              <span className="text-gray-500">
+                                                                {item.weight} {manifest.weightUnit}
+                                                              </span>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 gap-1">
+                                                              <span className="text-gray-500">Tracking:</span>
+                                                              <span>{item.trackingNumber}</span>
+                                                              <span className="text-gray-500">Carrier:</span>
+                                                              <span>{item.carrier} - {item.service}</span>
+                                                              <span className="text-gray-500">Recipient:</span>
+                                                              <span>{item.recipient}</span>
+                                                              <span className="text-gray-500">Destination:</span>
+                                                              <span>{item.destination}</span>
+                                                              <span className="text-gray-500">Dimensions:</span>
+                                                              <span>{item.dimensions}</span>
+                                                            </div>
+                                                          </div>
+                                                        ))}
+                                                      </div>
+                                                    </div>
+                                                    
+                                                    <DialogFooter>
+                                                      <Button
+                                                        variant="outline"
+                                                        onClick={handlePrintLabels}
+                                                        disabled={isPrinting}
+                                                      >
+                                                        {isPrinting ? (
+                                                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                                        ) : (
+                                                          <PrinterIcon className="h-4 w-4 mr-2" />
+                                                        )}
+                                                        Print Manifest
+                                                      </Button>
+                                                    </DialogFooter>
+                                                  </div>
+                                                ) : (
+                                                  <div className="flex flex-col items-center justify-center py-6">
+                                                    <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                                                    <p className="mt-2 text-sm text-gray-500">
+                                                      Generating manifest...
+                                                    </p>
+                                                  </div>
+                                                )}
+                                              </DialogContent>
+                                            </Dialog>
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
@@ -744,6 +830,69 @@ export default function WarehouseShipping() {
                             </TableCell>
                           </TableRow>
                         ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="incoming">
+          <Card>
+            <CardHeader>
+              <CardTitle>Incoming Shipments</CardTitle>
+              <CardDescription>
+                Manage and track shipments arriving from suppliers or returns from customers.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="border rounded-md">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Shipment ID</TableHead>
+                      <TableHead>Origin</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Expected Arrival</TableHead>
+                      <TableHead>Items</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {isLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-4">
+                          <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                          <span className="mt-2 block text-sm text-gray-500">Loading incoming shipments...</span>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-4">
+                          <div className="flex flex-col items-center justify-center text-center p-4">
+                            <TruckIcon className="h-10 w-10 text-gray-400 mb-2" />
+                            <h3 className="text-lg font-medium">No incoming shipments</h3>
+                            <p className="text-sm text-gray-500 max-w-sm mx-auto mt-1">
+                              There are currently no incoming shipments to display.
+                            </p>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="mt-4"
+                              onClick={() => {
+                                toast({
+                                  title: "Feature Coming Soon",
+                                  description: "The ability to register incoming shipments will be available in a future update."
+                                });
+                              }}
+                            >
+                              Register New Arrival
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
                     )}
                   </TableBody>
                 </Table>
@@ -822,135 +971,19 @@ export default function WarehouseShipping() {
                                 : "-"}
                             </TableCell>
                             <TableCell className="text-right">
-                              <Sheet>
-                                <SheetTrigger asChild>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => handleShipmentSelect(shipment)}
-                                  >
-                                    View
-                                  </Button>
-                                </SheetTrigger>
-                                <SheetContent className="sm:max-w-md">
-                                  <SheetHeader>
-                                    <SheetTitle>Shipment Details #{selectedShipment?.id}</SheetTitle>
-                                  </SheetHeader>
-                                  {selectedShipment && (
-                                    <div className="py-4">
-                                      <div className="space-y-4">
-                                        <div className="flex justify-between">
-                                          <h3 className="text-sm font-medium">Order #{selectedShipment.customerOrderId}</h3>
-                                          <Badge variant={getStatusBadgeVariant(selectedShipment.status)}>
-                                            {selectedShipment.status.replace("_", " ")}
-                                          </Badge>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-2 gap-y-2">
-                                          <span className="text-sm text-gray-500">Carrier:</span>
-                                          <span className="text-sm">{selectedShipment.carrier}</span>
-                                          
-                                          <span className="text-sm text-gray-500">Service:</span>
-                                          <span className="text-sm">{selectedShipment.service}</span>
-                                          
-                                          <span className="text-sm text-gray-500">Tracking Number:</span>
-                                          <span className="text-sm">{selectedShipment.trackingNumber || "N/A"}</span>
-                                          
-                                          <span className="text-sm text-gray-500">Shipping Date:</span>
-                                          <span className="text-sm">
-                                            {selectedShipment.shippingDate 
-                                              ? format(new Date(selectedShipment.shippingDate), "MMM d, yyyy") 
-                                              : "N/A"}
-                                          </span>
-                                          
-                                          <span className="text-sm text-gray-500">Est. Delivery:</span>
-                                          <span className="text-sm">
-                                            {selectedShipment.estimatedDeliveryDate 
-                                              ? format(new Date(selectedShipment.estimatedDeliveryDate), "MMM d, yyyy") 
-                                              : "N/A"}
-                                          </span>
-                                          
-                                          <span className="text-sm text-gray-500">Actual Delivery:</span>
-                                          <span className="text-sm">
-                                            {selectedShipment.actualDeliveryDate 
-                                              ? format(new Date(selectedShipment.actualDeliveryDate), "MMM d, yyyy") 
-                                              : "N/A"}
-                                          </span>
-                                        </div>
-                                        
-                                        <div className="bg-gray-50 p-3 rounded-md">
-                                          <h4 className="text-sm font-medium mb-2">Shipping Address</h4>
-                                          <p className="text-sm">
-                                            {selectedShipment.shippingAddress.recipientName}<br />
-                                            {selectedShipment.shippingAddress.company && 
-                                              <>{selectedShipment.shippingAddress.company}<br /></>
-                                            }
-                                            {selectedShipment.shippingAddress.streetAddress1}<br />
-                                            {selectedShipment.shippingAddress.streetAddress2 && 
-                                              <>{selectedShipment.shippingAddress.streetAddress2}<br /></>
-                                            }
-                                            {selectedShipment.shippingAddress.city}, {selectedShipment.shippingAddress.state} {selectedShipment.shippingAddress.postalCode}<br />
-                                            {selectedShipment.shippingAddress.country}
-                                          </p>
-                                        </div>
-                                        
-                                        <h4 className="text-sm font-medium pt-2">Packages ({selectedShipment.packages.length})</h4>
-                                        <div className="border rounded-md divide-y max-h-60 overflow-y-auto">
-                                          {selectedShipment.packages.map((pkg) => (
-                                            <div key={pkg.id} className="p-3">
-                                              <div className="flex justify-between mb-1">
-                                                <span className="text-sm font-medium">Package #{pkg.id}</span>
-                                                <Badge variant={pkg.status === "shipped" ? "default" : "outline"}>
-                                                  {pkg.status}
-                                                </Badge>
-                                              </div>
-                                              <div className="text-sm grid grid-cols-2 gap-1">
-                                                <span className="text-gray-500">Type:</span>
-                                                <span>{pkg.packageType}</span>
-                                                <span className="text-gray-500">Dimensions:</span>
-                                                <span>{pkg.length}x{pkg.width}x{pkg.height} {pkg.dimensionUnit}</span>
-                                                <span className="text-gray-500">Weight:</span>
-                                                <span>{pkg.weight} {pkg.weightUnit}</span>
-                                                {pkg.trackingNumber && (
-                                                  <>
-                                                    <span className="text-gray-500">Tracking:</span>
-                                                    <span>{pkg.trackingNumber}</span>
-                                                  </>
-                                                )}
-                                              </div>
-                                            </div>
-                                          ))}
-                                        </div>
-                                        
-                                        <div className="flex space-x-2 pt-4">
-                                          <Button
-                                            variant="outline"
-                                            onClick={() => generateManifest(selectedShipment.id)}
-                                            className="flex-1"
-                                          >
-                                            <FileIcon className="h-4 w-4 mr-2" />
-                                            View Manifest
-                                          </Button>
-                                          
-                                          <Button
-                                            variant="outline"
-                                            onClick={handlePrintLabels}
-                                            disabled={isPrinting}
-                                            className="flex-1"
-                                          >
-                                            {isPrinting ? (
-                                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                            ) : (
-                                              <PrinterIcon className="h-4 w-4 mr-2" />
-                                            )}
-                                            Print Labels
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-                                </SheetContent>
-                              </Sheet>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  handleShipmentSelect(shipment);
+                                  toast({
+                                    title: "View Shipment Details",
+                                    description: "Shipment details view is coming soon."
+                                  });
+                                }}
+                              >
+                                View
+                              </Button>
                             </TableCell>
                           </TableRow>
                         ))
@@ -965,24 +998,3 @@ export default function WarehouseShipping() {
     </div>
   );
 }
-
-// Missing Lucide icon definitions
-const FileIcon = ({ className }: { className?: string }) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-      <polyline points="14 2 14 8 20 8" />
-    </svg>
-  );
-};
