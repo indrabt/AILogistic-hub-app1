@@ -1948,7 +1948,7 @@ export class MemStorage implements IStorage {
       { id: 6, type: "local", name: "Liverpool LC", location: "Liverpool, NSW", lat: -33.9200, lng: 150.9212, inventory: 1800 }
     ];
     
-    this.shipments = [
+    this.supplyChainShipments = [
       { id: 1, shipmentId: "A4589", origin: "Penrith, NSW", destination: "Sydney CBD, NSW", status: "on-schedule", eta: "Today, 4:30 PM", priority: "high" },
       { id: 2, shipmentId: "B7813", origin: "Sydney, NSW", destination: "Melbourne, VIC", status: "delayed", eta: "Tomorrow, 10:15 AM", priority: "medium" },
       { id: 3, shipmentId: "C3921", origin: "Brisbane, QLD", destination: "Sydney, NSW", status: "on-schedule", eta: "Tomorrow, 2:45 PM", priority: "normal" }
@@ -2731,9 +2731,7 @@ export class MemStorage implements IStorage {
     return this.supplyChainNodes;
   }
 
-  async getShipments(): Promise<Shipment[]> {
-    return this.shipments;
-  }
+  // This function is superseded by the new implementation at the top of the class
 
   async getInventoryAlerts(): Promise<InventoryAlert[]> {
     return this.inventoryAlerts;
