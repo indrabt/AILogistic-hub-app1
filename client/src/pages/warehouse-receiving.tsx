@@ -355,7 +355,17 @@ export default function WarehouseReceiving() {
     expiryDate: z.string().optional()
   });
 
-  const receiveItemForm = useForm({
+  // Define the form type
+  type ReceiveItemFormValues = {
+    receivedQuantity: number;
+    status: "received" | "partial" | "rejected";
+    storageLocation: string;
+    batchNumber: string;
+    lotNumber: string;
+    expiryDate: string;
+  };
+
+  const receiveItemForm = useForm<ReceiveItemFormValues>({
     resolver: zodResolver(receiveItemSchema),
     defaultValues: {
       receivedQuantity: 0,
@@ -415,9 +425,10 @@ export default function WarehouseReceiving() {
     setCapturedImages([]);
   };
 
-  const onReceiveItem = (data: any) => {
+  const onReceiveItem = (data: ReceiveItemFormValues) => {
     console.log("onReceiveItem called with form data:", data);
     
+    // Validate required item selection
     if (!selectedItemId) {
       console.error("Cannot receive item: No item selected");
       toast({
@@ -428,34 +439,74 @@ export default function WarehouseReceiving() {
       return;
     }
     
+    // Find the item we're receiving
     const selectedItem = orderItems.find(item => item.id === selectedItemId);
+    if (!selectedItem) {
+      console.error(`Cannot find item with ID ${selectedItemId} in orderItems:`, orderItems);
+      toast({
+        title: "Data Error",
+        description: "The selected item could not be found in the order items list.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     console.log("Selected item object:", selectedItem);
     console.log("Receiving item with ID:", selectedItemId, "with data:", data);
     
+    // Make sure receivedQuantity is a number
+    let receivedQuantity = data.receivedQuantity;
+    if (typeof receivedQuantity !== 'number') {
+      try {
+        receivedQuantity = parseInt(receivedQuantity as any, 10);
+        if (isNaN(receivedQuantity)) {
+          console.error("receivedQuantity is not a valid number:", data.receivedQuantity);
+          receivedQuantity = 0;
+        }
+      } catch (e) {
+        console.error("Error parsing receivedQuantity:", e);
+        receivedQuantity = 0;
+      }
+    }
+    
     try {
+      // Prepare update payload with safety checks
       const updates = {
-        receivedQuantity: data.receivedQuantity,
-        status: data.status,
-        storageLocation: data.storageLocation,
-        batchNumber: data.batchNumber,
-        lotNumber: data.lotNumber,
-        expiryDate: data.expiryDate
+        receivedQuantity: receivedQuantity,
+        status: data.status || "received",
+        storageLocation: data.storageLocation || "",
+        batchNumber: data.batchNumber || "",
+        lotNumber: data.lotNumber || "",
+        expiryDate: data.expiryDate || ""
       };
       
       console.log("Preparing to send API request to:", `/api/warehouse/inbound-order-items/${selectedItemId}`);
       console.log("With update payload:", updates);
       
+      // Execute the mutation
       updateOrderItemMutation.mutate({ 
         id: selectedItemId,
         updates: updates
       }, {
-        onSuccess: (data) => {
-          console.log("Successfully received item. Response:", data);
+        onSuccess: (responseData) => {
+          console.log("Successfully received item. Response:", responseData);
+          toast({
+            title: "Item Received",
+            description: `${selectedItem.productName} has been successfully received.`,
+          });
+          // Force a refresh of the item list
+          queryClient.invalidateQueries({ 
+            queryKey: ['/api/warehouse/inbound-orders', selectedItem.inboundOrderId, 'items'] 
+          });
         },
         onError: (error: any) => {
           console.error("Error receiving item:", error);
           console.error("Error details:", error.message);
-          // Error is already handled in the mutation's onError
+          toast({
+            title: "API Error",
+            description: `Failed to update item: ${error.message || "Unknown error"}`,
+            variant: "destructive",
+          });
         }
       });
     } catch (err) {
@@ -993,78 +1044,136 @@ export default function WarehouseReceiving() {
                                     </DialogDescription>
                                   </DialogHeader>
                                   
-                                  <form
-                                    id="receive-item-form"
-                                    onSubmit={receiveItemForm.handleSubmit(onReceiveItem)}
-                                    className="space-y-4"
-                                  >
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div className="space-y-2">
-                                        <Label htmlFor="receivedQuantity">Received Quantity</Label>
-                                        <Input
-                                          id="receivedQuantity"
-                                          type="number"
-                                          min="0"
-                                          {...receiveItemForm.register('receivedQuantity', { 
-                                            valueAsNumber: true 
-                                          })}
+                                  <Form {...receiveItemForm}>
+                                    <form
+                                      id="receive-item-form"
+                                      onSubmit={receiveItemForm.handleSubmit(onReceiveItem, (errors) => {
+                                        console.error("Validation errors in receive form:", errors);
+                                        toast({
+                                          title: "Validation Error",
+                                          description: "Please check the form for errors",
+                                          variant: "destructive"
+                                        });
+                                      })}
+                                      className="space-y-4"
+                                    >
+                                      <div className="grid grid-cols-2 gap-4">
+                                        <FormField
+                                          control={receiveItemForm.control}
+                                          name="receivedQuantity"
+                                          render={({ field }) => (
+                                            <FormItem>
+                                              <FormLabel>Received Quantity</FormLabel>
+                                              <FormControl>
+                                                <Input
+                                                  type="number"
+                                                  min="0" 
+                                                  {...field}
+                                                  // Convert string to number when input changes
+                                                  onChange={(e) => {
+                                                    const val = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+                                                    field.onChange(isNaN(val) ? 0 : val);
+                                                  }}
+                                                />
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+
+                                        <FormField
+                                          control={receiveItemForm.control}
+                                          name="status"
+                                          render={({ field }) => (
+                                            <FormItem>
+                                              <FormLabel>Status</FormLabel>
+                                              <Select
+                                                onValueChange={field.onChange}
+                                                defaultValue={field.value}
+                                              >
+                                                <FormControl>
+                                                  <SelectTrigger>
+                                                    <SelectValue placeholder="Select status" />
+                                                  </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                  <SelectItem value="received">Received</SelectItem>
+                                                  <SelectItem value="partial">Partial</SelectItem>
+                                                  <SelectItem value="rejected">Rejected</SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
                                         />
                                       </div>
 
-                                      <div className="space-y-2">
-                                        <Label htmlFor="status">Status</Label>
-                                        <Select
-                                          onValueChange={(value) => receiveItemForm.setValue('status', value)}
-                                          defaultValue={receiveItemForm.getValues('status')}
-                                        >
-                                          <SelectTrigger id="status">
-                                            <SelectValue placeholder="Select status" />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            <SelectItem value="received">Received</SelectItem>
-                                            <SelectItem value="partial">Partial</SelectItem>
-                                            <SelectItem value="rejected">Rejected</SelectItem>
-                                          </SelectContent>
-                                        </Select>
-                                      </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                      <Label htmlFor="storageLocation">Storage Location</Label>
-                                      <Input
-                                        id="storageLocation"
-                                        placeholder="A1-B2-C3"
-                                        {...receiveItemForm.register('storageLocation')}
+                                      <FormField
+                                        control={receiveItemForm.control}
+                                        name="storageLocation"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>Storage Location</FormLabel>
+                                            <FormControl>
+                                              <Input placeholder="A1-B2-C3" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
                                       />
-                                    </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div className="space-y-2">
-                                        <Label htmlFor="batchNumber">Batch Number</Label>
-                                        <Input
-                                          id="batchNumber"
-                                          {...receiveItemForm.register('batchNumber')}
+                                      <div className="grid grid-cols-2 gap-4">
+                                        <FormField
+                                          control={receiveItemForm.control}
+                                          name="batchNumber"
+                                          render={({ field }) => (
+                                            <FormItem>
+                                              <FormLabel>Batch Number</FormLabel>
+                                              <FormControl>
+                                                <Input {...field} />
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+
+                                        <FormField
+                                          control={receiveItemForm.control}
+                                          name="lotNumber"
+                                          render={({ field }) => (
+                                            <FormItem>
+                                              <FormLabel>Lot Number</FormLabel>
+                                              <FormControl>
+                                                <Input {...field} />
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
                                         />
                                       </div>
 
-                                      <div className="space-y-2">
-                                        <Label htmlFor="lotNumber">Lot Number</Label>
-                                        <Input
-                                          id="lotNumber"
-                                          {...receiveItemForm.register('lotNumber')}
-                                        />
-                                      </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                      <Label htmlFor="expiryDate">Expiry Date</Label>
-                                      <Input
-                                        id="expiryDate"
-                                        type="date"
-                                        {...receiveItemForm.register('expiryDate')}
+                                      <FormField
+                                        control={receiveItemForm.control}
+                                        name="expiryDate"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>Expiry Date</FormLabel>
+                                            <FormControl>
+                                              <Input type="date" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
                                       />
-                                    </div>
-                                  </form>
+                                      
+                                      {/* Display form-level errors */}
+                                      {receiveItemForm.formState.errors.root && (
+                                        <p className="text-sm font-medium text-destructive">
+                                          {receiveItemForm.formState.errors.root.message}
+                                        </p>
+                                      )}
+                                    </form>
+                                  </Form>
 
                                   <DialogFooter>
                                     <Button variant="outline" onClick={() => setReceiveDialogOpen(false)}>
