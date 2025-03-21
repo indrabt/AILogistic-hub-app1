@@ -99,7 +99,7 @@ test.describe('Warehouse Shipping Operations', () => {
     
     // Check if any shipment has "shipped" status
     const shippedStatus = await page.locator('span:has-text("shipped")').first().isVisible();
-    expect(shippedStatus).toBeTruthy('A shipment with "shipped" status should be visible in the completed tab');
+    expect(shippedStatus).toBe(true);
     
     console.log('Test completed successfully - confirmed shipment status is now "shipped"');
   });
@@ -143,11 +143,11 @@ test.describe('Warehouse Shipping Operations', () => {
         
         // Verify that the manifest contains the expected data
         const manifestContent = await page.locator('div[role="dialog"]:has-text("Shipping Manifest")');
-        expect(await manifestContent.isVisible()).toBeTruthy('Shipping manifest dialog should be visible');
+        expect(await manifestContent.isVisible()).toBe(true);
         
         // Check for package information in the manifest
         const packageInfo = await page.locator('text=Package Information').isVisible();
-        expect(packageInfo).toBeTruthy('Manifest should contain package information');
+        expect(packageInfo).toBe(true);
         
         console.log('Manifest test completed successfully');
       } else {
