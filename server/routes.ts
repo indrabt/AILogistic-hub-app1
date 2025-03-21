@@ -2021,6 +2021,229 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Shipping Feature Endpoints
+  
+  // Get all shipping carriers
+  app.get("/api/warehouse/shipping/carriers", async (req, res) => {
+    try {
+      const carriers = await storage.getShippingCarriers();
+      res.json(carriers);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to fetch shipping carriers" });
+    }
+  });
+  
+  // Get a specific shipping carrier by ID
+  app.get("/api/warehouse/shipping/carriers/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const carrier = await storage.getShippingCarrierById(id);
+      
+      if (!carrier) {
+        return res.status(404).json({ message: "Shipping carrier not found" });
+      }
+      
+      res.json(carrier);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to fetch shipping carrier" });
+    }
+  });
+  
+  // Get shipping services for a carrier
+  app.get("/api/warehouse/shipping/carriers/:carrierId/services", async (req, res) => {
+    try {
+      const carrierId = parseInt(req.params.carrierId);
+      const services = await storage.getShippingServices(carrierId);
+      res.json(services);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to fetch shipping services" });
+    }
+  });
+  
+  // Get a specific shipping service by ID
+  app.get("/api/warehouse/shipping/services/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const service = await storage.getShippingServiceById(id);
+      
+      if (!service) {
+        return res.status(404).json({ message: "Shipping service not found" });
+      }
+      
+      res.json(service);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to fetch shipping service" });
+    }
+  });
+  
+  // Get all warehouse shipments
+  app.get("/api/warehouse/shipments", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const shipments = await storage.getWarehouseShipments(status);
+      res.json(shipments);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to fetch warehouse shipments" });
+    }
+  });
+  
+  // Get a specific warehouse shipment by ID
+  app.get("/api/warehouse/shipments/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const shipment = await storage.getWarehouseShipmentById(id);
+      
+      if (!shipment) {
+        return res.status(404).json({ message: "Warehouse shipment not found" });
+      }
+      
+      res.json(shipment);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to fetch warehouse shipment" });
+    }
+  });
+  
+  // Get a warehouse shipment by order ID
+  app.get("/api/warehouse/shipments/order/:orderId", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const shipment = await storage.getWarehouseShipmentByOrderId(orderId);
+      
+      if (!shipment) {
+        return res.status(404).json({ message: "Warehouse shipment not found for this order" });
+      }
+      
+      res.json(shipment);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to fetch warehouse shipment" });
+    }
+  });
+  
+  // Create a new warehouse shipment
+  app.post("/api/warehouse/shipments", async (req, res) => {
+    try {
+      const shipmentSchema = z.object({
+        customerOrderId: z.number(),
+        status: z.enum(["pending", "partially_shipped", "shipped", "delivered", "cancelled"]),
+        carrier: z.string(),
+        service: z.string(),
+        trackingNumber: z.string().optional(),
+        shippingCost: z.number().optional(),
+        shippingDate: z.string().nullable(),
+        estimatedDeliveryDate: z.string().optional(),
+        actualDeliveryDate: z.string().nullable(),
+        packages: z.array(z.any()),
+        shippingAddress: z.object({
+          recipientName: z.string(),
+          company: z.string().optional(),
+          streetAddress1: z.string(),
+          streetAddress2: z.string().optional(),
+          city: z.string(),
+          state: z.string(),
+          postalCode: z.string(),
+          country: z.string(),
+          phoneNumber: z.string().optional(),
+          email: z.string().optional()
+        }),
+        notes: z.string().optional()
+      });
+
+      const validatedData = shipmentSchema.parse(req.body);
+      const newShipment = await storage.createWarehouseShipment(validatedData);
+      
+      res.status(201).json(newShipment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid shipment data", errors: error.errors });
+      }
+      console.error(error);
+      res.status(500).json({ message: "Failed to create warehouse shipment" });
+    }
+  });
+  
+  // Update a warehouse shipment
+  app.patch("/api/warehouse/shipments/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const shipmentPartialSchema = z.object({
+        status: z.enum(["pending", "partially_shipped", "shipped", "delivered", "cancelled"]).optional(),
+        carrier: z.string().optional(),
+        service: z.string().optional(),
+        trackingNumber: z.string().optional(),
+        shippingCost: z.number().optional(),
+        shippingDate: z.string().nullable().optional(),
+        estimatedDeliveryDate: z.string().optional(),
+        actualDeliveryDate: z.string().nullable().optional(),
+        notes: z.string().optional()
+      });
+
+      const validatedData = shipmentPartialSchema.parse(req.body);
+      const updatedShipment = await storage.updateWarehouseShipment(id, validatedData);
+      
+      if (!updatedShipment) {
+        return res.status(404).json({ message: "Warehouse shipment not found" });
+      }
+      
+      res.json(updatedShipment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid shipment data", errors: error.errors });
+      }
+      console.error(error);
+      res.status(500).json({ message: "Failed to update warehouse shipment" });
+    }
+  });
+  
+  // Generate a shipping manifest for a shipment
+  app.get("/api/warehouse/shipments/:id/manifest", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const manifest = await storage.generateShippingManifest(id);
+      
+      res.json(manifest);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to generate shipping manifest" });
+    }
+  });
+  
+  // Confirm a shipment (mark as shipped)
+  app.post("/api/warehouse/shipments/:id/confirm", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      const confirmedShipment = await storage.confirmShipment(id);
+      
+      if (!confirmedShipment) {
+        return res.status(404).json({ message: "Warehouse shipment not found" });
+      }
+      
+      res.json(confirmedShipment);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to confirm shipment" });
+    }
+  });
+  
+  // Get shipping addresses for a shipment
+  app.get("/api/warehouse/shipments/:shipmentId/addresses", async (req, res) => {
+    try {
+      const shipmentId = parseInt(req.params.shipmentId);
+      const addresses = await storage.getShippingAddresses(shipmentId);
+      res.json(addresses);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to fetch shipping addresses" });
+    }
+  });
+
   // Create HTTP server
   const httpServer = createServer(app);
   
