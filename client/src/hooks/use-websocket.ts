@@ -13,6 +13,7 @@ interface UseWebSocketOptions {
   onMessage?: (data: WebSocketMessage) => void;
   onClose?: (event: CloseEvent) => void;
   onError?: (event: Event) => void;
+  disableWebSocketConnections?: boolean; // New option to disable WebSocket connections
 }
 
 /**
@@ -25,6 +26,7 @@ export function useWebSocket(
     onMessage,
     onClose,
     onError,
+    disableWebSocketConnections = false, // Default to false
   }: UseWebSocketOptions = {}
 ) {
   const [status, setStatus] = useState<WebSocketStatus>('closed');
@@ -37,8 +39,10 @@ export function useWebSocket(
   
   // Connect to WebSocket server
   const connect = useCallback(() => {
-    // Check if WebSocket connections are explicitly disabled in session storage
-    const disableWebSockets = sessionStorage.getItem('disableWebSocketConnections') === 'true';
+    // Check if WebSocket connections are explicitly disabled by prop or in session storage
+    const disableWebSockets = disableWebSocketConnections || 
+                              sessionStorage.getItem('disableWebSocketConnections') === 'true';
+    
     if (disableWebSockets) {
       console.log('WebSocket connections are explicitly disabled');
       setStatus('fallback');
@@ -214,7 +218,7 @@ export function useWebSocket(
         }, delay);
       }
     }
-  }, [onOpen, onMessage, onClose, onError]);
+  }, [onOpen, onMessage, onClose, onError, disableWebSocketConnections]);
   
   // Connect when component mounts
   useEffect(() => {
@@ -309,8 +313,10 @@ export function useWebSocket(
   
   // Function to manually reconnect
   const reconnect = useCallback(() => {
-    // Check if WebSocket connections are explicitly disabled
-    const disableWebSockets = sessionStorage.getItem('disableWebSocketConnections') === 'true';
+    // Check if WebSocket connections are explicitly disabled by prop or in session storage
+    const disableWebSockets = disableWebSocketConnections || 
+                              sessionStorage.getItem('disableWebSocketConnections') === 'true';
+    
     if (disableWebSockets) {
       console.log('Cannot reconnect: WebSocket connections are explicitly disabled');
       setStatus('fallback');
@@ -337,7 +343,7 @@ export function useWebSocket(
     
     // Connect again
     connect();
-  }, [connect]);
+  }, [connect, disableWebSocketConnections]);
   
   return {
     status,

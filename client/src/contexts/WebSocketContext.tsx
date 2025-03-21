@@ -22,9 +22,32 @@ interface WebSocketProviderProps {
   children: React.ReactNode;
 }
 
+// Helper function to determine if WebSockets should be disabled
+const shouldDisableWebSockets = (): boolean => {
+  // Check if this is a warehouse page - direct access pattern
+  const isWarehousePage = window.location.pathname.includes('warehouse-') || 
+                           sessionStorage.getItem('disableWebSocketConnections') === 'true';
+                           
+  // Check if we have navigation flags in session storage
+  const hasDirectNavigation = sessionStorage.getItem('warehouseDirect') === 'true' ||
+                              sessionStorage.getItem('orderManagementRedirect') === 'true';
+                              
+  return isWarehousePage || hasDirectNavigation;
+};
+
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
   const user = getCurrentUser();
   const [dashboardData, setDashboardData] = useState<WebSocketContextType['dashboardData']>(null);
+  const disableWebSockets = shouldDisableWebSockets();
+  
+  // Log the WebSocket connection status
+  useEffect(() => {
+    if (disableWebSockets) {
+      console.log('WebSocket connections disabled for this page');
+      // Set the flag in session storage for other components
+      sessionStorage.setItem('disableWebSocketConnections', 'true');
+    }
+  }, [disableWebSockets]);
   
   // Handle incoming messages
   const handleMessage = useCallback((data: WebSocketMessage) => {
@@ -72,12 +95,13 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     }
   }, [user]);
   
-  // Initialize the WebSocket connection
+  // Initialize the WebSocket connection, respecting the disable flag
   const { status, lastMessage, sendMessage, reconnect } = useWebSocket(
     '', // URL is determined in the hook
     {
       onOpen: handleOpen,
       onMessage: handleMessage,
+      disableWebSocketConnections: disableWebSockets
     }
   );
   
