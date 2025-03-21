@@ -405,24 +405,73 @@ export default function WarehouseReceiving() {
   };
 
   const onReceiveItem = (data: any) => {
-    if (!selectedItemId) return;
+    if (!selectedItemId) {
+      console.error("Cannot receive item: No item selected");
+      toast({
+        title: "Operation Failed",
+        description: "No item selected for receiving.",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    updateOrderItemMutation.mutate({ 
-      id: selectedItemId,
-      updates: {
-        receivedQuantity: data.receivedQuantity,
-        status: data.status,
-        storageLocation: data.storageLocation,
-        batchNumber: data.batchNumber,
-        lotNumber: data.lotNumber,
-        expiryDate: data.expiryDate
-      }
-    });
+    console.log("Receiving item:", selectedItemId, "with data:", data);
+    
+    try {
+      updateOrderItemMutation.mutate({ 
+        id: selectedItemId,
+        updates: {
+          receivedQuantity: data.receivedQuantity,
+          status: data.status,
+          storageLocation: data.storageLocation,
+          batchNumber: data.batchNumber,
+          lotNumber: data.lotNumber,
+          expiryDate: data.expiryDate
+        }
+      }, {
+        onError: (error: any) => {
+          console.error("Error receiving item:", error);
+          // Error is already handled in the mutation's onError
+        }
+      });
+    } catch (err) {
+      console.error("Exception in receive item operation:", err);
+      toast({
+        title: "System Error",
+        description: "An unexpected error occurred while receiving the item.",
+        variant: "destructive"
+      });
+    }
   };
 
   const onCreatePutAwayTask = () => {
-    if (!selectedItemId) return;
-    createPutAwayTaskMutation.mutate(selectedItemId);
+    if (!selectedItemId) {
+      console.error("Cannot create put-away task: No item selected");
+      toast({
+        title: "Operation Failed",
+        description: "No item selected for put-away task.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    console.log("Creating put-away task for item:", selectedItemId);
+    
+    try {
+      createPutAwayTaskMutation.mutate(selectedItemId, {
+        onError: (error: any) => {
+          console.error("Error creating put-away task:", error);
+          // Error is already handled in the mutation's onError
+        }
+      });
+    } catch (err) {
+      console.error("Exception in create put-away task operation:", err);
+      toast({
+        title: "System Error",
+        description: "An unexpected error occurred while creating the put-away task.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Helper function to get status color
