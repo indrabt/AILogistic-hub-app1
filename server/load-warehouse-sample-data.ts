@@ -127,16 +127,13 @@ async function loadSampleData() {
       const pickTasks = JSON.parse(fs.readFileSync(pickTasksPath, 'utf8'));
       
       for (const task of pickTasks) {
-        // Store each pick task
+        // Store each pick task with items
+        const itemsCopy = [...task.items]; // Make a copy of the items
+        
         await storage.createPickTask({
           ...task,
-          items: [] // We'll add items separately
+          items: itemsCopy // Include the items directly with the task
         });
-        
-        // Store pick task items
-        for (const item of task.items) {
-          await storage.updatePickTaskItem(item.id, item);
-        }
       }
       console.log(`Loaded ${pickTasks.length} pick tasks`);
     }
@@ -148,22 +145,15 @@ async function loadSampleData() {
       const packingTasks = JSON.parse(fs.readFileSync(packingTasksPath, 'utf8'));
       
       for (const task of packingTasks) {
-        // Store each packing task
+        // Store each packing task with items and packages
+        const itemsCopy = [...task.items]; // Make a copy of the items
+        const packagesCopy = [...task.packages]; // Make a copy of the packages
+        
         await storage.createPackingTask({
           ...task,
-          items: [],
-          packages: [] // We'll add these separately
+          items: itemsCopy,
+          packages: packagesCopy // Include all data directly
         });
-        
-        // Store packing task items
-        for (const item of task.items) {
-          await storage.updatePackingTaskItem(item.id, item);
-        }
-        
-        // Store packages
-        for (const pkg of task.packages) {
-          await storage.updateShipmentPackage(pkg.id, pkg);
-        }
       }
       console.log(`Loaded ${packingTasks.length} packing tasks`);
     }
