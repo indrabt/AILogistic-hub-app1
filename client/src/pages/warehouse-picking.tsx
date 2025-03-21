@@ -239,25 +239,66 @@ export default function WarehousePicking() {
 
   // Handle starting a picking task
   const handleStartTask = (task: PickTask) => {
-    updatePickTaskMutation.mutate({
-      id: task.id,
-      status: "in_progress",
-      assignedTo: user?.username
-    }, {
-      onSuccess: (updatedTask) => {
-        console.log("Task updated successfully:", updatedTask);
-        // Set the selected task with the updated task data
-        setSelectedTask(updatedTask);
-        
-        // Force refresh the task list
-        queryClient.invalidateQueries({ queryKey: ["/api/warehouse/pick-tasks"] });
-        
+    // Add loading state if needed
+    console.log("Starting task:", task);
+    
+    try {
+      // Check if user is available
+      if (!user?.username) {
         toast({
-          title: "Task Started",
-          description: `Picking task #${task.id} is now in progress`
+          title: "Authentication Error",
+          description: "You must be logged in to start a task",
+          variant: "destructive"
         });
+        return;
       }
-    });
+      
+      // Check if task can be started
+      if (task.status !== "pending") {
+        toast({
+          title: "Task Status Error",
+          description: `Task #${task.id} cannot be started because it is already ${task.status}`,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Proceed with the mutation
+      updatePickTaskMutation.mutate({
+        id: task.id,
+        status: "in_progress",
+        assignedTo: user.username
+      }, {
+        onSuccess: (updatedTask) => {
+          console.log("Task updated successfully:", updatedTask);
+          // Set the selected task with the updated task data
+          setSelectedTask(updatedTask);
+          
+          // Force refresh the task list
+          queryClient.invalidateQueries({ queryKey: ["/api/warehouse/pick-tasks"] });
+          
+          toast({
+            title: "Task Started",
+            description: `Picking task #${task.id} is now in progress`
+          });
+        },
+        onError: (error) => {
+          console.error("Error starting task:", error);
+          toast({
+            title: "Error Starting Task",
+            description: `Could not start picking task #${task.id}. Please try again.`,
+            variant: "destructive"
+          });
+        }
+      });
+    } catch (err) {
+      console.error("Exception when starting task:", err);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Handle completing a picking task
