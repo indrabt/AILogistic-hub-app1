@@ -4,265 +4,274 @@
  * Simplified version for Replit environment testing cycle count functionality.
  */
 
-const { Builder, By, Key, until } = require('selenium-webdriver');
+const { Builder, By, until, Key } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
+const fs = require('fs');
+const path = require('path');
 
-// Test configuration
+// Configuration
 const config = {
   baseUrl: 'http://localhost:5000',
-  username: 'warehouse1',
+  waitTimeout: 10000,
+  username: 'wstaff',
   password: 'password',
-  testTimeout: 30000,
-  waitTimeout: 10000
+  screenshotDir: './test-screenshots'
 };
 
-// Store driver reference
-let driver;
+// Create screenshots directory if it doesn't exist
+if (!fs.existsSync(config.screenshotDir)) {
+  fs.mkdirSync(config.screenshotDir, { recursive: true });
+}
 
-// Helper function for logging
+// Utility function for logging
 function log(message) {
-  console.log(`[TEST] ${message}`);
+  const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+  console.log(`[${timestamp}] ${message}`);
 }
 
-// Setup test environment
+// Setup WebDriver
 async function setup() {
-  log('Setting up test environment');
+  log('Setting up WebDriver...');
   
-  // Configure Chrome options for Replit environment
-  const chromeOptions = new chrome.Options();
+  let options = new chrome.Options();
+  options.addArguments('--headless');
+  options.addArguments('--no-sandbox');
+  options.addArguments('--disable-dev-shm-usage');
   
-  // Enable headless mode for Replit environment
-  chromeOptions.addArguments('--headless=new');
-  chromeOptions.addArguments('--no-sandbox');
-  chromeOptions.addArguments('--disable-dev-shm-usage');
-  chromeOptions.addArguments('--disable-gpu');
-  chromeOptions.addArguments('--window-size=1920,1080');
+  // Check if we have a custom Chrome path from the installation script
+  if (fs.existsSync('.chrome_config')) {
+    const chromeConfig = fs.readFileSync('.chrome_config', 'utf8');
+    const chromePath = chromeConfig.split('=')[1].trim();
+    log(`Using custom Chrome path: ${chromePath}`);
+    options.setChromeBinaryPath(chromePath);
+  }
   
-  // Create the driver
-  driver = await new Builder()
-    .forBrowser('chrome')
-    .setChromeOptions(chromeOptions)
-    .build();
-  
-  // Set timeout
-  await driver.manage().setTimeouts({ implicit: 5000 });
-  
-  return driver;
+  try {
+    const driver = await new Builder()
+      .forBrowser('chrome')
+      .setChromeOptions(options)
+      .build();
+      
+    log('WebDriver setup complete');
+    return driver;
+  } catch (error) {
+    log(`Error setting up WebDriver: ${error.message}`);
+    throw error;
+  }
 }
 
-// Cleanup
-async function teardown() {
-  log('Cleaning up');
+// Teardown WebDriver
+async function teardown(driver) {
   if (driver) {
-    await driver.quit();
+    log('Tearing down WebDriver...');
+    try {
+      await driver.quit();
+      log('WebDriver teardown complete');
+    } catch (error) {
+      log(`Error during teardown: ${error.message}`);
+    }
   }
 }
 
 // Take screenshot for debugging
-async function takeScreenshot(name) {
+async function takeScreenshot(driver, name) {
   try {
     const screenshot = await driver.takeScreenshot();
-    log(`Screenshot taken: ${name}`);
-    return screenshot;
+    const filename = path.join(config.screenshotDir, `${name}_${Date.now()}.png`);
+    fs.writeFileSync(filename, screenshot, 'base64');
+    log(`Screenshot saved: ${filename}`);
   } catch (error) {
-    log(`Failed to take screenshot: ${error.message}`);
-    return null;
+    log(`Error taking screenshot: ${error.message}`);
   }
 }
 
-// Login
-async function login() {
-  log('Attempting to login');
-  
+// Login to the application
+async function login(driver) {
   try {
-    // Navigate to login page
+    log('Navigating to login page...');
     await driver.get(`${config.baseUrl}/login`);
-    await takeScreenshot('login-page');
     
-    // Enter credentials
-    await driver.findElement(By.id('username')).sendKeys(config.username);
-    await driver.findElement(By.id('password')).sendKeys(config.password);
+    // Wait for the page to load
+    await driver.wait(until.elementLocated(By.name('username')), config.waitTimeout);
     
-    // Submit form
+    log('Entering login credentials...');
+    await driver.findElement(By.name('username')).sendKeys(config.username);
+    await driver.findElement(By.name('password')).sendKeys(config.password);
+    
+    log('Submitting login form...');
     await driver.findElement(By.css('button[type="submit"]')).click();
     
-    // Wait for login to complete
-    await driver.sleep(2000);
-    await takeScreenshot('after-login');
+    // Wait for successful login (dashboard should load)
+    await driver.wait(until.elementLocated(By.css('.dashboard-container')), config.waitTimeout);
     
-    // Check if login was successful
-    const currentUrl = await driver.getCurrentUrl();
-    const loginSuccessful = !currentUrl.includes('/login');
-    
-    log(`Login ${loginSuccessful ? 'successful' : 'failed'}`);
-    return loginSuccessful;
-  } catch (error) {
-    log(`Login error: ${error.message}`);
-    return false;
-  }
-}
-
-// Navigate to cycle count page
-async function navigateToCycleCount() {
-  log('Navigating to cycle count page');
-  
-  try {
-    // Direct navigation
-    await driver.get(`${config.baseUrl}/warehouse-cycle-count`);
-    await driver.sleep(2000);
-    await takeScreenshot('cycle-count-page');
-    
-    // Check if on correct page
-    const pageSource = await driver.getPageSource();
-    const pageTitle = await driver.getTitle();
-    
-    log(`Page title: ${pageTitle}`);
-    log(`Current URL: ${await driver.getCurrentUrl()}`);
-    
+    log('Login successful');
+    await takeScreenshot(driver, 'login_success');
     return true;
   } catch (error) {
-    log(`Navigation error: ${error.message}`);
+    log(`Login failed: ${error.message}`);
+    await takeScreenshot(driver, 'login_failed');
     return false;
   }
 }
 
-// Create a cycle count task
-async function createCycleCountTask() {
-  log('Creating a new cycle count task');
-  
+// Navigate to Cycle Count page using direct URL approach
+async function navigateToCycleCount(driver) {
   try {
-    // Find and click the create button
-    const buttons = await driver.findElements(By.css('button'));
-    let createButton = null;
+    log('Navigating to Cycle Count page...');
     
-    for (const button of buttons) {
-      const text = await button.getText();
-      log(`Found button: "${text}"`);
-      
-      if (text.toLowerCase().includes('create') || 
-          text.toLowerCase().includes('new') || 
-          text.toLowerCase().includes('add')) {
-        createButton = button;
+    // Use direct URL navigation approach
+    await driver.get(`${config.baseUrl}/warehouse-cycle-count`);
+    
+    // Wait for the page to load - look for cycle count heading
+    await driver.wait(until.elementLocated(By.css('h1')), config.waitTimeout);
+    const heading = await driver.findElement(By.css('h1')).getText();
+    
+    if (heading.includes('Cycle Count')) {
+      log('Successfully navigated to Cycle Count page');
+      await takeScreenshot(driver, 'cycle_count_page');
+      return true;
+    } else {
+      log(`Navigation to Cycle Count failed, found heading: ${heading}`);
+      await takeScreenshot(driver, 'cycle_count_navigation_failed');
+      return false;
+    }
+  } catch (error) {
+    log(`Error navigating to Cycle Count: ${error.message}`);
+    await takeScreenshot(driver, 'cycle_count_navigation_error');
+    return false;
+  }
+}
+
+// Create a new Cycle Count task
+async function createCycleCountTask(driver) {
+  try {
+    log('Creating a new Cycle Count task...');
+    
+    // Click the Create button
+    await driver.findElement(By.css('button[data-testid="create-cycle-count-button"]')).click();
+    log('Clicked Create button');
+    
+    // Wait for form to appear
+    await driver.wait(until.elementLocated(By.css('form')), config.waitTimeout);
+    
+    // Fill out the form
+    const taskName = `Test Cycle Count ${Date.now()}`;
+    await driver.findElement(By.id('name')).sendKeys(taskName);
+    log(`Entered task name: ${taskName}`);
+    
+    // Select counting method: cycle
+    const countingMethodDropdown = await driver.findElement(By.id('countingMethod'));
+    await countingMethodDropdown.click();
+    await driver.findElement(By.css('option[value="cycle"]')).click();
+    log('Selected cycle counting method');
+    
+    // Set scheduled date (today)
+    const today = new Date().toISOString().split('T')[0];
+    await driver.findElement(By.id('scheduledDate')).sendKeys(today);
+    log(`Set scheduled date: ${today}`);
+    
+    // Add notes
+    await driver.findElement(By.id('notes')).sendKeys('Automated test task');
+    log('Added notes');
+    
+    // Submit the form
+    await driver.findElement(By.css('button[type="submit"]')).click();
+    log('Submitted form');
+    
+    // Wait for success message or redirect back to list
+    try {
+      await driver.wait(until.elementLocated(By.css('.toast-success')), config.waitTimeout);
+      log('Success message appeared');
+    } catch (error) {
+      log('No success toast found, checking if we returned to task list');
+      await driver.wait(until.elementLocated(By.css('table')), config.waitTimeout);
+    }
+    
+    await takeScreenshot(driver, 'cycle_count_created');
+    
+    // Verify task was created by checking the task list
+    const tableRows = await driver.findElements(By.css('table tbody tr'));
+    let taskFound = false;
+    
+    for (const row of tableRows) {
+      const text = await row.getText();
+      if (text.includes(taskName)) {
+        taskFound = true;
+        log(`Task "${taskName}" was successfully created`);
         break;
       }
     }
     
-    if (createButton) {
-      await createButton.click();
-      log('Clicked create button');
-    } else {
-      log('Could not find create button, looking for "New" link');
-      const links = await driver.findElements(By.css('a'));
-      
-      for (const link of links) {
-        const text = await link.getText();
-        if (text.toLowerCase().includes('new') || 
-            text.toLowerCase().includes('create') || 
-            text.toLowerCase().includes('add')) {
-          await link.click();
-          log('Clicked create link');
-          break;
-        }
-      }
+    if (!taskFound) {
+      log(`Task "${taskName}" was not found in the task list`);
+      return false;
     }
-    
-    // Wait for form to appear
-    await driver.sleep(2000);
-    await takeScreenshot('create-form');
-    
-    // Fill in form fields
-    const taskName = `Test Cycle Count ${new Date().toISOString()}`;
-    
-    const inputs = await driver.findElements(By.css('input, select, textarea'));
-    for (const input of inputs) {
-      const name = await input.getAttribute('name');
-      const placeholder = await input.getAttribute('placeholder');
-      
-      log(`Found input field: name=${name}, placeholder=${placeholder}`);
-      
-      // Fill in appropriate fields based on attribute names
-      if (name === 'name' || (placeholder && placeholder.includes('name'))) {
-        await input.clear();
-        await input.sendKeys(taskName);
-        log('Filled name field');
-      }
-    }
-    
-    // Submit the form
-    const submitButtons = await driver.findElements(By.css('button[type="submit"]'));
-    if (submitButtons.length > 0) {
-      await submitButtons[0].click();
-      log('Submitted form');
-    } else {
-      // Try to find any button that looks like a submit button
-      const allButtons = await driver.findElements(By.css('button'));
-      for (const button of allButtons) {
-        const text = await button.getText();
-        if (text.toLowerCase().includes('save') || 
-            text.toLowerCase().includes('submit') || 
-            text.toLowerCase().includes('create')) {
-          await button.click();
-          log('Clicked submit button');
-          break;
-        }
-      }
-    }
-    
-    // Wait for submission to complete
-    await driver.sleep(2000);
-    await takeScreenshot('after-create');
     
     return true;
   } catch (error) {
-    log(`Create task error: ${error.message}`);
+    log(`Error creating Cycle Count task: ${error.message}`);
+    await takeScreenshot(driver, 'cycle_count_creation_error');
     return false;
   }
 }
 
-// Main test function
+// Run the test
 async function runTest() {
-  console.log('\n==== STARTING CYCLE COUNT UI TEST ====\n');
-  let testPassed = false;
+  let driver;
+  let success = false;
   
   try {
-    // Setup driver
-    await setup();
+    log('Starting Cycle Count test');
+    driver = await setup();
     
-    // Login
-    const loggedIn = await login();
+    const loggedIn = await login(driver);
     if (!loggedIn) {
-      throw new Error('Login failed');
+      log('Test failed: Unable to login');
+      return false;
     }
     
-    // Navigate to cycle count
-    const navigated = await navigateToCycleCount();
+    const navigated = await navigateToCycleCount(driver);
     if (!navigated) {
-      throw new Error('Navigation failed');
+      log('Test failed: Unable to navigate to Cycle Count page');
+      return false;
     }
     
-    // Create a task
-    const taskCreated = await createCycleCountTask();
+    const taskCreated = await createCycleCountTask(driver);
     if (!taskCreated) {
-      throw new Error('Task creation failed');
+      log('Test failed: Unable to create Cycle Count task');
+      return false;
     }
     
-    // Test successful if we get here
-    testPassed = true;
+    log('Test completed successfully');
+    success = true;
+    return true;
   } catch (error) {
-    console.error(`TEST FAILED: ${error.message}`);
+    log(`Test failed with error: ${error.message}`);
+    if (driver) {
+      await takeScreenshot(driver, 'test_failed');
+    }
+    return false;
   } finally {
-    // Cleanup
-    await teardown();
+    if (driver) {
+      await teardown(driver);
+    }
     
-    if (testPassed) {
-      console.log('\n==== CYCLE COUNT UI TEST PASSED ====\n');
+    if (success) {
+      log('🟢 ALL TESTS PASSED');
     } else {
-      console.log('\n==== CYCLE COUNT UI TEST FAILED ====\n');
+      log('🔴 TEST FAILED');
     }
   }
 }
 
 // Run the test
-runTest().catch(error => {
-  console.error('Unhandled error:', error);
-});
+if (require.main === module) {
+  runTest().then((success) => {
+    process.exit(success ? 0 : 1);
+  }).catch((error) => {
+    console.error('Unhandled error:', error);
+    process.exit(1);
+  });
+}
+
+module.exports = { runTest };

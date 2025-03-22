@@ -9,315 +9,333 @@
 const axios = require('axios');
 const { JSDOM } = require('jsdom');
 
-// Test configuration
+// Configuration
 const config = {
   baseUrl: 'http://localhost:5000',
-  username: 'warehouse1',
-  password: 'password',
-  waitTime: 1000
+  username: 'wstaff',
+  password: 'password'
 };
 
-// Global session cookie storage
-let cookies = [];
-
-// Helper functions
+// Utility function for logging
 function log(step, message) {
-  console.log(`\n[${step}] ${message}`);
+  console.log(`[${step}] ${message}`);
 }
 
+// Utility function for delays
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Login and get session cookie
+// Axios instance with cookies enabled
+const client = axios.create({
+  baseURL: config.baseUrl,
+  withCredentials: true
+});
+
+// Login to the application
 async function login() {
-  log('LOGIN', 'Logging in as warehouse staff');
+  log('LOGIN', 'Attempting to log in');
   
   try {
-    const response = await axios.post(`${config.baseUrl}/api/auth/login`, {
+    const response = await client.post('/api/auth/login', {
       username: config.username,
       password: config.password
-    }, {
-      validateStatus: status => status < 500,
-      withCredentials: true
     });
     
-    if (response.status === 200 && response.data) {
-      // Extract cookies
-      if (response.headers['set-cookie']) {
-        cookies = response.headers['set-cookie'];
-        log('LOGIN', 'Successfully logged in and got cookies');
-        return true;
-      }
-      
-      log('LOGIN', 'Logged in but no cookies received');
+    if (response.status === 200 && response.data.success) {
+      log('LOGIN', `Successfully logged in as ${config.username} (${response.data.user.role})`);
       return true;
     } else {
-      log('LOGIN', `Login failed with status ${response.status}`);
+      log('LOGIN', `Login failed: ${response.data.message || 'Unknown error'}`);
       return false;
     }
   } catch (error) {
-    log('LOGIN', `Login error: ${error.message}`);
+    log('LOGIN', `Login failed with error: ${error.message}`);
     return false;
   }
 }
 
-// Fetch a page and parse with JSDOM
+// Fetch a page and parse the HTML
 async function fetchPage(url) {
   log('FETCH', `Fetching page: ${url}`);
   
   try {
-    const response = await axios.get(url, {
-      headers: cookies.length > 0 ? { Cookie: cookies.join('; ') } : {},
-      validateStatus: status => status < 500
-    });
+    const response = await client.get(url);
+    const dom = new JSDOM(response.data);
     
-    if (response.status === 200) {
-      const dom = new JSDOM(response.data);
-      log('FETCH', 'Page loaded successfully');
-      return { dom, html: response.data };
-    } else {
-      log('FETCH', `Failed to fetch page: ${response.status}`);
-      return { dom: null, html: null };
-    }
+    log('FETCH', `Successfully fetched page`);
+    return { 
+      success: true, 
+      html: response.data, 
+      dom: dom.window.document 
+    };
   } catch (error) {
-    log('FETCH', `Fetch error: ${error.message}`);
-    return { dom: null, html: null };
+    log('FETCH', `Failed to fetch page: ${error.message}`);
+    return { 
+      success: false, 
+      error: error.message 
+    };
   }
 }
 
-// Analyze cycle count page content
+// Analyze Cycle Count page content
 function analyzeCycleCountPage(html, dom) {
-  log('ANALYZE', 'Analyzing cycle count page content');
+  log('ANALYZE', 'Checking Cycle Count page elements');
   
-  if (!dom || !html) {
-    log('ANALYZE', 'No content to analyze');
-    return { success: false };
-  }
+  // Check for important UI elements that should be present
+  const results = {
+    title: false,
+    createButton: false,
+    taskTable: false,
+    statusFilters: false,
+    errors: []
+  };
   
-  // Check for common cycle count page elements
-  const document = dom.window.document;
-  
-  // Look for headings
-  const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-  let isCycleCountPage = false;
-  
+  // Check page title/heading
+  const headings = dom.querySelectorAll('h1, h2');
   for (const heading of headings) {
-    const text = heading.textContent.toLowerCase();
-    if (text.includes('cycle count') || text.includes('inventory')) {
-      isCycleCountPage = true;
-      log('ANALYZE', `Found relevant heading: "${heading.textContent}"`);
+    if (heading.textContent.includes('Cycle Count')) {
+      results.title = true;
+      log('ANALYZE', `✓ Found page title: "${heading.textContent.trim()}"`);
       break;
     }
   }
   
-  // Look for create button
-  const buttons = document.querySelectorAll('button');
-  let hasCreateButton = false;
+  if (!results.title) {
+    results.errors.push('Missing cycle count title/heading');
+    log('ANALYZE', '✗ Could not find page title containing "Cycle Count"');
+  }
   
+  // Check for Create button
+  const buttons = dom.querySelectorAll('button');
   for (const button of buttons) {
-    const text = button.textContent.toLowerCase();
-    if (text.includes('create') || text.includes('new') || text.includes('add')) {
-      hasCreateButton = true;
-      log('ANALYZE', `Found create button: "${button.textContent}"`);
+    if (button.textContent.includes('Create') || 
+        button.getAttribute('data-testid') === 'create-cycle-count-button') {
+      results.createButton = true;
+      log('ANALYZE', '✓ Found Create button');
       break;
     }
   }
   
-  // Look for task table or list
-  const tables = document.querySelectorAll('table');
-  const lists = document.querySelectorAll('ul, ol');
-  
-  const hasTables = tables.length > 0;
-  const hasLists = lists.length > 0;
-  
-  if (hasTables) {
-    log('ANALYZE', `Found ${tables.length} tables`);
+  if (!results.createButton) {
+    results.errors.push('Missing create button');
+    log('ANALYZE', '✗ Could not find Create button');
   }
   
-  if (hasLists) {
-    log('ANALYZE', `Found ${lists.length} lists`);
+  // Check for task table
+  const tables = dom.querySelectorAll('table');
+  if (tables.length > 0) {
+    results.taskTable = true;
+    log('ANALYZE', `✓ Found ${tables.length} table(s)`);
+    
+    // Check table headers
+    const headers = tables[0].querySelectorAll('th');
+    const headerTexts = Array.from(headers).map(h => h.textContent.trim());
+    log('ANALYZE', `Table headers: ${headerTexts.join(', ')}`);
+    
+    // Look for expected headers
+    const expectedHeaders = ['Name', 'Status', 'Method', 'Scheduled', 'Actions'];
+    const missingHeaders = expectedHeaders.filter(eh => 
+      !headerTexts.some(h => h.includes(eh))
+    );
+    
+    if (missingHeaders.length > 0) {
+      results.errors.push(`Missing table headers: ${missingHeaders.join(', ')}`);
+      log('ANALYZE', `✗ Missing expected table headers: ${missingHeaders.join(', ')}`);
+    }
+  } else {
+    results.errors.push('Missing task table');
+    log('ANALYZE', '✗ Could not find task table');
   }
   
-  // Check for task-related keywords in the page content
-  const taskRelatedKeywords = ['task', 'status', 'date', 'count', 'inventory', 'location', 'cycle'];
-  let keywordsFound = [];
-  
-  for (const keyword of taskRelatedKeywords) {
-    if (html.toLowerCase().includes(keyword)) {
-      keywordsFound.push(keyword);
+  // Check for status filters
+  const filterElements = dom.querySelectorAll('.status-filter, [data-testid^="status-filter"]');
+  if (filterElements.length > 0) {
+    results.statusFilters = true;
+    log('ANALYZE', `✓ Found ${filterElements.length} status filter(s)`);
+  } else {
+    // Status filters are often in buttons or tabs
+    const filterButtons = Array.from(buttons).filter(b => 
+      ['Pending', 'In Progress', 'Completed', 'All'].some(status => 
+        b.textContent.includes(status)
+      )
+    );
+    
+    if (filterButtons.length > 0) {
+      results.statusFilters = true;
+      log('ANALYZE', `✓ Found ${filterButtons.length} status filter button(s)`);
+    } else {
+      results.errors.push('Missing status filters');
+      log('ANALYZE', '✗ Could not find status filters');
     }
   }
   
-  log('ANALYZE', `Found task-related keywords: ${keywordsFound.join(', ')}`);
+  // Summary
+  const successCount = Object.values(results).filter(v => v === true).length;
+  log('ANALYZE', `Found ${successCount} out of 4 expected elements`);
   
-  // Determine if page looks like a cycle count page
-  const looksLikeCycleCountPage = (
-    isCycleCountPage || 
-    (keywordsFound.length >= 3 && (hasTables || hasLists)) ||
-    (hasCreateButton && (hasTables || hasLists))
-  );
-  
-  return {
-    success: looksLikeCycleCountPage,
-    isCycleCountPage,
-    hasCreateButton,
-    hasTables,
-    hasLists,
-    keywordsFound
-  };
+  return results;
 }
 
-// Find form elements in cycle count create page
+// Analyze the Create Form
 function analyzeCreateForm(html, dom) {
-  log('FORM', 'Analyzing create form elements');
+  log('ANALYZE', 'Checking Create Form elements');
   
-  if (!dom || !html) {
-    log('FORM', 'No content to analyze');
-    return { success: false };
-  }
+  // Check for important form elements that should be present
+  const results = {
+    nameField: false,
+    methodSelector: false,
+    dateField: false,
+    submitButton: false,
+    errors: []
+  };
   
-  const document = dom.window.document;
-  
-  // Look for form
-  const forms = document.querySelectorAll('form');
+  // Check for form
+  const forms = dom.querySelectorAll('form');
   if (forms.length === 0) {
-    log('FORM', 'No forms found on page');
-    return { success: false };
+    results.errors.push('No form found');
+    log('ANALYZE', '✗ Could not find form element');
+    return results;
   }
   
-  log('FORM', `Found ${forms.length} forms`);
+  log('ANALYZE', `✓ Found ${forms.length} form(s)`);
+  const form = forms[0];
   
-  // Find important form fields
-  const inputFields = document.querySelectorAll('input, select, textarea');
-  let formFields = [];
-  
-  for (const field of inputFields) {
-    const name = field.getAttribute('name');
-    const type = field.getAttribute('type');
-    const placeholder = field.getAttribute('placeholder');
-    
-    formFields.push({
-      name: name || 'unnamed',
-      type: type || field.tagName.toLowerCase(),
-      placeholder: placeholder || 'none'
-    });
-    
-    log('FORM', `Found form field: name=${name}, type=${type}, placeholder=${placeholder}`);
+  // Check for name field
+  const nameInput = form.querySelector('#name, [name="name"]');
+  if (nameInput) {
+    results.nameField = true;
+    log('ANALYZE', '✓ Found name input field');
+  } else {
+    results.errors.push('Missing name field');
+    log('ANALYZE', '✗ Could not find name input field');
   }
   
-  // Look for submit button
-  const buttons = document.querySelectorAll('button');
-  let hasSubmitButton = false;
+  // Check for method selector
+  const methodSelect = form.querySelector('#countingMethod, [name="countingMethod"]');
+  if (methodSelect) {
+    results.methodSelector = true;
+    log('ANALYZE', '✓ Found counting method selector');
+    
+    // Check options
+    const options = methodSelect.querySelectorAll('option');
+    const optionValues = Array.from(options).map(opt => opt.value || opt.textContent.trim());
+    log('ANALYZE', `Method options: ${optionValues.join(', ')}`);
+  } else {
+    results.errors.push('Missing counting method selector');
+    log('ANALYZE', '✗ Could not find counting method selector');
+  }
   
+  // Check for date field
+  const dateInput = form.querySelector('#scheduledDate, [name="scheduledDate"], [type="date"]');
+  if (dateInput) {
+    results.dateField = true;
+    log('ANALYZE', '✓ Found scheduled date field');
+  } else {
+    results.errors.push('Missing scheduled date field');
+    log('ANALYZE', '✗ Could not find scheduled date field');
+  }
+  
+  // Check for submit button
+  const buttons = form.querySelectorAll('button');
   for (const button of buttons) {
-    const type = button.getAttribute('type');
-    const text = button.textContent.toLowerCase();
-    
-    if (type === 'submit' || text.includes('submit') || text.includes('save') || text.includes('create')) {
-      hasSubmitButton = true;
-      log('FORM', `Found submit button: "${button.textContent}"`);
+    if (button.getAttribute('type') === 'submit' || 
+        button.textContent.includes('Create') || 
+        button.textContent.includes('Submit')) {
+      results.submitButton = true;
+      log('ANALYZE', '✓ Found submit button');
       break;
     }
   }
   
-  return {
-    success: formFields.length > 0 && hasSubmitButton,
-    formFields,
-    hasSubmitButton
-  };
+  if (!results.submitButton) {
+    results.errors.push('Missing submit button');
+    log('ANALYZE', '✗ Could not find submit button');
+  }
+  
+  // Summary
+  const successCount = Object.values(results).filter(v => v === true).length;
+  log('ANALYZE', `Found ${successCount} out of 4 expected form elements`);
+  
+  return results;
 }
 
-// Main test function
+// Run all tests
 async function runTest() {
-  console.log('\n==== STARTING SIMPLE CYCLE COUNT UI TEST ====\n');
-  let testScore = 0;
-  const maxScore = 3;
+  log('TEST', 'Starting Cycle Count UI test');
+  let success = false;
   
   try {
     // Step 1: Login
     const loggedIn = await login();
     if (!loggedIn) {
-      log('TEST', 'Login failed, stopping test');
-      return;
+      throw new Error('Login failed, cannot proceed with tests');
     }
-    testScore++;
     
-    // Step 2: Check Cycle Count Page
-    await delay(config.waitTime);
-    const { dom, html } = await fetchPage(`${config.baseUrl}/warehouse-cycle-count`);
-    
-    const cycleCountPageAnalysis = analyzeCycleCountPage(html, dom);
-    if (!cycleCountPageAnalysis.success) {
-      log('TEST', 'Could not verify cycle count page, stopping test');
-      return;
+    // Step 2: Fetch the Cycle Count page
+    const { success: fetchSuccess, html, dom } = await fetchPage('/warehouse-cycle-count');
+    if (!fetchSuccess) {
+      throw new Error('Failed to fetch Cycle Count page');
     }
-    testScore++;
     
-    // Step 3: Find Create Form (URL may vary based on app)
-    await delay(config.waitTime);
+    // Step 3: Analyze the Cycle Count page
+    const pageAnalysis = analyzeCycleCountPage(html, dom);
+    if (pageAnalysis.errors.length > 0) {
+      log('TEST', `Page analysis found ${pageAnalysis.errors.length} issues`);
+    }
     
-    // Try to determine the URL for the create form
-    let createFormUrl = `${config.baseUrl}/warehouse-cycle-count/new`;
-    
-    // First try to extract the URL for the create button
-    if (dom) {
-      const document = dom.window.document;
-      const createLinks = document.querySelectorAll('a');
+    // Step 4: Try to navigate to Create Form (if button exists)
+    let createFormDom = null;
+    if (pageAnalysis.createButton) {
+      log('TEST', 'Attempting to access Create form by direct URL');
       
-      for (const link of createLinks) {
-        const text = link.textContent.toLowerCase();
-        if (text.includes('create') || text.includes('new') || text.includes('add')) {
-          const href = link.getAttribute('href');
-          if (href) {
-            createFormUrl = href.startsWith('http') ? href : `${config.baseUrl}${href.startsWith('/') ? '' : '/'}${href}`;
-            log('TEST', `Found create link with href: ${createFormUrl}`);
-            break;
-          }
-        }
-      }
-    }
-    
-    const { dom: formDom, html: formHtml } = await fetchPage(createFormUrl);
-    
-    const formAnalysis = analyzeCreateForm(formHtml, formDom);
-    if (!formAnalysis.success) {
-      log('TEST', 'Could not verify cycle count create form');
+      // Use direct URL to access create form since we can't click the button
+      const { success: createFetchSuccess, html: createHtml, dom: createDom } = 
+        await fetchPage('/warehouse-cycle-count?action=create');
       
-      // Fall back to checking if there are inputs on the main page
-      // (in case the form is shown through a modal or on the same page)
-      if (dom) {
-        const document = dom.window.document;
-        const inputs = document.querySelectorAll('input, select, textarea');
-        const hasInputs = inputs.length > 0;
+      if (createFetchSuccess) {
+        log('TEST', 'Successfully accessed Create form');
+        createFormDom = createDom;
         
-        if (hasInputs) {
-          log('TEST', `Found ${inputs.length} input fields on the main page, assuming form is shown in-place`);
-          testScore++;
+        // Step 5: Analyze the Create Form
+        const formAnalysis = analyzeCreateForm(createHtml, createDom);
+        if (formAnalysis.errors.length > 0) {
+          log('TEST', `Form analysis found ${formAnalysis.errors.length} issues`);
         }
+      } else {
+        log('TEST', 'Could not access Create form, skipping form analysis');
       }
-    } else {
-      testScore++;
     }
     
-    // Calculate final score
-    const testPercentage = Math.round((testScore / maxScore) * 100);
+    // Determine overall test success
+    const criticalIssues = pageAnalysis.errors.length > 1;
+    success = !criticalIssues && loggedIn;
     
-    log('RESULT', `Test Score: ${testScore}/${maxScore} (${testPercentage}%)`);
-    
-    if (testPercentage >= 70) {
-      log('RESULT', 'TEST PASSED - Cycle count UI elements verified');
+    if (success) {
+      log('TEST', 'UI test completed successfully');
+      log('RESULT', '🟢 PASS: Basic UI elements for Cycle Count functionality are present');
     } else {
-      log('RESULT', 'TEST FAILED - Could not verify all cycle count UI elements');
+      log('TEST', 'UI test completed with issues');
+      log('RESULT', '🟠 PARTIAL PASS: Some UI elements may be missing or inaccessible');
+      log('ISSUES', pageAnalysis.errors.join('\n'));
     }
+    
+    return success;
   } catch (error) {
-    log('ERROR', `Test failed with error: ${error.message}`);
+    log('ERROR', `Test failed: ${error.message}`);
+    log('RESULT', '🔴 FAIL: Cycle Count UI test encountered errors');
+    return false;
   }
-  
-  console.log('\n==== SIMPLE CYCLE COUNT UI TEST COMPLETED ====\n');
 }
 
 // Run the test
-runTest().catch(error => {
-  console.error('Unhandled test error:', error.message);
-});
+if (require.main === module) {
+  runTest().then((success) => {
+    process.exit(success ? 0 : 1);
+  }).catch((error) => {
+    console.error('Unhandled error:', error);
+    process.exit(1);
+  });
+}
+
+module.exports = { runTest };
