@@ -94,6 +94,7 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
   warehouse_staff: [
     { icon: <LayoutDashboard size={20} />, href: "/warehouse-dashboard", label: "Dashboard", id: "warehouse-dashboard" },
     { icon: <Package size={20} />, href: "/supply-chain", label: "Inventory", id: "warehouse-inventory" },
+    { icon: <ClipboardCheck size={20} />, href: "/cycle-count-direct", label: "Cycle Count Direct", id: "cycle-count-direct" },
     { 
       icon: <Warehouse size={20} />, 
       href: "#", 
@@ -111,6 +112,7 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
     { icon: <Route size={20} />, href: "/routes", label: "Route Optimization", id: "logistics-routes" },
     { icon: <Navigation size={20} />, href: "/hyper-local-routing", label: "Hyper-Local Routing", id: "logistics-hyper-local" },
     { icon: <Warehouse size={20} />, href: "/supply-chain", label: "Supply Chain", id: "logistics-supply-chain" },
+    { icon: <ClipboardCheck size={20} />, href: "/cycle-count-direct", label: "Cycle Count Direct", id: "logistics-cycle-count-direct" },
     { 
       icon: <Warehouse size={20} />, 
       href: "#", 
