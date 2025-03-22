@@ -86,7 +86,7 @@ const warehouseOperations = [
   { icon: <Package size={20} />, href: "/warehouse-picking", label: "Picking", id: "warehouse-picking" },
   { icon: <Package size={20} />, href: "/warehouse-packing", label: "Packing", id: "warehouse-packing" },
   { icon: <Truck size={20} />, href: "/warehouse-shipping", label: "Shipping", id: "warehouse-shipping" },
-  { icon: <ClipboardCheck size={20} />, href: "/cycle-count-standalone.html", label: "Cycle Count", id: "warehouse-cycle-count" },
+  { icon: <ClipboardCheck size={20} />, href: "/warehouse-direct-link.html?target=cycle-count", label: "Cycle Count", id: "warehouse-cycle-count" },
 ];
 
 // Define navigation items for each role
@@ -94,7 +94,7 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
   warehouse_staff: [
     { icon: <LayoutDashboard size={20} />, href: "/warehouse-dashboard", label: "Dashboard", id: "warehouse-dashboard" },
     { icon: <Package size={20} />, href: "/supply-chain", label: "Inventory", id: "warehouse-inventory" },
-    { icon: <ClipboardCheck size={20} />, href: "/cycle-count-standalone.html", label: "Cycle Count", id: "cycle-count-direct" },
+    { icon: <ClipboardCheck size={20} />, href: "/warehouse-direct-link.html?target=cycle-count", label: "Cycle Count", id: "cycle-count-direct" },
     { 
       icon: <Warehouse size={20} />, 
       href: "#", 
@@ -112,7 +112,7 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
     { icon: <Route size={20} />, href: "/routes", label: "Route Optimization", id: "logistics-routes" },
     { icon: <Navigation size={20} />, href: "/hyper-local-routing", label: "Hyper-Local Routing", id: "logistics-hyper-local" },
     { icon: <Warehouse size={20} />, href: "/supply-chain", label: "Supply Chain", id: "logistics-supply-chain" },
-    { icon: <ClipboardCheck size={20} />, href: "/cycle-count-standalone.html", label: "Cycle Count", id: "logistics-cycle-count" },
+    { icon: <ClipboardCheck size={20} />, href: "/warehouse-direct-link.html?target=cycle-count", label: "Cycle Count", id: "logistics-cycle-count" },
     { 
       icon: <Warehouse size={20} />, 
       href: "#", 
