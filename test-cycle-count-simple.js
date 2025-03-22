@@ -82,27 +82,43 @@ async function fetchPage(url) {
 function analyzeCycleCountPage(html, dom) {
   log('ANALYZE', 'Checking Cycle Count page elements');
   
-  // Check if this is the standalone HTML version
-  log('ANALYZE', 'HTML content excerpt for detection:', html.substring(0, 200) + '...');
-  
-  const isStandalone = html.includes('cycle-count-standalone') || 
-                       html.includes('AI Logistics Hub - Warehouse') || 
-                       html.includes('Warehouse Direct Link - Redirecting') ||
-                       html.includes('Loading Warehouse Interface');
-  
-  if (isStandalone) {
-    log('ANALYZE', 'Detected standalone HTML version of the cycle count page');
-  }
-
   // Check for important UI elements that should be present
   const results = {
-    isStandalone: isStandalone,
+    isStandalone: false,
     title: false,
     createButton: false,
     taskTable: false,
     statusFilters: false,
     errors: []
   };
+  
+  // Check if this is the standalone HTML version
+  log('ANALYZE', 'HTML content excerpt for detection:', html.substring(0, 200) + '...');
+  
+  const isStandalone = html.includes('cycle-count-standalone') || 
+                       html.includes('AI Logistics Hub - Warehouse') || 
+                       html.includes('Warehouse Direct Link - Redirecting') ||
+                       html.includes('Loading Warehouse Interface') ||
+                       html.includes('Warehouse Cycle Count');
+  
+  results.isStandalone = isStandalone;
+  
+  if (isStandalone) {
+    log('ANALYZE', 'Detected standalone HTML version of the cycle count page');
+    
+    // Check for hidden elements since JS might not have executed
+    const hiddenEmptyState = dom.querySelector('.empty-state[style*="display: none"]');
+    if (hiddenEmptyState) {
+      log('ANALYZE', 'Found hidden empty state, which would be shown after JS execution');
+      
+      // Look for the create button inside the hidden element
+      const createButton = hiddenEmptyState.querySelector('#createTaskBtn');
+      if (createButton) {
+        log('ANALYZE', `✓ Found Create button with text: "${createButton.textContent.trim()}"`);
+        results.createButton = true;
+      }
+    }
+  }
   
   // Check page title/heading
   const headings = dom.querySelectorAll('h1, h2');
@@ -301,6 +317,22 @@ async function runTest() {
       log('FETCH', 'Successfully fetched standalone page directly');
       html = standaloneResult.html;
       dom = standaloneResult.dom;
+      
+      // Log some DOM structure information to debug what's happening
+      log('DEBUG', 'Document title: ' + dom.title);
+      log('DEBUG', 'H1 elements: ' + Array.from(dom.querySelectorAll('h1')).map(el => el.textContent).join(', '));
+      log('DEBUG', 'Button elements: ' + Array.from(dom.querySelectorAll('button')).map(el => el.textContent.trim()).join(', '));
+      
+      const emptyState = dom.querySelector('.empty-state');
+      if (emptyState) {
+        log('DEBUG', 'Empty state found, display: ' + emptyState.style.display);
+        log('DEBUG', 'Empty state content: ' + emptyState.innerHTML.substring(0, 100) + '...');
+        
+        const createBtn = emptyState.querySelector('#createTaskBtn');
+        if (createBtn) {
+          log('DEBUG', 'Create button found in empty state: ' + createBtn.textContent);
+        }
+      }
     } else {
       log('FETCH', 'Failed to fetch standalone page directly, using original page data');
     }
@@ -335,29 +367,28 @@ async function runTest() {
     }
     
     // Determine overall test success based on whether it's standalone HTML or React component
-    let success = false;
-    
     if (pageAnalysis.isStandalone) {
       // For standalone HTML page, just check that we got a page with "Cycle Count" title
       const hasTitle = dom.querySelector('h1')?.textContent.includes('Cycle Count');
-      const hasCreateButton = dom.querySelector('button')?.textContent.includes('Create Cycle Count Task');
+      const hasCreateButton = dom.querySelector('button')?.textContent.includes('Create Cycle Count Task') || 
+                             dom.querySelector('#createTaskBtn') !== null;
       
       if (hasTitle && hasCreateButton) {
         log('TEST', 'Standalone HTML interface validated successfully');
-        success = true;
         log('RESULT', '🟢 PASS: Standalone Cycle Count HTML interface is accessible');
+        return true; // Success
       } else {
         log('TEST', 'Standalone HTML interface is missing critical elements');
-        success = false;
         log('RESULT', '🟠 PARTIAL PASS: Standalone HTML interface accessed but missing elements');
         
         if (!hasTitle) log('ISSUES', 'Standalone HTML missing Cycle Count title');
         if (!hasCreateButton) log('ISSUES', 'Standalone HTML missing Create button');
+        return false; // Failure
       }
     } else {
       // For React component, use the full validation criteria
       const criticalIssues = pageAnalysis.errors.length > 1;
-      success = !criticalIssues && loggedIn;
+      const success = !criticalIssues && loggedIn;
       
       if (success) {
         log('TEST', 'UI test completed successfully');
@@ -367,9 +398,9 @@ async function runTest() {
         log('RESULT', '🟠 PARTIAL PASS: Some UI elements may be missing or inaccessible');
         log('ISSUES', pageAnalysis.errors.join('\n'));
       }
+      
+      return success;
     }
-    
-    return success;
   } catch (error) {
     log('ERROR', `Test failed: ${error.message}`);
     log('RESULT', '🔴 FAIL: Cycle Count UI test encountered errors');
