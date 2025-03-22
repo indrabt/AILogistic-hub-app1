@@ -5,8 +5,8 @@
  * in headless mode for environments where GUI is not available.
  */
 
-const { Builder, By, Key, until } = require('selenium-webdriver');
-const chrome = require('selenium-webdriver/chrome');
+import { Builder, By, Key, until } from 'selenium-webdriver';
+import chrome from 'selenium-webdriver/chrome.js';
 
 // Test configuration
 const config = {
