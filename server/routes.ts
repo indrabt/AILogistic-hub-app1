@@ -1,9 +1,10 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import { webSocketManager } from "./websocket-simplified";
 import { log } from "./vite";
+import { loginUserSchema } from "../shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // prefix all routes with /api
