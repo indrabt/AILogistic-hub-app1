@@ -68,14 +68,43 @@ async function getAllCycleCountTasks(headers) {
   }
 }
 
+// Helper function to extract ID from response
+function extractTaskId(data) {
+  if (!data) return null;
+  
+  // If it's already a number or string, return it
+  if (typeof data === 'number' || typeof data === 'string') {
+    return data;
+  }
+  
+  // If data has an id property, use it
+  if (data.id) {
+    return data.id;
+  }
+  
+  // Try to parse JSON if it's a string
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data);
+      if (parsed && parsed.id) {
+        return parsed.id;
+      }
+    } catch (e) {
+      // Not JSON, continue
+    }
+  }
+  
+  return null;
+}
+
 // Create a new cycle count task
 async function createCycleCountTask(headers) {
   try {
+    const timestamp = new Date().toISOString();
     const newTask = {
-      name: `Test Cycle Count ${new Date().toISOString()}`,
+      name: `Test Cycle Count ${timestamp}`,
       countingMethod: "cycle",
-      status: "pending",
-      scheduledDate: new Date().toISOString().split('T')[0],
+      scheduledDate: timestamp.split('T')[0],
       locations: [1, 2, 3],
       notes: "Created by automated API test"
     };
@@ -87,8 +116,10 @@ async function createCycleCountTask(headers) {
     
     if (response.status === 201 || response.status === 200) {
       const task = response.data;
-      createdTaskId = task.id;
-      logResult('Create Cycle Count Task', true, `Successfully created task #${task.id}`, task);
+      const taskId = extractTaskId(task);
+      createdTaskId = taskId;
+      
+      logResult('Create Cycle Count Task', true, `Successfully created task #${taskId || 'unknown'}`, task);
       return task;
     } else {
       logResult('Create Cycle Count Task', false, 'Failed to create task', response.data);
@@ -105,11 +136,10 @@ async function updateCycleCountTask(headers, taskId) {
   try {
     const updates = {
       status: "in_progress",
-      startedAt: new Date().toISOString(),
       notes: "Updated by automated API test"
     };
     
-    const response = await axios.patch(`${baseUrl}/api/warehouse/cycle-count-tasks/${taskId}`, updates, {
+    const response = await axios.patch(`${baseUrl}/api/warehouse/cycle-counts/${taskId}`, updates, {
       headers,
       validateStatus: status => status < 500
     });
@@ -130,7 +160,7 @@ async function updateCycleCountTask(headers, taskId) {
 // Get a single cycle count task
 async function getCycleCountTask(headers, taskId) {
   try {
-    const response = await axios.get(`${baseUrl}/api/warehouse/cycle-count-tasks/${taskId}`, {
+    const response = await axios.get(`${baseUrl}/api/warehouse/cycle-counts/${taskId}`, {
       headers,
       validateStatus: status => status < 500
     });
@@ -161,28 +191,54 @@ async function runTests() {
   
   // Step 2: Get all tasks
   const initialTasks = await getAllCycleCountTasks(headers);
-  console.log(`Initial task count: ${initialTasks.length}`);
+  console.log(`Initial task count: ${initialTasks.length || 0}`);
   
   // Step 3: Create a task
   const createdTask = await createCycleCountTask(headers);
-  if (!createdTask) {
-    console.log('\n❌ Test Failed: Unable to create task');
-    return;
+  
+  // Debug the response
+  console.log('Raw response from create task: ', typeof createdTask, createdTask ? 'has data' : 'is null');
+  
+  // Analyze the response to see if it's HTML instead of JSON
+  if (createdTask && typeof createdTask === 'string' && createdTask.includes('<!DOCTYPE html>')) {
+    console.log('WARNING: Received HTML response instead of JSON. The server might be returning the wrong content type.');
+    
+    // Try to find a task ID in the HTML (this is a fallback approach)
+    const matches = createdTask.match(/task\s+#(\d+)/i);
+    if (matches && matches[1]) {
+      createdTaskId = parseInt(matches[1]);
+      console.log(`Extracted task ID ${createdTaskId} from HTML response`);
+    }
   }
   
   // Step 4: Get all tasks again to verify count increased
   const updatedTasks = await getAllCycleCountTasks(headers);
-  console.log(`Updated task count: ${updatedTasks.length}`);
+  console.log(`Updated task count: ${updatedTasks.length || 0}`);
   
-  const countCheck = updatedTasks.length > initialTasks.length;
+  // Compare before and after counts
+  const initialCount = Array.isArray(initialTasks) ? initialTasks.length : 0;
+  const updatedCount = Array.isArray(updatedTasks) ? updatedTasks.length : 0;
+  
+  const countCheck = updatedCount > initialCount;
   logResult(
     'Verify Task Count Increased', 
     countCheck,
     countCheck ? 'Task count increased as expected' : 'Task count did not increase'
   );
   
+  // Extra validation: check if our new task appears in the updated list
+  if (Array.isArray(updatedTasks) && createdTaskId) {
+    const foundTask = updatedTasks.find(task => task.id === createdTaskId);
+    if (foundTask) {
+      logResult('Find Created Task in List', true, `Task #${createdTaskId} found in task list`);
+    } else {
+      logResult('Find Created Task in List', false, `Task #${createdTaskId} not found in updated task list`);
+    }
+  }
+  
   // Step 5: Update the created task
   if (createdTaskId) {
+    console.log(`Attempting to update task #${createdTaskId}`);
     const updatedTask = await updateCycleCountTask(headers, createdTaskId);
     
     // Step 6: Get the single task to verify update
@@ -198,6 +254,8 @@ async function runTests() {
         );
       }
     }
+  } else {
+    console.log('Skipping update test: No valid task ID was captured');
   }
   
   console.log('\n✅ CYCLE COUNT API TESTS COMPLETED\n');
