@@ -28,10 +28,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { 
+  PackageIcon, 
+  Search as SearchIcon, 
+  Send as SendIcon, 
+  Loader2, 
+  RefreshCw,
+  Clock,
+  CheckIcon,
+  PrinterIcon,
+  TruckIcon,
+  AlertCircleIcon,
+  FileIcon
+} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { CheckIcon, Loader2, PackageIcon, PrinterIcon, SearchIcon, TruckIcon, AlertCircleIcon, SendIcon, FileIcon } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { getCurrentUser } from "@/utils/auth";
@@ -627,44 +639,101 @@ export default function WarehouseShipping() {
     }
   };
 
+  // This section was removed because it was a duplicate declaration
+
   return (
     <div className="container mx-auto py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Warehouse Shipping</h1>
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-            <Input
-              type="search"
-              placeholder="Search shipments..."
-              className="pl-8 w-64"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+      <div className="mb-6">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
+          <div>
+            <h1 className="text-3xl font-bold">Warehouse Shipping</h1>
+            <p className="text-muted-foreground">Manage outgoing packages and prepare shipments</p>
           </div>
-          <Select
-            value={filterStatus}
-            onValueChange={(value) => setFilterStatus(value)}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Shipments</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="partially_shipped">Partially Shipped</SelectItem>
-              <SelectItem value="shipped">Shipped</SelectItem>
-              <SelectItem value="delivered">Delivered</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            onClick={fetchShipments}
-            disabled={isLoading}
-          >
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Refresh"}
-          </Button>
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="relative w-full sm:w-auto">
+              <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+              <Input
+                type="search"
+                placeholder="Search by tracking #, order ID..."
+                className="pl-8 w-full sm:w-64"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Select
+              value={filterStatus}
+              onValueChange={(value) => setFilterStatus(value)}
+            >
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Shipments</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="partially_shipped">Partially Shipped</SelectItem>
+                <SelectItem value="shipped">Shipped</SelectItem>
+                <SelectItem value="delivered">Delivered</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              onClick={fetchShipments}
+              disabled={isLoading}
+              className="w-full sm:w-auto"
+            >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+              Refresh
+            </Button>
+          </div>
+        </div>
+        
+        <div className="flex flex-wrap gap-4 mb-6">
+          <Card className="w-full sm:w-auto flex-1">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Pending Shipments</p>
+                  <p className="text-2xl font-bold">{shipments.filter(s => s.status === "pending").length}</p>
+                </div>
+                <div className="p-2 bg-blue-100 rounded-md">
+                  <PackageIcon className="h-5 w-5 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="w-full sm:w-auto flex-1">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Shipped Today</p>
+                  <p className="text-2xl font-bold">{shipments.filter(s => 
+                    s.status === "shipped" && 
+                    s.shippingDate && 
+                    new Date(s.shippingDate).toDateString() === new Date().toDateString()
+                  ).length}</p>
+                </div>
+                <div className="p-2 bg-green-100 rounded-md">
+                  <SendIcon className="h-5 w-5 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="w-full sm:w-auto flex-1">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Processing Time</p>
+                  <p className="text-2xl font-bold">14 min</p>
+                </div>
+                <div className="p-2 bg-amber-100 rounded-md">
+                  <Clock className="h-5 w-5 text-amber-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
