@@ -3,7 +3,7 @@
  * This is an alternative to browser-based Playwright testing
  */
 
-const axios = require('axios');
+import axios from 'axios';
 
 // Base URL for API requests
 const baseUrl = 'http://localhost:5000';
@@ -29,11 +29,13 @@ async function login() {
       validateStatus: status => status < 500
     });
     
-    if (response.status === 200 && response.data.success) {
+    // Our actual API returns the user object directly on success
+    if (response.status === 200 && response.data) {
       logResult('Login', true, 'Successfully logged in as warehouse1', response.data);
       
       // Return cookies for subsequent requests if available
       const cookies = response.headers['set-cookie'];
+      // Even if no cookies, return empty headers object since we've logged in
       return cookies ? { Cookie: cookies[0].split(';')[0] } : {};
     } else {
       logResult('Login', false, 'Failed to login', response.data);
@@ -48,7 +50,7 @@ async function login() {
 // Get all cycle count tasks
 async function getAllCycleCountTasks(headers) {
   try {
-    const response = await axios.get(`${baseUrl}/api/warehouse/cycle-count-tasks`, {
+    const response = await axios.get(`${baseUrl}/api/warehouse/cycle-counts`, {
       headers,
       validateStatus: status => status < 500
     });
@@ -78,7 +80,7 @@ async function createCycleCountTask(headers) {
       notes: "Created by automated API test"
     };
     
-    const response = await axios.post(`${baseUrl}/api/warehouse/cycle-count-tasks`, newTask, {
+    const response = await axios.post(`${baseUrl}/api/warehouse/cycle-counts`, newTask, {
       headers,
       validateStatus: status => status < 500
     });
@@ -205,3 +207,6 @@ async function runTests() {
 runTests().catch(error => {
   console.error('Test script error:', error);
 });
+
+// Export for module compatibility
+export default runTests;
