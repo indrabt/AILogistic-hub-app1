@@ -1,0 +1,83 @@
+Explanation of Cycle Counting:
+
+Cycle counting is a method of inventory auditing where a small subset of inventory is counted on a regular, ongoing basis. Unlike a full physical inventory, which can be disruptive and time-consuming, cycle counting allows for more frequent and less intrusive checks on inventory accuracy. The goal is to identify and correct discrepancies between the physical inventory and the system records in a timely manner, leading to more reliable inventory data.
+
+Multiple Features of Cycle Counting with Detailed Acceptance Criteria and "Given, When, Then" Examples:
+
+Here are five key features of cycle counting within a WMS:
+
+1. Cycle Count Scheduling
+
+Feature Description: Allows warehouse managers to define and manage schedules for cycle counts based on various criteria.
+Acceptance Criteria:
+The system allows users to create cycle count schedules with definable frequency (e.g., daily, weekly, monthly).
+Users can schedule cycle counts based on specific criteria such as:
+Product Category: Count all items within a specific product group.
+Storage Location: Count all items within a designated warehouse zone or bin.
+Item Velocity (ABC Analysis): Count high-velocity (A) items more frequently than medium (B) or low (C) velocity items.
+Random Selection: Count a randomly selected sample of items.
+User-Defined Criteria: Allow for custom criteria based on specific needs.
+The system automatically generates cycle count tasks based on the defined schedules.
+Users can view and manage upcoming and completed cycle count schedules.
+The system allows for manual initiation of ad-hoc cycle counts outside of scheduled times.
+Example Functionality:
+Given: A warehouse manager wants to cycle count all "Electronics" category items weekly.
+When: The manager creates a new cycle count schedule, selects "Weekly" frequency, and filters by "Product Category = Electronics".
+Then: The system automatically generates cycle count tasks for all items classified as "Electronics" at the beginning of each week.
+2. Cycle Count Task Generation and Assignment
+
+Feature Description: Enables the system to create specific tasks for warehouse staff to perform the physical counts and allows for assignment of these tasks.
+Acceptance Criteria:
+The system automatically generates cycle count tasks based on the defined schedules or manual initiation.
+Each cycle count task clearly identifies the items to be counted (SKU, description, location).
+Warehouse managers can assign cycle count tasks to specific users or teams.
+Users can view their assigned cycle count tasks through the system (e.g., on a mobile device).
+The system allows for prioritization of cycle count tasks.
+The system tracks the status of each cycle count task (e.g., Pending, In Progress, Completed).
+Example Functionality:
+Given: A weekly cycle count schedule for high-velocity items has been triggered.
+When: The system generates 20 individual cycle count tasks for various high-velocity items in different locations.
+Then: The system assigns these 20 tasks to available warehouse staff members, and each staff member can see their assigned tasks on their mobile WMS application.
+3. Cycle Count Data Entry and Confirmation
+
+Feature Description: Provides a user-friendly interface for warehouse staff to record the physical count and confirm the accuracy.
+Acceptance Criteria:
+Users can access their assigned cycle count tasks through the WMS interface (e.g., mobile app).
+The system displays the expected item details (SKU, description, location) for each task.
+Users can enter the actual counted quantity for each item.
+The system allows for scanning of barcodes to verify the correct item and location.
+Users can add notes or comments related to the count (e.g., damaged goods, discrepancies).
+The system provides a clear indication of whether the counted quantity matches the system quantity.
+Users can submit their completed cycle counts through the system.
+Example Functionality:
+Given: A warehouse staff member has been assigned a cycle count task for "SKU-ABC" in location "Aisle 01, Rack 02, Bin 03".
+When: The staff member navigates to the task on their mobile device, scans the barcode of "SKU-ABC" at the specified location, and physically counts 10 units. They enter "10" as the counted quantity.
+Then: The system records the counted quantity for that task and indicates whether it matches the expected quantity in the system.
+4. Discrepancy Review and Adjustment
+
+Feature Description: Enables warehouse managers to review any discrepancies found during cycle counts and make necessary adjustments to the inventory records.
+Acceptance Criteria:
+The system flags cycle count tasks where the counted quantity does not match the system quantity.
+Warehouse managers can access a list of cycle count discrepancies, including item details, location, system quantity, counted quantity, and any notes.
+The system provides options for investigating discrepancies (e.g., reviewing recent transactions).
+Authorized users can approve or reject the proposed inventory adjustments based on the cycle count results.
+Upon approval, the system automatically updates the inventory records to reflect the accurate counted quantity.
+The system maintains an audit trail of all cycle count adjustments, including who made the adjustment and when.
+Example Functionality:
+Given: A cycle count for "SKU-XYZ" in location "B05-R01-B08" shows a system quantity of 50 but a counted quantity of 48.
+When: The warehouse manager reviews the discrepancy report and investigates the recent transactions for "SKU-XYZ". After confirming the physical count is correct, they approve the adjustment.
+Then: The system updates the inventory record for "SKU-XYZ" at location "B05-R01-B08" to 48, and a record of this adjustment is logged in the system's audit trail.
+5. Cycle Count Reporting and Analysis
+
+Feature Description: Provides reports and analytics to track the performance and accuracy of the cycle counting process.
+Acceptance Criteria:
+The system can generate reports on cycle count completion rates (e.g., percentage of scheduled counts completed).
+Reports show the accuracy of cycle counts (e.g., percentage of counts with zero discrepancies, average discrepancy rate).
+Users can filter cycle count reports by date range, product category, storage location, user, and other relevant criteria.
+The system provides insights into the root causes of inventory discrepancies based on cycle count data.
+Reports can be exported in various formats (e.g., CSV, Excel, PDF).
+The system may include dashboards to visualize key cycle counting metrics.
+Example Functionality:
+Given: The warehouse manager wants to assess the effectiveness of the weekly high-velocity item cycle count schedule over the past month.
+When: The manager generates a cycle count performance report for the last four weeks, filtering by the "High Velocity" item category.
+Then: The report shows that 95% of scheduled high-velocity item counts were completed, with an average discrepancy rate of 1.5%, indicating a generally accurate inventory for these critical items.
