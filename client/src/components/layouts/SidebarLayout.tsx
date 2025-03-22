@@ -394,6 +394,25 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                                   </Link>
                                 </li>
                               );
+                            } else if (subItem.href === "/warehouse-cycle-count") {
+                              return (
+                                <li key={subItem.id}>
+                                  <Link href={subItem.href}>
+                                    <div
+                                      className={cn(
+                                        "flex items-center py-2 px-3 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                                        location === subItem.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                                      )}
+                                      onClick={() => {
+                                        console.log("Warehouse Cycle Count navigation triggered from submenu");
+                                      }}
+                                    >
+                                      <span className="mr-3">{subItem.icon}</span>
+                                      {subItem.label}
+                                    </div>
+                                  </Link>
+                                </li>
+                              );
                             } else {
                               return (
                                 <li key={subItem.id}>
@@ -564,6 +583,22 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                   </li>
                 );
               } else if (item.href === "/warehouse-shipping") {
+                return (
+                  <li className="mb-2" key={item.id}>
+                    <Link href={item.href}>
+                      <div
+                        className={cn(
+                          "flex items-center py-2 px-4 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                          location === item.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                        )}
+                      >
+                        <span className="mr-3">{item.icon}</span>
+                        {item.label}
+                      </div>
+                    </Link>
+                  </li>
+                );
+              } else if (item.href === "/warehouse-cycle-count") {
                 return (
                   <li className="mb-2" key={item.id}>
                     <Link href={item.href}>
