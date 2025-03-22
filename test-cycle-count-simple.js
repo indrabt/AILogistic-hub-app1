@@ -6,8 +6,8 @@
  * than Selenium in restricted environments like Replit.
  */
 
-const axios = require('axios');
-const { JSDOM } = require('jsdom');
+import axios from 'axios';
+import { JSDOM } from 'jsdom';
 
 // Configuration
 const config = {
@@ -328,8 +328,9 @@ async function runTest() {
   }
 }
 
-// Run the test
-if (require.main === module) {
+// Run the test if file is executed directly
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
   runTest().then((success) => {
     process.exit(success ? 0 : 1);
   }).catch((error) => {
@@ -338,4 +339,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { runTest };
+export { runTest };

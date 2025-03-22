@@ -12,10 +12,19 @@ NC='\033[0m' # No Color
 # Print header
 echo -e "\n${BLUE}==== CYCLE COUNT TESTING SUITE ====${NC}\n"
 
+# Check nodejs version
+NODE_VERSION=$(node -v)
+echo -e "${BLUE}Using Node.js${NC} ${GREEN}${NODE_VERSION}${NC}"
+
 # Check for Chrome installation
 if ! command -v google-chrome &> /dev/null; then
     echo -e "${YELLOW}Chrome is not installed. Some tests may not work properly.${NC}"
     echo -e "Run ${GREEN}./install-chrome.sh${NC} to install Chrome first if you want to run Selenium tests."
+fi
+
+# Try to find Chromium if Google Chrome is not available
+if ! command -v google-chrome &> /dev/null && command -v chromium &> /dev/null; then
+    echo -e "${YELLOW}Using Chromium instead of Google Chrome${NC}"
 fi
 
 # Menu function
@@ -67,7 +76,11 @@ function run_simple_ui_test() {
 # Run Selenium Headless Test
 function run_selenium_headless_test() {
     echo -e "\n${BLUE}Running Selenium Headless test...${NC}"
-    node test-cycle-count-headless.js
+    if [[ -f test-cycle-count-headless.mjs ]]; then
+        node test-cycle-count-headless.mjs
+    else
+        node test-cycle-count-headless.js
+    fi
     
     echo -e "\n${GREEN}Test completed. Press Enter to return to menu...${NC}"
     read
@@ -77,7 +90,11 @@ function run_selenium_headless_test() {
 # Run Selenium UI Test
 function run_selenium_ui_test() {
     echo -e "\n${BLUE}Running Selenium UI test (non-headless)...${NC}"
-    node test-cycle-count-ui.js
+    if [[ -f test-cycle-count-ui.mjs ]]; then
+        node test-cycle-count-ui.mjs
+    else
+        node test-cycle-count-ui.js
+    fi
     
     echo -e "\n${GREEN}Test completed. Press Enter to return to menu...${NC}"
     read
@@ -87,7 +104,11 @@ function run_selenium_ui_test() {
 # Run Replit-optimized Test
 function run_replit_test() {
     echo -e "\n${BLUE}Running Replit-optimized UI test...${NC}"
-    node test-cycle-count-replit.js
+    if [[ -f test-cycle-count-replit.mjs ]]; then
+        node test-cycle-count-replit.mjs
+    else
+        node test-cycle-count-replit.js
+    fi
     
     echo -e "\n${GREEN}Test completed. Press Enter to return to menu...${NC}"
     read
@@ -105,19 +126,31 @@ function run_all_tests() {
     node test-cycle-count-simple.js
     
     echo -e "\n${YELLOW}3. Checking Chrome installation...${NC}"
-    if command -v google-chrome &> /dev/null; then
-        echo -e "${GREEN}Chrome is installed. Proceeding with Selenium tests.${NC}"
+    if command -v google-chrome &> /dev/null || command -v chromium &> /dev/null; then
+        echo -e "${GREEN}Chrome/Chromium is installed. Proceeding with Selenium tests.${NC}"
         
         echo -e "\n${YELLOW}4. Selenium Headless Test${NC}"
-        node test-cycle-count-headless.js
+        if [[ -f test-cycle-count-headless.mjs ]]; then
+            node test-cycle-count-headless.mjs
+        else 
+            node test-cycle-count-headless.js
+        fi
         
         echo -e "\n${YELLOW}5. Replit-optimized UI Test${NC}"
-        node test-cycle-count-replit.js
+        if [[ -f test-cycle-count-replit.mjs ]]; then
+            node test-cycle-count-replit.mjs
+        else
+            node test-cycle-count-replit.js
+        fi
         
         echo -e "\n${YELLOW}6. Selenium UI Test (non-headless)${NC}"
-        node test-cycle-count-ui.js
+        if [[ -f test-cycle-count-ui.mjs ]]; then
+            node test-cycle-count-ui.mjs
+        else
+            node test-cycle-count-ui.js
+        fi
     else
-        echo -e "${RED}Chrome is not installed. Skipping Selenium tests.${NC}"
+        echo -e "${RED}Chrome/Chromium is not installed. Skipping Selenium tests.${NC}"
     fi
     
     echo -e "\n${GREEN}All tests completed. Press Enter to return to menu...${NC}"

@@ -3,7 +3,7 @@
  * This is an alternative to browser-based Playwright testing
  */
 
-const axios = require('axios');
+import axios from 'axios';
 
 // Configuration
 const config = {
@@ -223,8 +223,9 @@ async function runTests() {
   }
 }
 
-// Run the test
-if (require.main === module) {
+// Run the test if file is executed directly
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
   runTests().then((success) => {
     process.exit(success ? 0 : 1);
   }).catch((error) => {
@@ -233,4 +234,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { runTests };
+export { runTests };
