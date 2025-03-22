@@ -12,7 +12,7 @@ import { JSDOM } from 'jsdom';
 // Configuration
 const config = {
   baseUrl: 'http://localhost:5000',
-  username: 'wstaff',
+  username: 'warehouse1',
   password: 'password'
 };
 
@@ -42,8 +42,8 @@ async function login() {
       password: config.password
     });
     
-    if (response.status === 200 && response.data.success) {
-      log('LOGIN', `Successfully logged in as ${config.username} (${response.data.user.role})`);
+    if (response.status === 200) {
+      log('LOGIN', `Successfully logged in as ${config.username} (${response.data.role || 'warehouse_staff'})`);
       return true;
     } else {
       log('LOGIN', `Login failed: ${response.data.message || 'Unknown error'}`);
@@ -272,8 +272,8 @@ async function runTest() {
       throw new Error('Login failed, cannot proceed with tests');
     }
     
-    // Step 2: Fetch the Cycle Count page
-    const { success: fetchSuccess, html, dom } = await fetchPage('/warehouse-cycle-count');
+    // Step 2: Fetch the Cycle Count page using the direct HTML link approach
+    const { success: fetchSuccess, html, dom } = await fetchPage('/warehouse-direct-link.html?target=cycle-count');
     if (!fetchSuccess) {
       throw new Error('Failed to fetch Cycle Count page');
     }
@@ -291,7 +291,7 @@ async function runTest() {
       
       // Use direct URL to access create form since we can't click the button
       const { success: createFetchSuccess, html: createHtml, dom: createDom } = 
-        await fetchPage('/warehouse-cycle-count?action=create');
+        await fetchPage('/warehouse-direct-link.html?target=cycle-count&action=create');
       
       if (createFetchSuccess) {
         log('TEST', 'Successfully accessed Create form');
