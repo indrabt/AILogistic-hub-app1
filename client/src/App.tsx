@@ -40,6 +40,7 @@ import WarehousePutaway from "@/pages/warehouse-putaway";
 import WarehousePicking from "@/pages/warehouse-picking";
 import WarehousePacking from "@/pages/warehouse-packing";
 import WarehouseShipping from "@/pages/warehouse-shipping";
+import WarehouseCycleCount from "./pages/warehouse-cycle-count";
 import RealTimeDashboard from "@/pages/real-time-dashboard";
 import RetailDashboard from "@/pages/retail-dashboard";
 import LocalSourcing from "@/pages/local-sourcing";
@@ -130,6 +131,7 @@ function Router() {
           <Route path="/warehouse-picking" component={WarehousePicking} />
           <Route path="/warehouse-packing" component={WarehousePacking} />
           <Route path="/warehouse-shipping" component={WarehouseShipping} />
+          <Route path="/warehouse-cycle-count" component={WarehouseCycleCount} />
           <Route path="/real-time-dashboard" component={RealTimeDashboard} />
           <Route path="/retail-dashboard" component={RetailDashboard} />
           <Route path="/demand-prediction" component={RetailDashboard} />
