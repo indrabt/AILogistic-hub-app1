@@ -194,23 +194,49 @@ export default function WarehouseShipping() {
       
       console.log(`Shipments API response status: ${response.status}`);
       
+      // Improved error handling to better identify HTML responses vs JSON
       if (!response.ok) {
-        // Clone the response to read it twice
-        const responseClone = response.clone();
         let errorText = "";
         try {
-          const errorData = await responseClone.json();
-          errorText = JSON.stringify(errorData);
+          // Check if the response is likely HTML (indicated by the error we're fixing)
+          const contentType = response.headers.get('content-type') || '';
+          if (contentType.includes('text/html')) {
+            errorText = await response.text();
+            console.error("Received HTML response instead of JSON:", errorText);
+            throw new Error("Server returned HTML instead of JSON. You may need to log in again.");
+          } else {
+            // Attempt to parse as JSON first
+            try {
+              const errorData = await response.clone().json();
+              errorText = JSON.stringify(errorData);
+            } catch (jsonError) {
+              // Fall back to text if JSON parsing fails
+              errorText = await response.text();
+            }
+          }
         } catch (e) {
-          errorText = await response.text();
+          errorText = "Could not extract error details from response";
         }
         console.error(`Failed to fetch shipments: ${response.status} ${response.statusText}`, errorText);
         throw new Error(`Failed to fetch shipments: ${response.status} ${response.statusText}`);
       }
       
-      const data = await response.json();
-      console.log("Fetched shipments data:", data);
-      setShipments(data);
+      let data;
+      try {
+        // For successful responses, check content type before parsing
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('text/html')) {
+          console.error("Received HTML response instead of JSON for successful request");
+          throw new Error("Server returned HTML instead of JSON. You may need to log in again.");
+        }
+        
+        data = await response.json();
+        console.log("Fetched shipments data:", data);
+        setShipments(data);
+      } catch (parseError) {
+        console.error("Error parsing shipments response:", parseError);
+        throw new Error("Could not parse server response for shipments");
+      }
     } catch (error) {
       console.error("Error fetching shipments:", error);
       toast({
@@ -230,27 +256,49 @@ export default function WarehouseShipping() {
       
       console.log(`Carriers API response status: ${response.status}`);
       
+      // Improved error handling to better identify HTML responses vs JSON
       if (!response.ok) {
-        // Clone the response to read it twice
-        const responseClone = response.clone();
         let errorText = "";
         try {
-          const errorData = await responseClone.json();
-          errorText = JSON.stringify(errorData);
-        } catch (e) {
-          try {
+          // Check if the response is likely HTML (indicated by the error we're fixing)
+          const contentType = response.headers.get('content-type') || '';
+          if (contentType.includes('text/html')) {
             errorText = await response.text();
-          } catch (textError) {
-            errorText = "Could not extract error details from response";
+            console.error("Received HTML response instead of JSON:", errorText);
+            throw new Error("Server returned HTML instead of JSON. You may need to log in again.");
+          } else {
+            // Attempt to parse as JSON first
+            try {
+              const errorData = await response.clone().json();
+              errorText = JSON.stringify(errorData);
+            } catch (jsonError) {
+              // Fall back to text if JSON parsing fails
+              errorText = await response.text();
+            }
           }
+        } catch (e) {
+          errorText = "Could not extract error details from response";
         }
         console.error(`Failed to fetch carriers: ${response.status} ${response.statusText}`, errorText);
         throw new Error(`Failed to fetch carriers: ${response.status} ${response.statusText}`);
       }
       
-      const data = await response.json();
-      console.log(`Successfully fetched ${data.length} shipping carriers`);
-      setCarriers(data);
+      let data;
+      try {
+        // For successful responses, check content type before parsing
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('text/html')) {
+          console.error("Received HTML response instead of JSON for successful request");
+          throw new Error("Server returned HTML instead of JSON. You may need to log in again.");
+        }
+        
+        data = await response.json();
+        console.log(`Successfully fetched ${data.length} shipping carriers`);
+        setCarriers(data);
+      } catch (parseError) {
+        console.error("Error parsing carriers response:", parseError);
+        throw new Error("Could not parse server response for carriers");
+      }
     } catch (error: any) {
       console.error("Error fetching carriers:", error);
       toast({
@@ -276,19 +324,28 @@ export default function WarehouseShipping() {
       
       console.log(`Manifest API response status: ${response.status}`);
       
+      // Improved error handling to better identify HTML responses vs JSON
       if (!response.ok) {
-        // Clone the response to read it twice
-        const responseClone = response.clone();
         let errorText = "";
         try {
-          const errorData = await responseClone.json();
-          errorText = JSON.stringify(errorData);
-        } catch (e) {
-          try {
+          // Check if the response is likely HTML (indicated by the error we're fixing)
+          const contentType = response.headers.get('content-type') || '';
+          if (contentType.includes('text/html')) {
             errorText = await response.text();
-          } catch (textError) {
-            errorText = "Could not extract error details from response";
+            console.error("Received HTML response instead of JSON:", errorText);
+            throw new Error("Server returned HTML instead of JSON. You may need to log in again.");
+          } else {
+            // Attempt to parse as JSON first
+            try {
+              const errorData = await response.clone().json();
+              errorText = JSON.stringify(errorData);
+            } catch (jsonError) {
+              // Fall back to text if JSON parsing fails
+              errorText = await response.text();
+            }
           }
+        } catch (e) {
+          errorText = "Could not extract error details from response";
         }
         console.error(`Failed to generate manifest: ${response.status} ${response.statusText}`, errorText);
         throw new Error(`Failed to generate manifest: ${response.status} ${response.statusText}`);
@@ -296,6 +353,13 @@ export default function WarehouseShipping() {
       
       let data;
       try {
+        // For successful responses, check content type before parsing
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('text/html')) {
+          console.error("Received HTML response instead of JSON for successful request");
+          throw new Error("Server returned HTML instead of JSON. You may need to log in again.");
+        }
+        
         data = await response.json();
         console.log("Manifest data generated:", data);
       } catch (parseError) {
@@ -343,16 +407,28 @@ export default function WarehouseShipping() {
       
       console.log(`Update shipment API response status: ${response.status}`);
       
-      // Clone the response so we can read it multiple times if needed
-      const responseClone = response.clone();
-      
+      // Improved error handling to better identify HTML responses vs JSON
       if (!response.ok) {
         let errorText = "";
         try {
-          const errorData = await responseClone.json();
-          errorText = JSON.stringify(errorData);
+          // Check if the response is likely HTML (indicated by the error we're fixing)
+          const contentType = response.headers.get('content-type') || '';
+          if (contentType.includes('text/html')) {
+            errorText = await response.text();
+            console.error("Received HTML response instead of JSON:", errorText);
+            throw new Error("Server returned HTML instead of JSON. You may need to log in again.");
+          } else {
+            // Attempt to parse as JSON first
+            try {
+              const errorData = await response.clone().json();
+              errorText = JSON.stringify(errorData);
+            } catch (jsonError) {
+              // Fall back to text if JSON parsing fails
+              errorText = await response.text();
+            }
+          }
         } catch (e) {
-          errorText = await response.text();
+          errorText = "Could not extract error details from response";
         }
         console.error(`Failed to update shipment: ${response.status} ${response.statusText}`, errorText);
         throw new Error(`Failed to update shipment: ${response.status} ${response.statusText}`);
@@ -360,6 +436,13 @@ export default function WarehouseShipping() {
       
       let updatedShipment;
       try {
+        // For successful responses, check content type before parsing
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('text/html')) {
+          console.error("Received HTML response instead of JSON for successful request");
+          throw new Error("Server returned HTML instead of JSON. You may need to log in again.");
+        }
+        
         updatedShipment = await response.json();
         console.log("Updated shipment data:", updatedShipment);
       } catch (error) {
@@ -413,20 +496,28 @@ export default function WarehouseShipping() {
         throw new Error(`Network error: ${fetchError.message || "Failed to connect to server"}`);
       }
       
-      // Clone the response so we can read it multiple times if needed
-      const responseClone = response.clone();
-      
+      // Improved error handling to better identify HTML responses vs JSON
       if (!response.ok) {
         let errorText = "";
         try {
-          const errorData = await responseClone.json();
-          errorText = JSON.stringify(errorData);
-        } catch (e) {
-          try {
+          // Check if the response is likely HTML (indicated by the error we're fixing)
+          const contentType = response.headers.get('content-type') || '';
+          if (contentType.includes('text/html')) {
             errorText = await response.text();
-          } catch (textError) {
-            errorText = "Could not extract error details from response";
+            console.error("Received HTML response instead of JSON:", errorText);
+            throw new Error("Server returned HTML instead of JSON. You may need to log in again.");
+          } else {
+            // Attempt to parse as JSON first
+            try {
+              const errorData = await response.clone().json();
+              errorText = JSON.stringify(errorData);
+            } catch (jsonError) {
+              // Fall back to text if JSON parsing fails
+              errorText = await response.text();
+            }
           }
+        } catch (e) {
+          errorText = "Could not extract error details from response";
         }
         console.error(`Failed to confirm shipment: ${response.status} ${response.statusText}`, errorText);
         throw new Error(`Failed to confirm shipment: ${response.status} ${response.statusText}`);
@@ -434,6 +525,13 @@ export default function WarehouseShipping() {
       
       let confirmedShipment;
       try {
+        // For successful responses, check content type before parsing
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('text/html')) {
+          console.error("Received HTML response instead of JSON for successful request");
+          throw new Error("Server returned HTML instead of JSON. You may need to log in again.");
+        }
+        
         confirmedShipment = await response.json();
         console.log("Confirmed shipment data:", confirmedShipment);
       } catch (parseError) {
