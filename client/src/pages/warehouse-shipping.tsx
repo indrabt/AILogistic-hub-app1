@@ -688,9 +688,13 @@ export default function WarehouseShipping() {
           </div>
         </div>
         
+        {/* Shipping-specific metrics cards - distinct from dashboard */}
         <div className="flex flex-wrap gap-4 mb-6">
-          <Card className="w-full sm:w-auto flex-1">
-            <CardContent className="pt-6">
+          <Card className="w-full sm:w-auto flex-1 border-blue-200 bg-blue-50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg text-blue-800">Shipping Hub</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Pending Shipments</p>
@@ -703,26 +707,45 @@ export default function WarehouseShipping() {
             </CardContent>
           </Card>
           
-          <Card className="w-full sm:w-auto flex-1">
-            <CardContent className="pt-6">
+          <Card className="w-full sm:w-auto flex-1 border-green-200 bg-green-50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg text-green-800">Outbound Metrics</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Shipped Today</p>
-                  <p className="text-2xl font-bold">{shipments.filter(s => 
-                    s.status === "shipped" && 
-                    s.shippingDate && 
-                    new Date(s.shippingDate).toDateString() === new Date().toDateString()
-                  ).length}</p>
+                  <p className="text-2xl font-bold">{shipments.filter(s => s.status === "shipped" && s.shippingDate && new Date(s.shippingDate).toDateString() === new Date().toDateString()).length}</p>
                 </div>
                 <div className="p-2 bg-green-100 rounded-md">
-                  <SendIcon className="h-5 w-5 text-green-600" />
+                  <TruckIcon className="h-5 w-5 text-green-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="w-full sm:w-auto flex-1">
-            <CardContent className="pt-6">
+          <Card className="w-full sm:w-auto flex-1 border-purple-200 bg-purple-50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg text-purple-800">Carrier Performance</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Available Carriers</p>
+                  <p className="text-2xl font-bold">{carriers.filter(c => c.status === "active").length}</p>
+                </div>
+                <div className="p-2 bg-purple-100 rounded-md">
+                  <SendIcon className="h-5 w-5 text-purple-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="w-full sm:w-auto flex-1 border-amber-200 bg-amber-50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg text-amber-800">Shipment Efficiency</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Processing Time</p>
