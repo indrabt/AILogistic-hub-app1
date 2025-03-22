@@ -86,6 +86,7 @@ const warehouseOperations = [
   { icon: <Package size={20} />, href: "/warehouse-picking", label: "Picking", id: "warehouse-picking" },
   { icon: <Package size={20} />, href: "/warehouse-packing", label: "Packing", id: "warehouse-packing" },
   { icon: <Truck size={20} />, href: "/warehouse-shipping", label: "Shipping", id: "warehouse-shipping" },
+  { icon: <ClipboardCheck size={20} />, href: "/warehouse-cycle-count", label: "Cycle Count", id: "warehouse-cycle-count" },
 ];
 
 // Define navigation items for each role
