@@ -284,14 +284,15 @@ export default function WarehouseShipping() {
       }
       
       let data;
+      
+      // For successful responses, check content type before parsing
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('text/html')) {
+        console.error("Received HTML response instead of JSON for successful request");
+        throw new Error("Server returned HTML instead of JSON. You may need to log in again.");
+      }
+      
       try {
-        // For successful responses, check content type before parsing
-        const contentType = response.headers.get('content-type') || '';
-        if (contentType.includes('text/html')) {
-          console.error("Received HTML response instead of JSON for successful request");
-          throw new Error("Server returned HTML instead of JSON. You may need to log in again.");
-        }
-        
         data = await response.json();
         console.log(`Successfully fetched ${data.length} shipping carriers`);
         setCarriers(data);
