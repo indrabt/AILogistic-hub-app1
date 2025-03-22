@@ -1023,6 +1023,7 @@ export default function WarehouseReceiving() {
                               </Button>
                               
                               <Dialog open={receiveDialogOpen && selectedItemId === item.id} onOpenChange={(open) => {
+                                console.log("Dialog onOpenChange called with:", open);
                                 setReceiveDialogOpen(open);
                                 if (open) setSelectedItemId(item.id);
                               }}>
@@ -1031,6 +1032,11 @@ export default function WarehouseReceiving() {
                                     variant="ghost"
                                     size="sm"
                                     disabled={item.status === "received"}
+                                    onClick={() => {
+                                      console.log("Receive button clicked for item:", item.id);
+                                      setSelectedItemId(item.id);
+                                      setReceiveDialogOpen(true);
+                                    }}
                                   >
                                     <CheckCircle className="h-4 w-4 mr-1" />
                                     Receive
@@ -1194,6 +1200,7 @@ export default function WarehouseReceiving() {
                               </Dialog>
 
                               <Dialog open={putAwayDialogOpen && selectedItemId === item.id} onOpenChange={(open) => {
+                                console.log("Put Away dialog onOpenChange called with:", open);
                                 setPutAwayDialogOpen(open);
                                 if (open) setSelectedItemId(item.id);
                               }}>
@@ -1202,6 +1209,11 @@ export default function WarehouseReceiving() {
                                     variant="ghost"
                                     size="sm"
                                     disabled={item.status !== "received"}
+                                    onClick={() => {
+                                      console.log("Put Away button clicked for item:", item.id);
+                                      setSelectedItemId(item.id);
+                                      setPutAwayDialogOpen(true);
+                                    }}
                                   >
                                     <FileBarChart className="h-4 w-4 mr-1" />
                                     Put Away
@@ -1286,9 +1298,17 @@ export default function WarehouseReceiving() {
                   )}
                 </CardDescription>
               </div>
-              <Dialog open={discrepancyDialogOpen} onOpenChange={setDiscrepancyDialogOpen}>
+              <Dialog open={discrepancyDialogOpen} onOpenChange={(open) => {
+                  console.log("Discrepancy dialog onOpenChange called with:", open);
+                  setDiscrepancyDialogOpen(open);
+                }}>
                 <DialogTrigger asChild>
-                  <Button>
+                  <Button
+                    onClick={() => {
+                      console.log("Add Discrepancy button clicked");
+                      setDiscrepancyDialogOpen(true);
+                    }}
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Discrepancy
                   </Button>
