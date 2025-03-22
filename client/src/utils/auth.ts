@@ -23,6 +23,7 @@ export const routePermissions: Record<string, UserRole[]> = {
   "/warehouse-putaway": ["warehouse_staff", "logistics_manager"],
   "/warehouse-picking": ["warehouse_staff", "logistics_manager"],
   "/warehouse-packing": ["warehouse_staff", "logistics_manager"],
+  "/warehouse-shipping": ["warehouse_staff", "logistics_manager"],
   "/": ["logistics_manager"], // Root path redirects to default dashboard
   "/dashboard": ["logistics_manager"],
   "/warehouse-dashboard": ["warehouse_staff", "logistics_manager"],
