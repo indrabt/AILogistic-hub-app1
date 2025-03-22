@@ -86,7 +86,7 @@ const warehouseOperations = [
   { icon: <Package size={20} />, href: "/warehouse-picking", label: "Picking", id: "warehouse-picking" },
   { icon: <Package size={20} />, href: "/warehouse-packing", label: "Packing", id: "warehouse-packing" },
   { icon: <Truck size={20} />, href: "/warehouse-shipping", label: "Shipping", id: "warehouse-shipping" },
-  { icon: <ClipboardCheck size={20} />, href: "/warehouse-cycle-count", label: "Cycle Count", id: "warehouse-cycle-count" },
+  { icon: <ClipboardCheck size={20} />, href: "/cycle-count-standalone.html", label: "Cycle Count", id: "warehouse-cycle-count" },
 ];
 
 // Define navigation items for each role
@@ -94,7 +94,7 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
   warehouse_staff: [
     { icon: <LayoutDashboard size={20} />, href: "/warehouse-dashboard", label: "Dashboard", id: "warehouse-dashboard" },
     { icon: <Package size={20} />, href: "/supply-chain", label: "Inventory", id: "warehouse-inventory" },
-    { icon: <ClipboardCheck size={20} />, href: "/cycle-count-direct", label: "Cycle Count Direct", id: "cycle-count-direct" },
+    { icon: <ClipboardCheck size={20} />, href: "/cycle-count-standalone.html", label: "Cycle Count", id: "cycle-count-direct" },
     { 
       icon: <Warehouse size={20} />, 
       href: "#", 
@@ -112,7 +112,7 @@ const navigationByRole: Record<UserRole, { icon: ReactNode; href: string; label:
     { icon: <Route size={20} />, href: "/routes", label: "Route Optimization", id: "logistics-routes" },
     { icon: <Navigation size={20} />, href: "/hyper-local-routing", label: "Hyper-Local Routing", id: "logistics-hyper-local" },
     { icon: <Warehouse size={20} />, href: "/supply-chain", label: "Supply Chain", id: "logistics-supply-chain" },
-    { icon: <ClipboardCheck size={20} />, href: "/cycle-count-direct", label: "Cycle Count Direct", id: "logistics-cycle-count-direct" },
+    { icon: <ClipboardCheck size={20} />, href: "/cycle-count-standalone.html", label: "Cycle Count", id: "logistics-cycle-count" },
     { 
       icon: <Warehouse size={20} />, 
       href: "#", 
@@ -349,6 +349,21 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
                                       sessionStorage.setItem("directWarehousePickingAccess", "true");
                                       sessionStorage.setItem("lastDirectWarehouseAccess", new Date().toISOString());
                                     }}
+                                  >
+                                    <span className="mr-3">{subItem.icon}</span>
+                                    {subItem.label}
+                                  </a>
+                                </li>
+                              );
+                            } else if (subItem.href === "/cycle-count-standalone.html") {
+                              return (
+                                <li key={subItem.id}>
+                                  <a 
+                                    href="/cycle-count-standalone.html"
+                                    className={cn(
+                                      "flex items-center py-2 px-3 rounded-r-lg transition-colors duration-200 cursor-pointer",
+                                      location === subItem.href ? "bg-primary-light text-white font-medium" : "hover:bg-primary-light/70 text-white"
+                                    )}
                                   >
                                     <span className="mr-3">{subItem.icon}</span>
                                     {subItem.label}
