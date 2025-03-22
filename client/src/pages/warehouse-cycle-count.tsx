@@ -101,6 +101,13 @@ export default function WarehouseCycleCount() {
   const { data: cycleItems, isLoading: isLoadingItems } = useQuery({
     queryKey: ['/api/warehouse/cycle-counts', selectedTaskId, 'items'],
     enabled: !!selectedTaskId,
+    queryFn: async () => {
+      const response = await fetch(`/api/warehouse/cycle-counts/${selectedTaskId}/items`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch cycle count items');
+      }
+      return response.json();
+    }
   });
 
   // Create a new cycle count task
@@ -269,7 +276,10 @@ export default function WarehouseCycleCount() {
     },
     onSuccess: () => {
       if (selectedTaskId) {
+        // Invalidate the specific items query to fetch updated data
         queryClient.invalidateQueries({ queryKey: ['/api/warehouse/cycle-counts', selectedTaskId, 'items'] });
+        // Also invalidate the task query as the progress may have changed
+        queryClient.invalidateQueries({ queryKey: ['/api/warehouse/cycle-counts', selectedTaskId] });
       }
       setSelectedItemId(null);
       setCurrentQuantity("");
