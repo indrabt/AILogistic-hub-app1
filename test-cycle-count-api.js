@@ -8,7 +8,7 @@ import axios from 'axios';
 // Configuration
 const config = {
   baseUrl: 'http://localhost:5000',
-  username: 'wstaff',
+  username: 'warehouse1',
   password: 'password',
   apiEndpoint: '/api/warehouse/cycle-counts'
 };
@@ -41,8 +41,8 @@ async function login() {
       password: config.password
     });
     
-    if (response.status === 200 && response.data.success) {
-      return logResult('LOGIN', true, `Logged in as ${response.data.user.username} (${response.data.user.role})`, response.data.user);
+    if (response.status === 200) {
+      return logResult('LOGIN', true, `Logged in as ${response.data.username} (${response.data.role})`, response.data);
     } else {
       return logResult('LOGIN', false, response.data.message || 'Unknown error');
     }
@@ -59,12 +59,15 @@ async function getAllCycleCountTasks(headers) {
     const response = await client.get(config.apiEndpoint, { headers });
     
     if (response.status === 200) {
-      return logResult('GET TASKS', true, `Retrieved ${response.data.length} tasks`, response.data);
+      logResult('GET TASKS', true, `Retrieved ${response.data.length} tasks`, response.data);
+      return response.data;
     } else {
-      return logResult('GET TASKS', false, 'Failed to retrieve tasks');
+      logResult('GET TASKS', false, 'Failed to retrieve tasks');
+      return [];
     }
   } catch (error) {
-    return logResult('GET TASKS', false, `Error: ${error.message}`);
+    logResult('GET TASKS', false, `Error: ${error.message}`);
+    return [];
   }
 }
 
@@ -94,12 +97,15 @@ async function createCycleCountTask(headers) {
     const response = await client.post(config.apiEndpoint, task, { headers });
     
     if (response.status === 201 || response.status === 200) {
-      return logResult('CREATE TASK', true, 'Task created successfully', response.data);
+      logResult('CREATE TASK', true, 'Task created successfully', response.data);
+      return response.data; // Return the task data directly
     } else {
-      return logResult('CREATE TASK', false, 'Failed to create task');
+      logResult('CREATE TASK', false, 'Failed to create task');
+      return null;
     }
   } catch (error) {
-    return logResult('CREATE TASK', false, `Error: ${error.message}`);
+    logResult('CREATE TASK', false, `Error: ${error.message}`);
+    return null;
   }
 }
 
@@ -116,12 +122,15 @@ async function updateCycleCountTask(headers, taskId) {
     const response = await client.patch(`${config.apiEndpoint}/${taskId}`, update, { headers });
     
     if (response.status === 200) {
-      return logResult('UPDATE TASK', true, 'Task updated successfully', response.data);
+      logResult('UPDATE TASK', true, 'Task updated successfully', response.data);
+      return response.data;
     } else {
-      return logResult('UPDATE TASK', false, 'Failed to update task');
+      logResult('UPDATE TASK', false, 'Failed to update task');
+      return null;
     }
   } catch (error) {
-    return logResult('UPDATE TASK', false, `Error: ${error.message}`);
+    logResult('UPDATE TASK', false, `Error: ${error.message}`);
+    return null;
   }
 }
 
@@ -133,12 +142,15 @@ async function getCycleCountTask(headers, taskId) {
     const response = await client.get(`${config.apiEndpoint}/${taskId}`, { headers });
     
     if (response.status === 200) {
-      return logResult('GET TASK', true, 'Task retrieved successfully', response.data);
+      logResult('GET TASK', true, 'Task retrieved successfully', response.data);
+      return response.data;
     } else {
-      return logResult('GET TASK', false, 'Failed to retrieve task');
+      logResult('GET TASK', false, 'Failed to retrieve task');
+      return null;
     }
   } catch (error) {
-    return logResult('GET TASK', false, `Error: ${error.message}`);
+    logResult('GET TASK', false, `Error: ${error.message}`);
+    return null;
   }
 }
 
@@ -172,7 +184,7 @@ async function runTests() {
   const taskCreated = await createCycleCountTask(headers);
   
   // Get the ID of the newly created task
-  if (taskCreated && taskCreated.id) {
+  if (taskCreated) {
     taskId = taskCreated.id;
     console.log(`New task created with ID: ${taskId}`);
   } else {
@@ -203,11 +215,12 @@ async function runTests() {
   
   if (updatedTaskRetrieved) {
     // Check if the status is now 'in_progress'
-    if (updatedTaskRetrieved.status === 'in_progress') {
+    const task = updatedTaskRetrieved.data || updatedTaskRetrieved;
+    if (task && task.status === 'in_progress') {
       updateVerified = true;
       logResult('VERIFY UPDATE', true, 'Task status was updated to in_progress');
     } else {
-      logResult('VERIFY UPDATE', false, `Task status is ${updatedTaskRetrieved.status}, expected 'in_progress'`);
+      logResult('VERIFY UPDATE', false, `Task status is ${task ? task.status : 'undefined'}, expected 'in_progress'`);
     }
   }
   
