@@ -280,6 +280,26 @@ export interface IStorage {
   
   generateShippingManifest(shipmentId: number): Promise<{url: string}>;
   confirmShipment(shipmentId: number): Promise<WarehouseShipment | undefined>;
+  
+  // 7. Cycle Counting Feature
+  getCycleCountTasks(status?: string): Promise<CycleCountTask[]>;
+  getCycleCountTaskById(id: number): Promise<CycleCountTask | undefined>;
+  createCycleCountTask(task: Omit<CycleCountTask, 'id'>): Promise<CycleCountTask>;
+  updateCycleCountTask(id: number, task: Partial<CycleCountTask>): Promise<CycleCountTask | undefined>;
+  
+  getCycleCountItems(taskId: number): Promise<CycleCountItem[]>;
+  getCycleCountItemById(id: number): Promise<CycleCountItem | undefined>;
+  updateCycleCountItem(id: number, item: Partial<CycleCountItem>): Promise<CycleCountItem | undefined>;
+  
+  startCycleCountTask(id: number, assignedTo: string): Promise<CycleCountTask | undefined>;
+  completeCycleCountTask(id: number): Promise<CycleCountTask | undefined>;
+  
+  // For inventory adjustments based on cycle counting
+  applyCycleCountAdjustments(cycleCountTaskId: number): Promise<{
+    success: boolean;
+    adjustedItems: CycleCountItem[];
+    inventoryMovements: InventoryMovement[];
+  }>;
 }
 
 export class MemStorage implements IStorage {
@@ -288,6 +308,8 @@ export class MemStorage implements IStorage {
   private shippingAddresses: ShippingAddress[] = [];
   private shippingCarriers: ShippingCarrier[] = [];
   private shippingServices: ShippingService[] = [];
+  private cycleCountTasks: CycleCountTask[] = [];
+  private cycleCountItems: CycleCountItem[] = [];
   
   // Supply Chain Data methods
   
@@ -3249,6 +3271,191 @@ export class MemStorage implements IStorage {
     
     this.partnerships.push(newPartnership);
     return newPartnership;
+  }
+
+  // Warehouse Management System Methods - Cycle Counting Feature
+  
+  async getCycleCountTasks(status?: string): Promise<CycleCountTask[]> {
+    if (status) {
+      return this.cycleCountTasks.filter(task => task.status === status);
+    }
+    return this.cycleCountTasks;
+  }
+  
+  async getCycleCountTaskById(id: number): Promise<CycleCountTask | undefined> {
+    return this.cycleCountTasks.find(task => task.id === id);
+  }
+  
+  async createCycleCountTask(task: Omit<CycleCountTask, 'id'>): Promise<CycleCountTask> {
+    const newTask: CycleCountTask = {
+      ...task,
+      id: this.cycleCountTasks.length > 0 ? Math.max(...this.cycleCountTasks.map(t => t.id)) + 1 : 1,
+      items: task.items || []
+    };
+    this.cycleCountTasks.push(newTask);
+    return newTask;
+  }
+  
+  async updateCycleCountTask(id: number, task: Partial<CycleCountTask>): Promise<CycleCountTask | undefined> {
+    const index = this.cycleCountTasks.findIndex(t => t.id === id);
+    if (index === -1) return undefined;
+    
+    this.cycleCountTasks[index] = {
+      ...this.cycleCountTasks[index],
+      ...task
+    };
+    return this.cycleCountTasks[index];
+  }
+  
+  async getCycleCountItems(taskId: number): Promise<CycleCountItem[]> {
+    return this.cycleCountItems.filter(item => item.cycleCountTaskId === taskId);
+  }
+  
+  async getCycleCountItemById(id: number): Promise<CycleCountItem | undefined> {
+    return this.cycleCountItems.find(item => item.id === id);
+  }
+  
+  async updateCycleCountItem(id: number, item: Partial<CycleCountItem>): Promise<CycleCountItem | undefined> {
+    const index = this.cycleCountItems.findIndex(i => i.id === id);
+    if (index === -1) return undefined;
+    
+    this.cycleCountItems[index] = {
+      ...this.cycleCountItems[index],
+      ...item
+    };
+    
+    // If there's a count completed, calculate discrepancy
+    if (item.actualQuantity !== undefined) {
+      const expectedQuantity = this.cycleCountItems[index].expectedQuantity;
+      this.cycleCountItems[index].discrepancy = item.actualQuantity - expectedQuantity;
+      
+      // Update status based on discrepancy
+      if (this.cycleCountItems[index].discrepancy !== 0) {
+        this.cycleCountItems[index].status = "investigation";
+      } else {
+        this.cycleCountItems[index].status = "counted";
+      }
+    }
+    
+    return this.cycleCountItems[index];
+  }
+  
+  async startCycleCountTask(id: number, assignedTo: string): Promise<CycleCountTask | undefined> {
+    const task = await this.getCycleCountTaskById(id);
+    if (!task) return undefined;
+    
+    // Can only start pending tasks
+    if (task.status !== "pending") {
+      return undefined;
+    }
+    
+    task.status = "in_progress";
+    task.assignedTo = assignedTo;
+    task.startedAt = new Date().toISOString();
+    
+    return task;
+  }
+  
+  async completeCycleCountTask(id: number): Promise<CycleCountTask | undefined> {
+    const task = await this.getCycleCountTaskById(id);
+    if (!task) return undefined;
+    
+    // Can only complete in-progress tasks
+    if (task.status !== "in_progress") {
+      return undefined;
+    }
+    
+    // Check if all items have been counted
+    const items = await this.getCycleCountItems(id);
+    const allItemsCounted = items.every(item => 
+      item.status === "counted" || item.status === "adjusted" || item.status === "investigation"
+    );
+    
+    if (!allItemsCounted) {
+      return undefined; // Can't complete if not all items are counted
+    }
+    
+    task.status = "completed";
+    task.completedAt = new Date().toISOString();
+    
+    return task;
+  }
+  
+  async applyCycleCountAdjustments(cycleCountTaskId: number): Promise<{
+    success: boolean;
+    adjustedItems: CycleCountItem[];
+    inventoryMovements: InventoryMovement[];
+  }> {
+    const task = await this.getCycleCountTaskById(cycleCountTaskId);
+    if (!task) {
+      return { success: false, adjustedItems: [], inventoryMovements: [] };
+    }
+    
+    // Can only apply adjustments to completed tasks
+    if (task.status !== "completed") {
+      return { success: false, adjustedItems: [], inventoryMovements: [] };
+    }
+    
+    const items = await this.getCycleCountItems(cycleCountTaskId);
+    const adjustedItems: CycleCountItem[] = [];
+    const inventoryMovements: InventoryMovement[] = [];
+    
+    for (const item of items) {
+      // Skip items that don't need adjustment
+      if (item.discrepancy === undefined || item.discrepancy === 0 || item.status === "adjusted") {
+        continue;
+      }
+      
+      // Get the inventory item
+      const inventoryItem = await this.getInventoryItemById(item.inventoryItemId);
+      if (!inventoryItem) continue;
+      
+      // Get the inventory location
+      const inventoryLocation = inventoryItem.locations.find(loc => loc.locationId === item.locationId);
+      if (!inventoryLocation) continue;
+      
+      // Calculate new quantities
+      const newQuantity = item.actualQuantity || 0;
+      const oldQuantity = inventoryLocation.quantity;
+      const adjustmentQuantity = Math.abs(newQuantity - oldQuantity);
+      
+      // Create inventory movement record
+      const movement: Omit<InventoryMovement, 'id'> = {
+        inventoryItemId: item.inventoryItemId,
+        fromLocationId: item.discrepancy < 0 ? item.locationId : undefined, // If negative adjustment (missing items)
+        toLocationId: item.discrepancy > 0 ? item.locationId : undefined, // If positive adjustment (found items)
+        quantity: adjustmentQuantity,
+        type: "adjustment",
+        referenceNumber: `CYCLECOUNT-${cycleCountTaskId}`,
+        referenceType: "cycle_count_task",
+        performedBy: item.countedBy || "system",
+        performedAt: new Date().toISOString(),
+        notes: `Cycle count adjustment for item ${item.sku} at location ${item.locationId}. Discrepancy: ${item.discrepancy}`
+      };
+      
+      const createdMovement = await this.createInventoryMovement(movement);
+      inventoryMovements.push(createdMovement);
+      
+      // Update the inventory location quantity
+      inventoryLocation.quantity = newQuantity;
+      
+      // Update the inventory item totals
+      inventoryItem.totalQuantity += item.discrepancy;
+      inventoryItem.availableQuantity += item.discrepancy;
+      
+      // Update the cycle count item status
+      item.status = "adjusted";
+      adjustedItems.push(item);
+      
+      // Update the cycle count item in storage
+      await this.updateCycleCountItem(item.id, { status: "adjusted" });
+    }
+    
+    return {
+      success: true,
+      adjustedItems,
+      inventoryMovements
+    };
   }
 }
 
