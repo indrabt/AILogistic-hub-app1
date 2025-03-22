@@ -3315,6 +3315,25 @@ export class MemStorage implements IStorage {
     return this.cycleCountItems.find(item => item.id === id);
   }
   
+  async createCycleCountItem(item: Omit<CycleCountItem, 'id'>): Promise<CycleCountItem> {
+    const newItem: CycleCountItem = {
+      ...item,
+      id: this.cycleCountItems.length > 0 ? Math.max(...this.cycleCountItems.map(i => i.id)) + 1 : 1
+    };
+    this.cycleCountItems.push(newItem);
+    
+    // Update the cycle count task's items array
+    const task = await this.getCycleCountTaskById(item.cycleCountTaskId);
+    if (task) {
+      if (!task.items) {
+        task.items = [];
+      }
+      task.items.push(newItem);
+    }
+    
+    return newItem;
+  }
+  
   async updateCycleCountItem(id: number, item: Partial<CycleCountItem>): Promise<CycleCountItem | undefined> {
     const index = this.cycleCountItems.findIndex(i => i.id === id);
     if (index === -1) return undefined;

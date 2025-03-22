@@ -6,6 +6,7 @@ import { webSocketManager } from "./websocket-simplified";
 import { log } from "./vite";
 import { loginUserSchema } from "../shared/schema";
 import { Session } from "express-session";
+import { CycleCountTask, CycleCountItem } from "../shared/warehouse-types";
 
 // Custom request interface to include session
 interface Request extends Express.Request {
@@ -2250,6 +2251,221 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Failed to fetch shipping addresses" });
+    }
+  });
+
+  // Warehouse Management System - Cycle Counting Feature
+  
+  // Get all cycle count tasks
+  app.get("/api/warehouse/cycle-counts", async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const tasks = await storage.getCycleCountTasks(status);
+      res.json(tasks);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to fetch cycle count tasks" });
+    }
+  });
+  
+  // Get a specific cycle count task
+  app.get("/api/warehouse/cycle-counts/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const task = await storage.getCycleCountTaskById(id);
+      
+      if (!task) {
+        return res.status(404).json({ message: "Cycle count task not found" });
+      }
+      
+      res.json(task);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to fetch cycle count task" });
+    }
+  });
+  
+  // Create a new cycle count task
+  app.post("/api/warehouse/cycle-counts", async (req, res) => {
+    try {
+      // Basic validation of incoming data
+      const { name, countingMethod, scheduledDate, locations = [] } = req.body;
+      
+      if (!name || !countingMethod || !scheduledDate || !Array.isArray(locations)) {
+        return res.status(400).json({ message: "Invalid cycle count task data" });
+      }
+      
+      // Create the cycle count task with initial data
+      const newTask = await storage.createCycleCountTask({
+        name,
+        countingMethod,
+        status: "pending",
+        scheduledDate,
+        locations,
+        items: [], // Will be populated later with inventory data
+        notes: req.body.notes
+      });
+      
+      // For each location, get inventory items and create cycle count items
+      for (const locationId of locations) {
+        const inventoryItems = await storage.getInventoryItemsByLocation(locationId);
+        
+        for (const invLocation of inventoryItems) {
+          const inventoryItem = await storage.getInventoryItemById(invLocation.inventoryItemId);
+          if (!inventoryItem) continue;
+          
+          // Create a cycle count item for this inventory item
+          await storage.createCycleCountItem({
+            cycleCountTaskId: newTask.id,
+            inventoryItemId: inventoryItem.id,
+            locationId,
+            sku: inventoryItem.sku,
+            productName: inventoryItem.productName,
+            expectedQuantity: invLocation.quantity,
+            status: "pending"
+          });
+        }
+      }
+      
+      // Get the updated task with all items
+      const fullTask = await storage.getCycleCountTaskById(newTask.id);
+      res.status(201).json(fullTask);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to create cycle count task" });
+    }
+  });
+  
+  // Update a cycle count task
+  app.patch("/api/warehouse/cycle-counts/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const task = await storage.getCycleCountTaskById(id);
+      
+      if (!task) {
+        return res.status(404).json({ message: "Cycle count task not found" });
+      }
+      
+      const allowedFields = ["name", "notes", "status"];
+      const updates: Partial<CycleCountTask> = {};
+      
+      for (const field of allowedFields) {
+        if (field in req.body) {
+          updates[field] = req.body[field];
+        }
+      }
+      
+      const updatedTask = await storage.updateCycleCountTask(id, updates);
+      res.json(updatedTask);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to update cycle count task" });
+    }
+  });
+  
+  // Get all cycle count items for a task
+  app.get("/api/warehouse/cycle-counts/:id/items", async (req, res) => {
+    try {
+      const taskId = parseInt(req.params.id);
+      const items = await storage.getCycleCountItems(taskId);
+      res.json(items);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to fetch cycle count items" });
+    }
+  });
+  
+  // Update a cycle count item (record count)
+  app.patch("/api/warehouse/cycle-count-items/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const item = await storage.getCycleCountItemById(id);
+      
+      if (!item) {
+        return res.status(404).json({ message: "Cycle count item not found" });
+      }
+      
+      const allowedFields = ["actualQuantity", "notes", "countedBy"];
+      const updates: Partial<CycleCountItem> = {};
+      
+      for (const field of allowedFields) {
+        if (field in req.body) {
+          updates[field] = req.body[field];
+        }
+      }
+      
+      if (updates.actualQuantity !== undefined) {
+        updates.countedAt = new Date().toISOString();
+      }
+      
+      const updatedItem = await storage.updateCycleCountItem(id, updates);
+      res.json(updatedItem);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to update cycle count item" });
+    }
+  });
+  
+  // Start a cycle count task
+  app.post("/api/warehouse/cycle-counts/:id/start", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Check if the user is authenticated
+      if (!req.session || !req.session.user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const task = await storage.startCycleCountTask(id, req.session.user.username);
+      
+      if (!task) {
+        return res.status(400).json({ message: "Cannot start cycle count task. It may not be in 'pending' status." });
+      }
+      
+      res.json(task);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to start cycle count task" });
+    }
+  });
+  
+  // Complete a cycle count task
+  app.post("/api/warehouse/cycle-counts/:id/complete", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      const task = await storage.completeCycleCountTask(id);
+      
+      if (!task) {
+        return res.status(400).json({ 
+          message: "Cannot complete cycle count task. Task must be in 'in_progress' status and all items must be counted." 
+        });
+      }
+      
+      res.json(task);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to complete cycle count task" });
+    }
+  });
+  
+  // Apply inventory adjustments from a cycle count
+  app.post("/api/warehouse/cycle-counts/:id/apply-adjustments", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      const result = await storage.applyCycleCountAdjustments(id);
+      
+      if (!result.success) {
+        return res.status(400).json({ 
+          message: "Cannot apply adjustments. Task must be in 'completed' status." 
+        });
+      }
+      
+      res.json(result);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to apply cycle count adjustments" });
     }
   });
 
