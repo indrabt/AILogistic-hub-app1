@@ -134,6 +134,51 @@ export default function WarehouseDashboard() {
       description: `Shipment ${shipmentId} has been marked as picked`,
     });
   };
+  
+  // Handle receiving a shipment
+  const handleReceiveShipment = (shipmentId: string) => {
+    console.log(`Receiving shipment ${shipmentId}`);
+    
+    // Make API call to receive the shipment
+    fetch(`/api/warehouse/shipments/${shipmentId}/receive`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to receive shipment: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Shipment received successfully:', data);
+      toast({
+        title: "Shipment Received",
+        description: `Shipment ${shipmentId} has been received and is ready for processing`,
+      });
+      
+      // Refresh the shipments data
+      fetch('/api/shipments')
+        .then(response => response.json())
+        .then(updatedShipments => {
+          // Update your state with the new shipments data
+          // This would refresh the UI with the updated shipment status
+        })
+        .catch(error => {
+          console.error('Error refreshing shipments:', error);
+        });
+    })
+    .catch(error => {
+      console.error('Error receiving shipment:', error);
+      toast({
+        title: "Error",
+        description: `Failed to receive shipment: ${error.message}`,
+        variant: "destructive",
+      });
+    });
+  };
 
   // Handle marking an item as packed
   const handleMarkAsPacked = (shipmentId: string) => {
@@ -474,7 +519,7 @@ export default function WarehouseDashboard() {
                             variant="ghost" 
                             size="sm"
                             className="flex items-center gap-1"
-                            onClick={() => handleMarkAsPicked(shipment.shipmentId)}
+                            onClick={() => handleReceiveShipment(shipment.shipmentId)}
                           >
                             <CheckCircle2 className="h-3 w-3" />
                             <span>Receive</span>
